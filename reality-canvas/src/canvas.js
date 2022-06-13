@@ -1,8 +1,11 @@
 export default class Canvas {
+    // constructor takes a "parent" html tag, and create elements attach to it
     constructor(parent) {
         this.isDrawing = false;
         this.position = { x: 0, y: 0 };
+        // find the parent
         let parentTag = document.getElementsByTagName(parent);
+        // attach the canvas to the parent
         parentTag[0].appendChild(this.create_canvas());
     }
     // create 'canvas' tag and add event listeners to it
@@ -35,9 +38,11 @@ export default class Canvas {
                 this.position = { x: e.offsetX, y: e.offsetY };
             }
         });
+        // note this is registered on the 'window'
         window.addEventListener('mouseup', e => {
             if (this.isDrawing === true) {
                 this.drawLine(canvas.getContext('2d'), this.position, { x: e.offsetX, y: e.offsetY });
+                // reset
                 this.position = { x: 0, y: 0 };
                 this.isDrawing = false;
             }
@@ -65,6 +70,7 @@ export default class Canvas {
         });
         return canvas;
     }
+    // draw a line on the canvas respect to  to two points
     drawLine(context, pos1, pos2) {
         if (context) {
             context.beginPath();
