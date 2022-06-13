@@ -4,23 +4,28 @@ import Stage from "./stage.js"
 export default class Canvas {
     isDrawing: boolean = false
     position: { x: number, y: number } = { x: 0, y: 0 }
+    currentLine: { x: number, y: number }[] = []
+    historyLines: { x: number, y: number }[][] = []
+
+
     stage: Stage = new Stage()
     canvas = this.stage.render.canvas
 
     constructor() {
 
         // add event listeners
-
-        
         this.canvas.addEventListener('mousedown', e => {
             // set last position to start
             this.position.x = e.offsetX;
             this.position.y = e.offsetY;
+
+            this.currentLine.push(this.position);
             this.isDrawing = true;
         })
 
 
         this.canvas.addEventListener('mousemove', e => {
+
             // if it is drawing
             if (this.isDrawing) {
                 // drawing a line between last position with current position
@@ -35,6 +40,7 @@ export default class Canvas {
                 );
                 // update the last position with current position
                 this.position = { x: e.offsetX, y: e.offsetY };
+                this.currentLine.push(this.position);
             }
         })
 
@@ -43,6 +49,11 @@ export default class Canvas {
         window.addEventListener('mouseup', e => {
             if (this.isDrawing === true) {
                 drawLine(this.canvas.getContext('2d'), this.position, { x: e.offsetX, y: e.offsetY });
+                
+                this.currentLine.push({ x: e.offsetX, y: e.offsetY });
+                this.historyLines.push(this.currentLine);
+                this.currentLine = [];
+
                 // reset
                 this.position = { x: 0, y: 0 };
                 this.isDrawing = false;
@@ -55,11 +66,9 @@ export default class Canvas {
             pos2: { x: number, y: number }) => {
 
             if (context) {
-
-                console.log('here');
                 context.beginPath();
                 context.strokeStyle = 'red';
-                context.lineWidth = 1;
+                context.lineWidth = 2;
                 context.moveTo(pos1.x, pos1.y);
                 context.lineTo(pos2.x, pos2.y);
                 context.stroke();
@@ -68,6 +77,13 @@ export default class Canvas {
         }
     }
 
+
+    animate()
+    {
+        this.stage.add_body(this.historyLines[0][0].x,this.historyLines[0][0].y, this.historyLines);
+        this.historyLines=[];
+        this.stage.run();
+    }
 
 }
 

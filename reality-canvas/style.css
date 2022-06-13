@@ -5,6 +5,11 @@ body {
     overflow: hidden
 }
 
+button{
+    position: relative;
+    z-index: 5;
+}
+
 canvas {
     background:transparent;
     position: relative;

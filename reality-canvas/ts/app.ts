@@ -10,3 +10,9 @@ class App{
 }
 
 const app = new App();
+
+const animate = () =>{
+    app.canvas.animate();
+}
+
+document.getElementById('animate_button')?.addEventListener('click',animate)

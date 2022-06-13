@@ -17,17 +17,23 @@ export default class Stage {
         // create two boxes and a ground
         var boxA = Bodies.rectangle(400, 200, 80, 80);
         var boxB = Bodies.rectangle(450, 50, 80, 80);
+        var boxC = Bodies.rectangle(550, 50, 80, 80);
         var ground = Bodies.rectangle(400, 610, 810, 60, { isStatic: true });
         // add all of the bodies to the world
         Composite.add(this.engine.world, [boxA, boxB, ground]);
+        Composite.add(this.engine.world, boxC);
+        // Render.run(this.render);
+    }
+    add_body(x, y, vertices) {
+        Composite.add(this.engine.world, Bodies.fromVertices(x, y, vertices, { minimumArea: 100 }));
+    }
+    run() {
         var runner;
-        setTimeout(() => {
-            Render.run(this.render);
-            // create runner
-            runner = Runner.create();
-            // run the engine
-            Runner.run(runner, this.engine);
-        }, 5000);
+        Render.run(this.render);
+        // create runner
+        runner = Runner.create();
+        // run the engine
+        Runner.run(runner, this.engine);
     }
 }
 // setTimeout(() => {
