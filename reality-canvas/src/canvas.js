@@ -20,6 +20,7 @@ export default class Canvas {
             // set last position to start
             this.position.x = e.offsetX;
             this.position.y = e.offsetY;
+            console.log(this.position);
             this.isDrawing = true;
         });
         canvas.addEventListener('mousemove', e => {

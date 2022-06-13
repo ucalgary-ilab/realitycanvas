@@ -1,7 +1,7 @@
 import Canvas from './canvas.js'
 
 class App{
-    canvas: Canvas
+    // canvas: Canvas
 
     constructor(parent:string)
     {
@@ -9,7 +9,7 @@ class App{
         
         
         // parentTag[0].appendChild(this.create_drawing_plane());
-        this.canvas = new Canvas(parent);
+        // this.canvas = new Canvas(parent);
     }
 
     // create_drawing_plane()

@@ -6,6 +6,7 @@ body {
 }
 
 canvas {
+    background:transparent;
     position: relative;
     top: -100px;
     -webkit-touch-callout: none;
