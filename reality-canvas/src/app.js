@@ -1,11 +1,7 @@
+import Canvas from './canvas.js';
 class App {
-    // canvas: Canvas
-    constructor(parent) {
-        // let parentTag = document.getElementsByTagName(parent);
-        // parentTag[0].appendChild(this.create_drawing_plane());
-        // this.canvas = new Canvas(parent);
+    constructor() {
+        this.canvas = new Canvas();
     }
 }
-const app = new App("a-scene");
-export {};
-// console.log("success")
+const app = new App();
