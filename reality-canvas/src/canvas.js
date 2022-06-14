@@ -1,4 +1,5 @@
 // @ts-ignore
+import Physic from "./physic.js";
 import Stage from "./stage.js";
 export default class Canvas {
     constructor() {
@@ -6,8 +7,9 @@ export default class Canvas {
         this.position = { x: 0, y: 0 };
         this.currentLine = [];
         this.historyLines = [];
+        this.physic = new Physic();
         this.stage = new Stage();
-        this.canvas = this.stage.render.canvas;
+        this.canvas = this.physic.render.canvas;
         // add event listeners
         this.canvas.addEventListener('mousedown', e => {
             // set last position to start
@@ -59,8 +61,8 @@ export default class Canvas {
         };
     }
     animate() {
-        this.stage.add_body(this.historyLines[0][0].x, this.historyLines[0][0].y, this.historyLines);
+        this.physic.add_body(this.historyLines[0][0].x, this.historyLines[0][0].y, this.historyLines);
         this.historyLines = [];
-        this.stage.run();
+        this.physic.run();
     }
 }

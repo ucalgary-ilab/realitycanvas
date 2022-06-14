@@ -1,5 +1,7 @@
 // @ts-ignore
+import Physic from "./physic.js"
 import Stage from "./stage.js"
+
 
 export default class Canvas {
     isDrawing: boolean = false
@@ -8,8 +10,9 @@ export default class Canvas {
     historyLines: { x: number, y: number }[][] = []
 
 
+    physic: Physic = new Physic()
     stage: Stage = new Stage()
-    canvas = this.stage.render.canvas
+    canvas = this.physic.render.canvas
 
     constructor() {
 
@@ -80,9 +83,9 @@ export default class Canvas {
 
     animate()
     {
-        this.stage.add_body(this.historyLines[0][0].x,this.historyLines[0][0].y, this.historyLines);
+        this.physic.add_body(this.historyLines[0][0].x,this.historyLines[0][0].y, this.historyLines);
         this.historyLines=[];
-        this.stage.run();
+        this.physic.run();
     }
 
 }

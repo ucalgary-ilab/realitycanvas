@@ -10,6 +10,11 @@ button{
     z-index: 5;
 }
 
+#container{
+    position: relative;
+    z-index: 99;
+}
+
 canvas {
     background:transparent;
     position: relative;
