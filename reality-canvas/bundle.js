@@ -18448,6 +18448,8 @@ var Vector = __webpack_require__(2);
             v,
             z;
 
+
+            
         // check decomp is as expected
         canDecomp = Boolean(decomp && decomp.quickDecomp);
 
@@ -24193,7 +24195,8 @@ class Canvas {
   }
 
   animate() {
-    this.physic.add_body(this.historyLines[0][0].x, this.historyLines[0][0].y, this.historyLines);
+    this.physic.add_body(this.historyLines[0][0].x, this.historyLines[0][0].y, this.historyLines); // empty the history lines
+
     this.historyLines = [];
     this.physic.run();
   }
@@ -24219,6 +24222,8 @@ var Engine = _matterJs.default.Engine,
     Render = _matterJs.default.Render,
     Runner = _matterJs.default.Runner,
     Bodies = _matterJs.default.Bodies,
+    Svg = _matterJs.default.Svg,
+    Vertices = _matterJs.default.Vertices,
     Composite = _matterJs.default.Composite;
 
 class Physic {
@@ -24236,20 +24241,27 @@ class Physic {
     }); // create two boxes and a ground
 
     var boxA = Bodies.rectangle(400, 200, 80, 80);
-    var boxB = Bodies.rectangle(450, 50, 80, 80);
-    var boxC = Bodies.rectangle(550, 50, 80, 80);
+    var boxB = Bodies.rectangle(450, 50, 80, 80); // var boxC = Bodies.rectangle(550, 50, 80, 80);
+
     var ground = Bodies.rectangle(400, 610, 810, 60, {
       isStatic: true
-    }); // add all of the bodies to the world
+    }); // var loadSvg = function(url) {
+    //     return fetch(url)
+    //         .then(function(response) { return response.text(); })
+    //         .then(function(raw) { return (new window.DOMParser()).parseFromString(raw, 'image/svg+xml'); });
+    // };
+    // let vertexSet = loadSvg("./apple.svg").then(function(path) { return Vertices.scale(Svg.pathToVertices(path, 30), 0.4, 0.4); });
+    // Composite.add(this.engine.world, Bodies.fromVertices(600,600,vertexSet));
+    // add all of the bodies to the world
 
-    Composite.add(this.engine.world, [boxA, boxB, ground]);
-    Composite.add(this.engine.world, boxC); // Render.run(this.render);
+    Composite.add(this.engine.world, [boxA, boxB, ground]); // Composite.add(this.engine.world, boxC);
+    // Render.run(this.render);
   }
 
   add_body(x, y, vertices) {
-    Composite.add(this.engine.world, Bodies.fromVertices(x, y, vertices, {
-      minimumArea: 100
-    }));
+    let body = Bodies.fromVertices(x, y, vertices);
+    console.log(body);
+    Composite.add(this.engine.world, body);
   }
 
   run() {
@@ -24261,26 +24273,7 @@ class Physic {
     Runner.run(runner, this.engine);
   }
 
-} // setTimeout(() => {
-//     // World.clear(world);
-//     Engine.clear(engine);
-//     Render.stop(render);
-//     Runner.stop(runner);
-//     render.canvas.remove();
-//     render.canvas = null;
-//     render.context = null;
-//     render.textures = {};
-//     // add all of the bodies to the world
-//     Composite.add(engine.world, [boxA, boxB, ground]);
-// }, 5000)
-// setTimeout(() => {
-//     Render.run(render);
-//     // create runner
-//     runner = Runner.create();
-//     // run the engine
-//     Runner.run(runner, engine)
-// }, 8000);
-
+}
 
 exports.default = Physic;
 

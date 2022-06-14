@@ -6,8 +6,9 @@ body {
 }
 
 button{
-    position: relative;
-    z-index: 5;
+    position: absolute;
+    left: 100px;
+    z-index: 1;
 }
 
 #container{
@@ -19,6 +20,7 @@ canvas {
     background:transparent;
     position: relative;
     top: -100px;
+    /* z-index: 2; */
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
@@ -28,4 +30,5 @@ canvas {
     outline: none;
     -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
     /* mobile webkit */
+
 }

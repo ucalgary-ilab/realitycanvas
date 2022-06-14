@@ -7,6 +7,8 @@ var Engine = Matter.Engine,
     Render = Matter.Render,
     Runner = Matter.Runner,
     Bodies = Matter.Bodies,
+    Svg = Matter.Svg,
+    Vertices = Matter.Vertices,
     Composite = Matter.Composite;
 
 export default class Physic {
@@ -27,12 +29,24 @@ export default class Physic {
         // create two boxes and a ground
         var boxA = Bodies.rectangle(400, 200, 80, 80);
         var boxB = Bodies.rectangle(450, 50, 80, 80);
-        var boxC = Bodies.rectangle(550, 50, 80, 80);
+        // var boxC = Bodies.rectangle(550, 50, 80, 80);
         var ground = Bodies.rectangle(400, 610, 810, 60, { isStatic: true });
+
+
+        // var loadSvg = function(url) {
+        //     return fetch(url)
+        //         .then(function(response) { return response.text(); })
+        //         .then(function(raw) { return (new window.DOMParser()).parseFromString(raw, 'image/svg+xml'); });
+        // };
+
+        // let vertexSet = loadSvg("./apple.svg").then(function(path) { return Vertices.scale(Svg.pathToVertices(path, 30), 0.4, 0.4); });
+
+      
+        // Composite.add(this.engine.world, Bodies.fromVertices(600,600,vertexSet));
 
         // add all of the bodies to the world
         Composite.add(this.engine.world, [boxA, boxB, ground]);
-        Composite.add(this.engine.world, boxC);
+        // Composite.add(this.engine.world, boxC);
 
         // Render.run(this.render);
 
@@ -40,8 +54,12 @@ export default class Physic {
     }
 
 
-    add_body(x: number, y: number, vertices: { x: number, y: number }[][]) {
-        Composite.add(this.engine.world, Bodies.fromVertices(x, y, vertices, {minimumArea:100}));
+    add_body(x: number, y: number, 
+        vertices: { x: number, y: number }[][]) {
+
+        let body =Bodies.fromVertices(x, y, vertices);
+        console.log(body);
+        Composite.add(this.engine.world, body);
     }
 
 
@@ -56,29 +74,3 @@ export default class Physic {
 
     }
 }
-
-
-
-
-
-// setTimeout(() => {
-//     // World.clear(world);
-//     Engine.clear(engine);
-//     Render.stop(render);
-//     Runner.stop(runner);
-//     render.canvas.remove();
-//     render.canvas = null;
-//     render.context = null;
-//     render.textures = {};
-//     // add all of the bodies to the world
-//     Composite.add(engine.world, [boxA, boxB, ground]);
-// }, 5000)
-
-// setTimeout(() => {
-
-//     Render.run(render);
-//     // create runner
-//     runner = Runner.create();
-//     // run the engine
-//     Runner.run(runner, engine)
-// }, 8000);

@@ -83,7 +83,11 @@ export default class Canvas {
 
     animate()
     {
-        this.physic.add_body(this.historyLines[0][0].x,this.historyLines[0][0].y, this.historyLines);
+        this.physic.add_body(this.historyLines[0][0].x,
+            this.historyLines[0][0].y, 
+            this.historyLines);
+        
+        // empty the history lines
         this.historyLines=[];
         this.physic.run();
     }

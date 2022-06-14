@@ -1,5 +1,7 @@
 import Canvas from './canvas.js'
 
+
+
 class App{
     canvas: Canvas = new Canvas()
 
