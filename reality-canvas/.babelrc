@@ -1,4 +1,4 @@
 // .babelrc
 {
-    "presets": ["env"]
+    "presets": ["@babel/preset-env"]
 }
