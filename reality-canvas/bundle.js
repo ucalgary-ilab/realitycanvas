@@ -18448,8 +18448,6 @@ var Vector = __webpack_require__(2);
             v,
             z;
 
-
-            
         // check decomp is as expected
         canDecomp = Boolean(decomp && decomp.quickDecomp);
 
@@ -24085,127 +24083,26 @@ var Common = __webpack_require__(0);
 },{}],58:[function(require,module,exports){
 "use strict";
 
-var _canvas = _interopRequireDefault(require("./canvas.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var _a;
-
-class App {
-  constructor() {
-    this.canvas = new _canvas.default();
-  }
-
-}
-
-const app = new App();
-
-const animate = () => {
-  app.canvas.animate();
-};
-
-(_a = document.getElementById('animate_button')) === null || _a === void 0 ? void 0 : _a.addEventListener('click', animate);
-
-},{"./canvas.js":59}],59:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
 var _physic = _interopRequireDefault(require("./physic.js"));
 
 var _stage = _interopRequireDefault(require("./stage.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-// @ts-ignore
-class Canvas {
+class App {
   constructor() {
-    this.isDrawing = false;
-    this.position = {
-      x: 0,
-      y: 0
-    };
-    this.currentLine = [];
-    this.historyLines = [];
     this.physic = new _physic.default();
     this.stage = new _stage.default();
-    this.canvas = this.physic.render.canvas; // add event listeners
-
-    this.canvas.addEventListener('mousedown', e => {
-      // set last position to start
-      this.position.x = e.offsetX;
-      this.position.y = e.offsetY;
-      this.currentLine.push(this.position);
-      this.isDrawing = true;
-    });
-    this.canvas.addEventListener('mousemove', e => {
-      // if it is drawing
-      if (this.isDrawing) {
-        // drawing a line between last position with current position
-        drawLine(this.canvas.getContext('2d'), // last position
-        this.position, // current position
-        {
-          x: e.offsetX,
-          y: e.offsetY
-        }); // update the last position with current position
-
-        this.position = {
-          x: e.offsetX,
-          y: e.offsetY
-        };
-        this.currentLine.push(this.position);
-      }
-    }); // note this is registered on the 'window'
-
-    window.addEventListener('mouseup', e => {
-      if (this.isDrawing === true) {
-        drawLine(this.canvas.getContext('2d'), this.position, {
-          x: e.offsetX,
-          y: e.offsetY
-        });
-        this.currentLine.push({
-          x: e.offsetX,
-          y: e.offsetY
-        });
-        this.historyLines.push(this.currentLine);
-        this.currentLine = []; // reset
-
-        this.position = {
-          x: 0,
-          y: 0
-        };
-        this.isDrawing = false;
-      }
-    }); // draw a line on the canvas respect to  to two points
-
-    const drawLine = (context, pos1, pos2) => {
-      if (context) {
-        context.beginPath();
-        context.strokeStyle = 'red';
-        context.lineWidth = 2;
-        context.moveTo(pos1.x, pos1.y);
-        context.lineTo(pos2.x, pos2.y);
-        context.stroke();
-        context.closePath();
-      }
-    };
-  }
-
-  animate() {
-    this.physic.add_body(this.historyLines[0][0].x, this.historyLines[0][0].y, this.historyLines); // empty the history lines
-
-    this.historyLines = [];
-    this.physic.run();
   }
 
 }
 
-exports.default = Canvas;
+new App(); // const animate = () =>{
+//     app.canvas.animate();
+// }
+// document.getElementById('animate_button')?.addEventListener('click',animate)
 
-},{"./physic.js":60,"./stage.js":61}],60:[function(require,module,exports){
+},{"./physic.js":59,"./stage.js":60}],59:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -24224,7 +24121,8 @@ var Engine = _matterJs.default.Engine,
     Bodies = _matterJs.default.Bodies,
     Svg = _matterJs.default.Svg,
     Vertices = _matterJs.default.Vertices,
-    Composite = _matterJs.default.Composite;
+    Composite = _matterJs.default.Composite,
+    Events = _matterJs.default.Events;
 
 class Physic {
   constructor() {
@@ -24240,22 +24138,14 @@ class Physic {
       }
     }); // create two boxes and a ground
 
-    var boxA = Bodies.rectangle(400, 200, 80, 80);
+    this.boxA = Bodies.rectangle(400, 200, 80, 80);
     var boxB = Bodies.rectangle(450, 50, 80, 80); // var boxC = Bodies.rectangle(550, 50, 80, 80);
 
     var ground = Bodies.rectangle(400, 610, 810, 60, {
       isStatic: true
-    }); // var loadSvg = function(url) {
-    //     return fetch(url)
-    //         .then(function(response) { return response.text(); })
-    //         .then(function(raw) { return (new window.DOMParser()).parseFromString(raw, 'image/svg+xml'); });
-    // };
-    // let vertexSet = loadSvg("./apple.svg").then(function(path) { return Vertices.scale(Svg.pathToVertices(path, 30), 0.4, 0.4); });
-    // Composite.add(this.engine.world, Bodies.fromVertices(600,600,vertexSet));
-    // add all of the bodies to the world
-
-    Composite.add(this.engine.world, [boxA, boxB, ground]); // Composite.add(this.engine.world, boxC);
-    // Render.run(this.render);
+    });
+    Composite.add(this.engine.world, [this.boxA, boxB, ground]);
+    this.run();
   }
 
   add_body(x, y, vertices) {
@@ -24271,13 +24161,16 @@ class Physic {
     runner = Runner.create(); // run the engine
 
     Runner.run(runner, this.engine);
+    Events.on(this.engine, 'afterUpdate', () => {
+      console.log(this.boxA.position);
+    });
   }
 
 }
 
 exports.default = Physic;
 
-},{"matter-js":57}],61:[function(require,module,exports){
+},{"matter-js":57}],60:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -24293,21 +24186,47 @@ class Stage {
   constructor() {
     this.stage = new _konva.default.Stage({
       container: 'container',
-      width: 500,
-      height: 500
+      width: window.innerWidth,
+      height: window.innerHeight - 25
     });
     this.layer = new _konva.default.Layer();
-    var circle = new _konva.default.Circle({
-      x: this.stage.width() / 2,
-      y: this.stage.height() / 2,
-      radius: 70,
-      fill: 'red',
-      stroke: 'black',
-      strokeWidth: 4
+    this.isPaint = false; // this.layer.add(circle);
+
+    this.stage.add(this.layer); // this.layer.draw();
+
+    this.stage.on('mousedown touchstart', e => {
+      this.isPaint = true;
+      var pos = this.stage.getPointerPosition();
+      this.lastLine = new _konva.default.Line({
+        stroke: '#df4b26',
+        strokeWidth: 5,
+        globalCompositeOperation: 'source-over',
+        // round cap for smoother lines
+        lineCap: 'round',
+        // add point twice, so we have some drawings even on a simple click
+        //@ts-ignore
+        points: [pos.x, pos.y, pos.x, pos.y]
+      });
+      this.layer.add(this.lastLine);
     });
-    this.layer.add(circle);
-    this.stage.add(this.layer);
-    this.layer.draw();
+    this.stage.on('mouseup touchend', () => {
+      this.isPaint = false;
+    }); // and core function - drawing
+
+    this.stage.on('mousemove touchmove', e => {
+      console.log("herer!");
+
+      if (!this.isPaint) {
+        return;
+      } // prevent scrolling on touch devices
+
+
+      e.evt.preventDefault();
+      const pos = this.stage.getPointerPosition(); //@ts-ignore
+
+      var newPoints = this.lastLine.points().concat([pos.x, pos.y]);
+      this.lastLine.points(newPoints);
+    });
   }
 
 }

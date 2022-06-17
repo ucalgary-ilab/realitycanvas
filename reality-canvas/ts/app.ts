@@ -1,9 +1,14 @@
-import Canvas from './canvas.js'
+
+import Physic from "./physic.js"
+import Stage from "./stage.js"
 
 
 
 class App{
-    canvas: Canvas = new Canvas()
+
+
+    physic: Physic = new Physic()
+    stage: Stage = new Stage()
 
     constructor()
     {
@@ -11,10 +16,10 @@ class App{
 
 }
 
-const app = new App();
+new App();
 
-const animate = () =>{
-    app.canvas.animate();
-}
+// const animate = () =>{
+//     app.canvas.animate();
+// }
 
-document.getElementById('animate_button')?.addEventListener('click',animate)
+// document.getElementById('animate_button')?.addEventListener('click',animate)

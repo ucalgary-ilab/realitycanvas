@@ -1,23 +1,29 @@
 html,
 body {
     margin: 0;
-    height: 100%;
-    overflow: hidden
+    padding: 0;
+    overflow: hidden;
 }
 
-button{
-    position: absolute;
+#animate_button {
+    position: fixed;
     left: 100px;
     z-index: 1;
 }
 
-#container{
-    position: relative;
-    z-index: 99;
+#container {
+    position: fixed;
+    z-index: 5 ;
 }
 
+a-scene{
+    position:fixed;
+    z-index: 0;
+}
+
+
 canvas {
-    background:transparent;
+    background: transparent;
     position: relative;
     top: -100px;
     /* z-index: 2; */
