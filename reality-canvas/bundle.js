@@ -24083,26 +24083,167 @@ var Common = __webpack_require__(0);
 },{}],58:[function(require,module,exports){
 "use strict";
 
-var _physic = _interopRequireDefault(require("./physic.js"));
-
-var _stage = _interopRequireDefault(require("./stage.js"));
+var _canvas = _interopRequireDefault(require("./canvas.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+var _a;
+
 class App {
   constructor() {
-    this.physic = new _physic.default();
-    this.stage = new _stage.default();
+    // physic: Physic = new Physic()
+    // stage: Stage = new Stage()
+    this.canvas = new _canvas.default();
   }
 
 }
 
-new App(); // const animate = () =>{
-//     app.canvas.animate();
-// }
-// document.getElementById('animate_button')?.addEventListener('click',animate)
+const app = new App();
 
-},{"./physic.js":59,"./stage.js":60}],59:[function(require,module,exports){
+const animate = () => {
+  app.canvas.animate();
+};
+
+(_a = document.getElementById('animate_button')) === null || _a === void 0 ? void 0 : _a.addEventListener('click', animate);
+
+},{"./canvas.js":59}],59:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _physic = _interopRequireDefault(require("./physic.js"));
+
+var _stage = _interopRequireDefault(require("./stage.js"));
+
+var _particle = _interopRequireDefault(require("./particle.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+// @ts-ignore
+class Canvas {
+  constructor() {
+    this.isDrawing = false;
+    this.position = {
+      x: 0,
+      y: 0
+    };
+    this.currentLine = [];
+    this.historyLines = [];
+    this.physic = new _physic.default();
+    this.stage = new _stage.default();
+    this.isPaint = false;
+    this.stage.stage.on('mousedown touchstart', e => {
+      this.isPaint = true;
+      let pos = this.stage.stage.getPointerPosition();
+
+      if (pos) {
+        this.currentLine.push(pos);
+        this.position = pos;
+      }
+    });
+    this.stage.stage.on('mouseup touchend', () => {
+      this.isPaint = false;
+      this.historyLines.push(this.currentLine);
+      this.currentLine = [];
+    }); // and core function - drawing
+
+    this.stage.stage.on('mousemove touchmove', e => {
+      if (!this.isPaint) {
+        return;
+      } // prevent scrolling on touch devices
+
+
+      e.evt.preventDefault();
+      let pos = this.stage.stage.getPointerPosition(); //@ts-ignore
+
+      if (pos && this.position != pos) {
+        this.currentLine.push(pos);
+      }
+    });
+  }
+
+  animate() {
+    let object = new _particle.default(this.historyLines[0][0], this.historyLines);
+    this.stage.layer.add(object.stageShape);
+    this.physic.add_particle(object);
+  }
+
+}
+
+exports.default = Canvas;
+
+},{"./particle.js":60,"./physic.js":61,"./stage.js":62}],60:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _konva = _interopRequireDefault(require("konva"));
+
+var _matterJs = _interopRequireDefault(require("matter-js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var Bodies = _matterJs.default.Bodies;
+
+class particle {
+  constructor(position, lines) {
+    this.limiter = 10; // mark last position
+
+    this.lastPos = position;
+    this.physicBody = Bodies.fromVertices(position.x, position.y, lines); // flatten the 2d array
+
+    let points = [];
+    lines.map(line => {
+      points = points.concat(line);
+    });
+    let newPoints = [];
+    points.map(pos => {
+      newPoints.push(pos.x);
+      newPoints.push(pos.y);
+    });
+    this.stageShape = new _konva.default.Line({
+      stroke: '#df4b26',
+      strokeWidth: 3,
+      globalCompositeOperation: 'source-over',
+      lineCap: 'round',
+      // points has the pattern [x1,y1,x2,y2]
+      points: newPoints
+    });
+  }
+
+  update() {
+    if (--this.limiter > 0) {
+      console.log(this.lastPos);
+      console.log(this.physicBody.position);
+    } // associate the shape's position with physic's position
+
+
+    let x_offset = this.lastPos.x - this.physicBody.position.x;
+    let y_offset = this.lastPos.y - this.physicBody.position.y; // apply the offsets
+
+    let newPoints = [];
+
+    for (let i = 0; i < this.stageShape.attrs.points.length; i += 2) {
+      newPoints.push(this.stageShape.attrs.points[i] - x_offset);
+      newPoints.push(this.stageShape.attrs.points[i + 1] - y_offset);
+    } // update the points
+
+
+    this.stageShape.points(newPoints);
+    this.lastPos = this.physicBody.position;
+  }
+
+}
+
+exports.default = particle;
+
+},{"konva":39,"matter-js":57}],61:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -24136,22 +24277,17 @@ class Physic {
         background: '#800000',
         wireframeBackground: 'none'
       }
-    }); // create two boxes and a ground
-
-    this.boxA = Bodies.rectangle(400, 200, 80, 80);
-    var boxB = Bodies.rectangle(450, 50, 80, 80); // var boxC = Bodies.rectangle(550, 50, 80, 80);
-
+    });
     var ground = Bodies.rectangle(400, 610, 810, 60, {
       isStatic: true
     });
-    Composite.add(this.engine.world, [this.boxA, boxB, ground]);
+    Composite.add(this.engine.world, ground);
     this.run();
   }
 
-  add_body(x, y, vertices) {
-    let body = Bodies.fromVertices(x, y, vertices);
-    console.log(body);
-    Composite.add(this.engine.world, body);
+  add_particle(particle) {
+    this.boxA = particle;
+    Composite.add(this.engine.world, this.boxA.physicBody);
   }
 
   run() {
@@ -24161,8 +24297,10 @@ class Physic {
     runner = Runner.create(); // run the engine
 
     Runner.run(runner, this.engine);
-    Events.on(this.engine, 'afterUpdate', () => {
-      console.log(this.boxA.position);
+    Events.on(runner, 'afterUpdate', () => {
+      if (this.boxA) {
+        this.boxA.update();
+      }
     });
   }
 
@@ -24170,7 +24308,7 @@ class Physic {
 
 exports.default = Physic;
 
-},{"matter-js":57}],60:[function(require,module,exports){
+},{"matter-js":57}],62:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -24192,41 +24330,8 @@ class Stage {
     this.layer = new _konva.default.Layer();
     this.isPaint = false; // this.layer.add(circle);
 
-    this.stage.add(this.layer); // this.layer.draw();
-
-    this.stage.on('mousedown touchstart', e => {
-      this.isPaint = true;
-      var pos = this.stage.getPointerPosition();
-      this.lastLine = new _konva.default.Line({
-        stroke: '#df4b26',
-        strokeWidth: 5,
-        globalCompositeOperation: 'source-over',
-        // round cap for smoother lines
-        lineCap: 'round',
-        // add point twice, so we have some drawings even on a simple click
-        //@ts-ignore
-        points: [pos.x, pos.y, pos.x, pos.y]
-      });
-      this.layer.add(this.lastLine);
-    });
-    this.stage.on('mouseup touchend', () => {
-      this.isPaint = false;
-    }); // and core function - drawing
-
-    this.stage.on('mousemove touchmove', e => {
-      console.log("herer!");
-
-      if (!this.isPaint) {
-        return;
-      } // prevent scrolling on touch devices
-
-
-      e.evt.preventDefault();
-      const pos = this.stage.getPointerPosition(); //@ts-ignore
-
-      var newPoints = this.lastLine.points().concat([pos.x, pos.y]);
-      this.lastLine.points(newPoints);
-    });
+    this.stage.add(this.layer);
+    this.layer.draw();
   }
 
 }

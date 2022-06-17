@@ -14,18 +14,13 @@ export default class Physic {
                 wireframeBackground: 'none'
             }
         });
-        // create two boxes and a ground
-        this.boxA = Bodies.rectangle(400, 200, 80, 80);
-        var boxB = Bodies.rectangle(450, 50, 80, 80);
-        // var boxC = Bodies.rectangle(550, 50, 80, 80);
         var ground = Bodies.rectangle(400, 610, 810, 60, { isStatic: true });
-        Composite.add(this.engine.world, [this.boxA, boxB, ground]);
+        Composite.add(this.engine.world, ground);
         this.run();
     }
-    add_body(x, y, vertices) {
-        let body = Bodies.fromVertices(x, y, vertices);
-        console.log(body);
-        Composite.add(this.engine.world, body);
+    add_particle(particle) {
+        this.boxA = particle;
+        Composite.add(this.engine.world, this.boxA.physicBody);
     }
     run() {
         var runner;
@@ -34,8 +29,10 @@ export default class Physic {
         runner = Runner.create();
         // run the engine
         Runner.run(runner, this.engine);
-        Events.on(this.engine, 'afterUpdate', () => {
-            console.log(this.boxA.position);
+        Events.on(runner, 'afterUpdate', () => {
+            if (this.boxA) {
+                this.boxA.update();
+            }
         });
     }
 }

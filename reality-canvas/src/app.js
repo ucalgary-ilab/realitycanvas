@@ -1,13 +1,14 @@
-import Physic from "./physic.js";
-import Stage from "./stage.js";
+var _a;
+import Canvas from "./canvas.js";
 class App {
     constructor() {
-        this.physic = new Physic();
-        this.stage = new Stage();
+        // physic: Physic = new Physic()
+        // stage: Stage = new Stage()
+        this.canvas = new Canvas();
     }
 }
-new App();
-// const animate = () =>{
-//     app.canvas.animate();
-// }
-// document.getElementById('animate_button')?.addEventListener('click',animate)
+const app = new App();
+const animate = () => {
+    app.canvas.animate();
+};
+(_a = document.getElementById('animate_button')) === null || _a === void 0 ? void 0 : _a.addEventListener('click', animate);
