@@ -1,5 +1,6 @@
 import Konva from 'konva';
 import Matter from 'matter-js';
+import _ from 'lodash';
 var Bodies = Matter.Bodies;
 export default class particle {
     constructor(position, lines) {
@@ -29,11 +30,12 @@ export default class particle {
     update() {
         if (--this.limiter > 0) {
             console.log(this.lastPos);
-            console.log(this.physicBody.position);
+            console.log(this.physicBody);
         }
         // associate the shape's position with physic's position
         let x_offset = this.lastPos.x - this.physicBody.position.x;
         let y_offset = this.lastPos.y - this.physicBody.position.y;
+        this.lastPos = _.cloneDeep(this.physicBody.position);
         // apply the offsets
         let newPoints = [];
         for (let i = 0; i < this.stageShape.attrs.points.length; i += 2) {
@@ -42,6 +44,5 @@ export default class particle {
         }
         // update the points
         this.stageShape.points(newPoints);
-        this.lastPos = this.physicBody.position;
     }
 }
