@@ -16,11 +16,15 @@ const app = new App();
 const save = () => {
     app.canvas.save_particle();
 }
-
-document.getElementById('animate_button')?.addEventListener('click', save)
+document.getElementById('save_button')?.addEventListener('click', save)
 
 
 const emit = () => {
     app.canvas.mode = "emitting";
 }
 document.getElementById('emit_button')?.addEventListener('click', emit)
+
+const motion = () => {
+    app.canvas.mode = "motion";
+}
+document.getElementById('motion_button')?.addEventListener('click', motion)

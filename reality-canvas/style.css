@@ -5,7 +5,7 @@ body {
     overflow: hidden;
 }
 
-#animate_button {
+#save_button {
     position: fixed;
     left: 100px;
     z-index: 2;
@@ -14,6 +14,12 @@ body {
 #emit_button {
     position: fixed;
     left: 300px;
+    z-index: 2;
+}
+
+#motion_button {
+    position: fixed;
+    left: 500px;
     z-index: 2;
 }
 

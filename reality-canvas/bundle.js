@@ -28009,6 +28009,20 @@ var Vector = __webpack_require__(2);
             }
         }
 
+        if(parts.length==0)
+        {
+            for (v = 0; v < vertexSets.length; v += 1) {
+                vertices = vertexSets[v];
+
+                vertices = Vertices.hull(vertices);
+
+                parts.push({
+                    position: { x: x, y: y },
+                    vertices: vertices
+                });
+            }
+        }
+        
         // create body parts
         for (i = 0; i < parts.length; i++) {
             parts[i] = Body.create(Common.extend(parts[i], options));
@@ -33568,7 +33582,7 @@ var _canvas = _interopRequireDefault(require("./canvas.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var _a, _b;
+var _a, _b, _c;
 
 class App {
   constructor() {
@@ -33584,13 +33598,19 @@ const save = () => {
   app.canvas.save_particle();
 };
 
-(_a = document.getElementById('animate_button')) === null || _a === void 0 ? void 0 : _a.addEventListener('click', save);
+(_a = document.getElementById('save_button')) === null || _a === void 0 ? void 0 : _a.addEventListener('click', save);
 
 const emit = () => {
   app.canvas.mode = "emitting";
 };
 
 (_b = document.getElementById('emit_button')) === null || _b === void 0 ? void 0 : _b.addEventListener('click', emit);
+
+const motion = () => {
+  app.canvas.mode = "motion";
+};
+
+(_c = document.getElementById('motion_button')) === null || _c === void 0 ? void 0 : _c.addEventListener('click', motion);
 
 },{"./canvas.js":60}],60:[function(require,module,exports){
 "use strict";
@@ -33619,17 +33639,32 @@ class Canvas {
       x: 0,
       y: 0
     };
-    this.saveLines = [];
+    this.motionLine = [];
+    this.savedLines = [];
     this.physic = new _physic.default();
     this.stage = new _stage.default();
     this.stage.stage.on('mousedown touchstart', e => {
       this.isPaint = true;
       let pos = this.stage.stage.getPointerPosition();
+      let color;
+
+      switch (this.mode) {
+        case 'emitting':
+          color = '#3cb043';
+          break;
+
+        case 'motion':
+          color = '#29446f';
+          break;
+
+        default:
+          color = '#df4b26';
+      }
 
       if (pos) {
         this.position = pos;
         this.currentLine = new _konva.default.Line({
-          stroke: this.mode === "drawing" ? '#df4b26' : '#3cb043',
+          stroke: color,
           strokeWidth: 5,
           globalCompositeOperation: 'source-over',
           // round cap for smoother lines
@@ -33646,6 +33681,10 @@ class Canvas {
       switch (this.mode) {
         case "emitting":
           this.emit();
+          break;
+
+        case "motion":
+          this.add_motion();
           break;
 
         default:
@@ -33672,18 +33711,31 @@ class Canvas {
   }
 
   save_particle() {
-    this.saveLines.push(this.currentLine);
-    this.currentLine = null; // console.log(this.saveLines);
+    this.savedLines.push(this.currentLine);
+    this.currentLine = null;
+  }
+
+  add_motion() {
+    let motionVertex = this.currentLine.attrs.points; // transform to something that matter needs
+
+    let motionVertexSet = [];
+
+    for (let i = 0; i < motionVertex.length; i += 2) {
+      motionVertexSet.push({
+        x: motionVertex[i],
+        y: motionVertex[i + 1]
+      });
+    }
+
+    this.physic.add_motion(motionVertexSet);
   }
 
   emit() {
-    this.saveLines.map(line => {
-      let object = new _particle.default({
+    this.savedLines.map(line => {
+      this.physic.add_particle(new _particle.default({
         x: this.currentLine.attrs.points[0],
         y: this.currentLine.attrs.points[1]
-      }, line);
-      console.log(object);
-      this.physic.add_particle(object);
+      }, line));
     });
   }
 
@@ -33765,6 +33817,7 @@ var Engine = _matterJs.default.Engine,
     Render = _matterJs.default.Render,
     Runner = _matterJs.default.Runner,
     Bodies = _matterJs.default.Bodies,
+    Body = _matterJs.default.Body,
     Svg = _matterJs.default.Svg,
     Vertices = _matterJs.default.Vertices,
     Composite = _matterJs.default.Composite,
@@ -33784,6 +33837,7 @@ class Physic {
       }
     });
     this.particles = [];
+    this.motion = [];
     var ground = Bodies.rectangle(400, 610, 1200, 60, {
       isStatic: true
     });
@@ -33793,8 +33847,40 @@ class Physic {
 
   add_particle(particle) {
     this.particles.push(particle);
-    console.log(particle);
     Composite.add(this.engine.world, particle.physicBody); // console.log(this.particles);
+  }
+
+  add_motion(motion) {
+    this.motion = motion;
+  }
+
+  get_velocity(particle) {
+    let min = Infinity;
+    let i = 0;
+
+    for (let k = 0; k < this.motion.length; k++) {
+      let number = Math.pow(this.motion[k].x - particle.physicBody.position.x, 2) + Math.pow(this.motion[k].y - particle.physicBody.position.y, 2);
+
+      if (number < min) {
+        min = number;
+        i = k;
+      }
+    }
+
+    let result = {
+      x: 0,
+      y: 0
+    };
+
+    if (i < this.motion.length - 1) {
+      result.x = this.motion[i + 1].x - this.motion[i].x;
+      result.y = this.motion[i + 1].y - this.motion[i].y;
+    }
+
+    console.log({
+      result
+    });
+    return result;
   }
 
   run() {
@@ -33804,9 +33890,15 @@ class Physic {
     runner = Runner.create(); // run the engine
 
     Runner.run(runner, this.engine);
+    Events.on(runner, 'beforeUpdate', () => {
+      if (this.motion.length > 0) {
+        this.particles.map(p => {
+          Body.setVelocity(p.physicBody, this.get_velocity(p));
+        });
+      }
+    });
     Events.on(runner, 'afterUpdate', () => {
       this.particles.map(p => {
-        console.log(p);
         p.update();
       });
     });

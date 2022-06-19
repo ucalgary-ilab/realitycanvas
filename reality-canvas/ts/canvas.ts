@@ -11,8 +11,8 @@ export default class Canvas {
 
     // currentLine keeps current drawing line, might be a very bad name
     currentLine: any;
-
-    saveLines: any[] = [];
+    motionLine: any[] = [];
+    savedLines: any[] = [];
 
 
     physic: Physic = new Physic()
@@ -24,10 +24,24 @@ export default class Canvas {
         this.stage.stage.on('mousedown touchstart', e => {
             this.isPaint = true;
             let pos = this.stage.stage.getPointerPosition();
+
+            let color:string;
+            switch(this.mode)
+            {
+                case 'emitting':
+                    color='#3cb043';
+                    break;
+                case 'motion':
+                    color='#29446f'
+                    break;
+                default:
+                    color='#df4b26'
+            }
+
             if (pos) {
                 this.position = pos;
                 this.currentLine = new Konva.Line({
-                    stroke: this.mode === "drawing" ? '#df4b26' : '#3cb043',
+                    stroke: color,
                     strokeWidth: 5,
                     globalCompositeOperation: 'source-over',
                     // round cap for smoother lines
@@ -46,6 +60,9 @@ export default class Canvas {
             switch (this.mode) {
                 case "emitting":
                     this.emit();
+                    break;
+                case "motion":
+                    this.add_motion();
                     break;
                 default:
                     // nothing, keep drawing
@@ -76,20 +93,28 @@ export default class Canvas {
 
 
     save_particle() {
-        this.saveLines.push(this.currentLine);
+        this.savedLines.push(this.currentLine);
         this.currentLine = null;
-        // console.log(this.saveLines);
+    }
+
+    add_motion(){
+        let motionVertex = this.currentLine.attrs.points;
+
+        // transform to something that matter needs
+        let motionVertexSet: { x: number, y: number }[] = []
+        for (let i = 0; i < motionVertex.length; i += 2) {
+            motionVertexSet.push({ x: motionVertex[i], y: motionVertex[i + 1] })
+        }
+        this.physic.add_motion(motionVertexSet);
     }
 
     emit() {
-        this.saveLines.map(line => {
-            let object = new particle({
+        this.savedLines.map(line => {
+            this.physic.add_particle(new particle({
                 x: this.currentLine.attrs.points[0],
                 y: this.currentLine.attrs.points[1],
             }
-                , line)
-            console.log(object)
-            this.physic.add_particle(object);
+                , line));
         });
 
 

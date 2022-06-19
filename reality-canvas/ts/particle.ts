@@ -30,6 +30,8 @@ export default class particle {
 
     }
 
+    
+
     update() {
         // associate the shape's position with physic's position
         let x_offset = this.lastPos.x - this.physicBody.position.x;
