@@ -14,13 +14,16 @@ export default class Physic {
                 wireframeBackground: 'none'
             }
         });
-        var ground = Bodies.rectangle(400, 610, 810, 60, { isStatic: true });
+        this.particles = [];
+        var ground = Bodies.rectangle(400, 610, 1200, 60, { isStatic: true });
         Composite.add(this.engine.world, ground);
         this.run();
     }
     add_particle(particle) {
-        this.boxA = particle;
-        Composite.add(this.engine.world, this.boxA.physicBody);
+        this.particles.push(particle);
+        console.log(particle);
+        Composite.add(this.engine.world, particle.physicBody);
+        // console.log(this.particles);
     }
     run() {
         var runner;
@@ -30,9 +33,10 @@ export default class Physic {
         // run the engine
         Runner.run(runner, this.engine);
         Events.on(runner, 'afterUpdate', () => {
-            if (this.boxA) {
-                this.boxA.update();
-            }
+            this.particles.map(p => {
+                console.log(p);
+                p.update();
+            });
         });
     }
 }

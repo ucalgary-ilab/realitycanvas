@@ -5,22 +5,22 @@ import Stage from "./stage.js"
 
 
 
-class App{
-
-
-    // physic: Physic = new Physic()
-    // stage: Stage = new Stage()
-    canvas=new Canvas();
-    constructor()
-    {
-    }
-
+class App {
+    canvas = new Canvas();
 }
 
+// create application instance
 const app = new App();
 
-const animate = () =>{
-    app.canvas.animate();
+// register button event handlers
+const save = () => {
+    app.canvas.save_particle();
 }
 
-document.getElementById('animate_button')?.addEventListener('click',animate)
+document.getElementById('animate_button')?.addEventListener('click', save)
+
+
+const emit = () => {
+    app.canvas.mode = "emitting";
+}
+document.getElementById('emit_button')?.addEventListener('click', emit)

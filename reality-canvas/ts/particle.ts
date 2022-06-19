@@ -10,51 +10,30 @@ export default class particle {
     stageShape: any
     lastPos: { x: number, y: number }
 
-    limiter: number = 10;
 
-    constructor(position: { x: number, y: number }, lines: { x: number, y: number }[][]) {
+    constructor(position:{x:number,y:number},shape: any) {
+
+        // get all the points from the konva line
+        let vertex = shape.attrs.points;
+
+        // transform to something that matter needs
+        let vertexSet: { x: number, y: number }[] = []
+        for (let i = 0; i < vertex.length; i += 2) {
+            vertexSet.push({ x: vertex[i], y: vertex[i + 1] })
+        }
 
         // mark last position
-        this.lastPos = position
-        this.physicBody = Bodies.fromVertices(position.x, position.y, lines);
+        this.lastPos = vertexSet[0];
 
-
-        // flatten the 2d array
-        let points: { x: number, y: number }[] = []
-        lines.map(line => {
-            points = points.concat(line);
-        })
-
-        let newPoints: number[] = []
-        points.map(pos => {
-            newPoints.push(pos.x);
-            newPoints.push(pos.y);
-        })
-
-
-        this.stageShape = new Konva.Line({
-            stroke: '#df4b26',
-            strokeWidth: 3,
-            globalCompositeOperation: 'source-over',
-            lineCap: 'round',
-            // points has the pattern [x1,y1,x2,y2]
-            points: newPoints,
-        });
+        this.physicBody = Bodies.fromVertices(position.x, position.y, vertexSet);
+        this.stageShape = shape;
 
     }
 
     update() {
-
-        if (--this.limiter > 0) {
-            console.log(this.lastPos);
-            console.log(this.physicBody);
-        }
-
         // associate the shape's position with physic's position
         let x_offset = this.lastPos.x - this.physicBody.position.x;
         let y_offset = this.lastPos.y - this.physicBody.position.y;
-
-
 
         this.lastPos = _.cloneDeep(this.physicBody.position);
 
@@ -64,8 +43,6 @@ export default class particle {
             newPoints.push(this.stageShape.attrs.points[i] - x_offset);
             newPoints.push(this.stageShape.attrs.points[i + 1] - y_offset);
         }
-
-
 
         // update the points
         this.stageShape.points(newPoints);

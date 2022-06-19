@@ -24,10 +24,10 @@ export default class Physic {
             wireframeBackground: 'none'
         }
     })
-    boxA: any
+    particles:particle[]=[]
 
     constructor() {
-        var ground = Bodies.rectangle(400, 610, 810, 60, { isStatic: true });
+        var ground = Bodies.rectangle(400, 610, 1200, 60, { isStatic: true });
 
         Composite.add(this.engine.world, ground);
         this.run();
@@ -35,8 +35,10 @@ export default class Physic {
 
 
     add_particle(particle: particle) {
-        this.boxA = particle;
-        Composite.add(this.engine.world, this.boxA.physicBody);
+        this.particles.push(particle);
+        console.log(particle);
+        Composite.add(this.engine.world, particle.physicBody);
+        // console.log(this.particles);
     }
 
 
@@ -50,10 +52,10 @@ export default class Physic {
         Runner.run(runner, this.engine)
 
         Events.on(runner, 'afterUpdate', () => {
-            if (this.boxA)
-            {
-                this.boxA.update();
-            }
+            this.particles.map(p=>{
+                console.log(p);
+                p.update();
+            })
         })
     }
 }

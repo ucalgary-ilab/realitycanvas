@@ -33568,24 +33568,29 @@ var _canvas = _interopRequireDefault(require("./canvas.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var _a;
+var _a, _b;
 
 class App {
   constructor() {
-    // physic: Physic = new Physic()
-    // stage: Stage = new Stage()
     this.canvas = new _canvas.default();
   }
 
-}
+} // create application instance
 
-const app = new App();
 
-const animate = () => {
-  app.canvas.animate();
+const app = new App(); // register button event handlers
+
+const save = () => {
+  app.canvas.save_particle();
 };
 
-(_a = document.getElementById('animate_button')) === null || _a === void 0 ? void 0 : _a.addEventListener('click', animate);
+(_a = document.getElementById('animate_button')) === null || _a === void 0 ? void 0 : _a.addEventListener('click', save);
+
+const emit = () => {
+  app.canvas.mode = "emitting";
+};
+
+(_b = document.getElementById('emit_button')) === null || _b === void 0 ? void 0 : _b.addEventListener('click', emit);
 
 },{"./canvas.js":60}],60:[function(require,module,exports){
 "use strict";
@@ -33599,6 +33604,8 @@ var _physic = _interopRequireDefault(require("./physic.js"));
 
 var _stage = _interopRequireDefault(require("./stage.js"));
 
+var _konva = _interopRequireDefault(require("konva"));
+
 var _particle = _interopRequireDefault(require("./particle.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -33606,29 +33613,45 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 // @ts-ignore
 class Canvas {
   constructor() {
-    this.isDrawing = false;
+    this.isPaint = false;
+    this.mode = "drawing";
     this.position = {
       x: 0,
       y: 0
     };
-    this.currentLine = [];
-    this.historyLines = [];
+    this.saveLines = [];
     this.physic = new _physic.default();
     this.stage = new _stage.default();
-    this.isPaint = false;
     this.stage.stage.on('mousedown touchstart', e => {
       this.isPaint = true;
       let pos = this.stage.stage.getPointerPosition();
 
       if (pos) {
-        this.currentLine.push(pos);
         this.position = pos;
+        this.currentLine = new _konva.default.Line({
+          stroke: this.mode === "drawing" ? '#df4b26' : '#3cb043',
+          strokeWidth: 5,
+          globalCompositeOperation: 'source-over',
+          // round cap for smoother lines
+          lineCap: 'round',
+          // add point twice, so we have some drawings even on a simple click
+          points: [pos.x, pos.y, pos.x, pos.y]
+        });
+        this.stage.layer.add(this.currentLine);
       }
     });
     this.stage.stage.on('mouseup touchend', () => {
       this.isPaint = false;
-      this.historyLines.push(this.currentLine);
-      this.currentLine = [];
+
+      switch (this.mode) {
+        case "emitting":
+          this.emit();
+          break;
+
+        default:
+          // nothing, keep drawing
+          ;
+      }
     }); // and core function - drawing
 
     this.stage.stage.on('mousemove touchmove', e => {
@@ -33641,30 +33664,40 @@ class Canvas {
       let pos = this.stage.stage.getPointerPosition(); //@ts-ignore
 
       if (pos && this.position != pos) {
-        this.currentLine.push(pos);
+        var newPoints = this.currentLine.points().concat([pos.x, pos.y]);
+        this.currentLine.points(newPoints);
+        this.position = pos;
       }
     });
   }
 
-  animate() {
-    let object = new _particle.default(this.historyLines[0][0], this.historyLines);
-    this.stage.layer.add(object.stageShape);
-    this.physic.add_particle(object);
+  save_particle() {
+    this.saveLines.push(this.currentLine);
+    this.currentLine = null; // console.log(this.saveLines);
+  }
+
+  emit() {
+    this.saveLines.map(line => {
+      let object = new _particle.default({
+        x: this.currentLine.attrs.points[0],
+        y: this.currentLine.attrs.points[1]
+      }, line);
+      console.log(object);
+      this.physic.add_particle(object);
+    });
   }
 
 }
 
 exports.default = Canvas;
 
-},{"./particle.js":61,"./physic.js":62,"./stage.js":63}],61:[function(require,module,exports){
+},{"./particle.js":61,"./physic.js":62,"./stage.js":63,"konva":39}],61:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
-
-var _konva = _interopRequireDefault(require("konva"));
 
 var _matterJs = _interopRequireDefault(require("matter-js"));
 
@@ -33675,38 +33708,27 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var Bodies = _matterJs.default.Bodies;
 
 class particle {
-  constructor(position, lines) {
-    this.limiter = 10; // mark last position
+  constructor(position, shape) {
+    // get all the points from the konva line
+    let vertex = shape.attrs.points; // transform to something that matter needs
 
-    this.lastPos = position;
-    this.physicBody = Bodies.fromVertices(position.x, position.y, lines); // flatten the 2d array
+    let vertexSet = [];
 
-    let points = [];
-    lines.map(line => {
-      points = points.concat(line);
-    });
-    let newPoints = [];
-    points.map(pos => {
-      newPoints.push(pos.x);
-      newPoints.push(pos.y);
-    });
-    this.stageShape = new _konva.default.Line({
-      stroke: '#df4b26',
-      strokeWidth: 3,
-      globalCompositeOperation: 'source-over',
-      lineCap: 'round',
-      // points has the pattern [x1,y1,x2,y2]
-      points: newPoints
-    });
+    for (let i = 0; i < vertex.length; i += 2) {
+      vertexSet.push({
+        x: vertex[i],
+        y: vertex[i + 1]
+      });
+    } // mark last position
+
+
+    this.lastPos = vertexSet[0];
+    this.physicBody = Bodies.fromVertices(position.x, position.y, vertexSet);
+    this.stageShape = shape;
   }
 
   update() {
-    if (--this.limiter > 0) {
-      console.log(this.lastPos);
-      console.log(this.physicBody);
-    } // associate the shape's position with physic's position
-
-
+    // associate the shape's position with physic's position
     let x_offset = this.lastPos.x - this.physicBody.position.x;
     let y_offset = this.lastPos.y - this.physicBody.position.y;
     this.lastPos = _lodash.default.cloneDeep(this.physicBody.position); // apply the offsets
@@ -33726,7 +33748,7 @@ class particle {
 
 exports.default = particle;
 
-},{"konva":39,"lodash":57,"matter-js":58}],62:[function(require,module,exports){
+},{"lodash":57,"matter-js":58}],62:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -33761,7 +33783,8 @@ class Physic {
         wireframeBackground: 'none'
       }
     });
-    var ground = Bodies.rectangle(400, 610, 810, 60, {
+    this.particles = [];
+    var ground = Bodies.rectangle(400, 610, 1200, 60, {
       isStatic: true
     });
     Composite.add(this.engine.world, ground);
@@ -33769,8 +33792,9 @@ class Physic {
   }
 
   add_particle(particle) {
-    this.boxA = particle;
-    Composite.add(this.engine.world, this.boxA.physicBody);
+    this.particles.push(particle);
+    console.log(particle);
+    Composite.add(this.engine.world, particle.physicBody); // console.log(this.particles);
   }
 
   run() {
@@ -33781,9 +33805,10 @@ class Physic {
 
     Runner.run(runner, this.engine);
     Events.on(runner, 'afterUpdate', () => {
-      if (this.boxA) {
-        this.boxA.update();
-      }
+      this.particles.map(p => {
+        console.log(p);
+        p.update();
+      });
     });
   }
 

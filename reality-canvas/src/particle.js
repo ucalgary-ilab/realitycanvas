@@ -1,37 +1,21 @@
-import Konva from 'konva';
 import Matter from 'matter-js';
 import _ from 'lodash';
 var Bodies = Matter.Bodies;
 export default class particle {
-    constructor(position, lines) {
-        this.limiter = 10;
+    constructor(position, shape) {
+        // get all the points from the konva line
+        let vertex = shape.attrs.points;
+        // transform to something that matter needs
+        let vertexSet = [];
+        for (let i = 0; i < vertex.length; i += 2) {
+            vertexSet.push({ x: vertex[i], y: vertex[i + 1] });
+        }
         // mark last position
-        this.lastPos = position;
-        this.physicBody = Bodies.fromVertices(position.x, position.y, lines);
-        // flatten the 2d array
-        let points = [];
-        lines.map(line => {
-            points = points.concat(line);
-        });
-        let newPoints = [];
-        points.map(pos => {
-            newPoints.push(pos.x);
-            newPoints.push(pos.y);
-        });
-        this.stageShape = new Konva.Line({
-            stroke: '#df4b26',
-            strokeWidth: 3,
-            globalCompositeOperation: 'source-over',
-            lineCap: 'round',
-            // points has the pattern [x1,y1,x2,y2]
-            points: newPoints,
-        });
+        this.lastPos = vertexSet[0];
+        this.physicBody = Bodies.fromVertices(position.x, position.y, vertexSet);
+        this.stageShape = shape;
     }
     update() {
-        if (--this.limiter > 0) {
-            console.log(this.lastPos);
-            console.log(this.physicBody);
-        }
         // associate the shape's position with physic's position
         let x_offset = this.lastPos.x - this.physicBody.position.x;
         let y_offset = this.lastPos.y - this.physicBody.position.y;
