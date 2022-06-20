@@ -54,17 +54,23 @@ export default class Physic {
         // console.log(this.particles);
     }
 
+    // motion is defined [{x,y}]
     add_motion(motion){
         this.motion = motion;
     }
 
-    get_velocity(particle){
+
+
+    get_velocity(particle:particle){
         let min=Infinity;
         let i=0;
+
+
         for(let k=0;k<this.motion.length;k++)
         {
-            let number = Math.pow(this.motion[k].x-particle.physicBody.position.x,2)+Math.pow(this.motion[k].y-particle.physicBody.position.y,2);
 
+            let number = Math.pow(this.motion[k].x-particle.physicBody.position.x,2)+Math.pow(this.motion[k].y-particle.physicBody.position.y,2);
+            assert(number!=0,"number shouldnt be zero");
             if(number<min)
             {
                 min=number;
@@ -79,7 +85,7 @@ export default class Physic {
             result.x = this.motion[i+1].x-this.motion[i].x;
             result.y = this.motion[i+1].y-this.motion[i].y;
         }
-        console.log({result});
+        // console.log({result});
         
         return result;
     }
@@ -100,7 +106,6 @@ export default class Physic {
                     Body.setVelocity(p.physicBody, this.get_velocity(p))
                 })
             }
-
         })
 
 

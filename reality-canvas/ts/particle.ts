@@ -54,19 +54,20 @@ export default class particle {
 
 
         // apply the offsets
-        let newPoints: number[] = [];
+        
 
 
         // since we an array of lines
         // we need to loop through all the lines
         // then loop through all the points of the current line
         this.stageShape.map(line=>{
+            let newPoints: number[] = [];
             for (let i = 0; i < line.attrs.points.length; i += 2) {
                 newPoints.push(line.attrs.points[i] - x_offset);
                 newPoints.push(line.attrs.points[i + 1] - y_offset);
-                // update the points
-                line.points(newPoints);
             }
+            // update the points
+            line.points(newPoints);
         });
     }
 }

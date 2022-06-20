@@ -1,3 +1,4 @@
+import { assert } from 'console';
 import Matter from 'matter-js';
 // module aliases
 var Engine = Matter.Engine, Render = Matter.Render, Runner = Matter.Runner, Bodies = Matter.Bodies, Body = Matter.Body, Svg = Matter.Svg, Vertices = Matter.Vertices, Composite = Matter.Composite, Events = Matter.Events;
@@ -29,6 +30,7 @@ export default class Physic {
         Composite.add(this.engine.world, particle.physicBody);
         // console.log(this.particles);
     }
+    // motion is defined [{x,y}]
     add_motion(motion) {
         this.motion = motion;
     }
@@ -37,6 +39,7 @@ export default class Physic {
         let i = 0;
         for (let k = 0; k < this.motion.length; k++) {
             let number = Math.pow(this.motion[k].x - particle.physicBody.position.x, 2) + Math.pow(this.motion[k].y - particle.physicBody.position.y, 2);
+            assert(number != 0, "number shouldnt be zero");
             if (number < min) {
                 min = number;
                 i = k;
@@ -47,7 +50,7 @@ export default class Physic {
             result.x = this.motion[i + 1].x - this.motion[i].x;
             result.y = this.motion[i + 1].y - this.motion[i].y;
         }
-        console.log({ result });
+        // console.log({result});
         return result;
     }
     run() {
