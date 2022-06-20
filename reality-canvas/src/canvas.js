@@ -27,17 +27,24 @@ export default class Canvas {
                     color = '#df4b26';
             }
             if (pos) {
-                this.position = pos;
-                this.currentLine = new Konva.Line({
-                    stroke: color,
-                    strokeWidth: 5,
-                    globalCompositeOperation: 'source-over',
-                    // round cap for smoother lines
-                    lineCap: 'round',
-                    // add point twice, so we have some drawings even on a simple click
-                    points: [pos.x, pos.y, pos.x, pos.y],
-                });
-                this.stage.layer.add(this.currentLine);
+                if (!this.currentLine) {
+                    this.position = pos;
+                    this.currentLine = new Konva.Line({
+                        stroke: color,
+                        strokeWidth: 5,
+                        globalCompositeOperation: 'source-over',
+                        // round cap for smoother lines
+                        lineCap: 'round',
+                        // add point twice, so we have some drawings even on a simple click
+                        points: [pos.x, pos.y, pos.x, pos.y],
+                    });
+                    this.stage.layer.add(this.currentLine);
+                }
+                else {
+                    var newPoints = this.currentLine.points().concat([pos.x, pos.y]);
+                    this.currentLine.points(newPoints);
+                    this.position = pos;
+                }
             }
         });
         this.stage.stage.on('mouseup touchend', () => {

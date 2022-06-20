@@ -2,7 +2,9 @@ import Matter from 'matter-js';
 // module aliases
 var Engine = Matter.Engine, Render = Matter.Render, Runner = Matter.Runner, Bodies = Matter.Bodies, Body = Matter.Body, Svg = Matter.Svg, Vertices = Matter.Vertices, Composite = Matter.Composite, Events = Matter.Events;
 export default class Physic {
+    //
     constructor() {
+        // create engine and render
         this.engine = Engine.create();
         this.render = Render.create({
             element: document.getElementsByTagName('a-scene')[0],
@@ -14,7 +16,9 @@ export default class Physic {
                 wireframeBackground: 'none'
             }
         });
+        // contains all the particles drawn
         this.particles = [];
+        // needed to be refactored
         this.motion = [];
         var ground = Bodies.rectangle(400, 610, 1200, 60, { isStatic: true });
         Composite.add(this.engine.world, ground);

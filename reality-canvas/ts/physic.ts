@@ -14,7 +14,11 @@ var Engine = Matter.Engine,
     Composite = Matter.Composite,
     Events = Matter.Events
 
+
+
+
 export default class Physic {
+    // create engine and render
     engine = Engine.create()
     render = Render.create({
         element: document.getElementsByTagName('a-scene')[0],
@@ -26,9 +30,15 @@ export default class Physic {
             wireframeBackground: 'none'
         }
     })
+
+    // contains all the particles drawn
     particles:particle[]=[]
+
+    // needed to be refactored
     motion:{x:number,y:number}[]=[];
 
+
+    //
     constructor() {
         var ground = Bodies.rectangle(400, 610, 1200, 60, { isStatic: true });
 

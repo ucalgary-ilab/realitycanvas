@@ -6,16 +6,9 @@ export default class Stage {
         width: window.innerWidth,
         height: window.innerHeight-25,
     })
-
-
     layer = new Konva.Layer()
-    isPaint: boolean = false
-    lastLine:any 
-
 
     constructor() {
-
-
         // this.layer.add(circle);
         this.stage.add(this.layer);
         this.layer.draw();

@@ -33662,17 +33662,23 @@ class Canvas {
       }
 
       if (pos) {
-        this.position = pos;
-        this.currentLine = new _konva.default.Line({
-          stroke: color,
-          strokeWidth: 5,
-          globalCompositeOperation: 'source-over',
-          // round cap for smoother lines
-          lineCap: 'round',
-          // add point twice, so we have some drawings even on a simple click
-          points: [pos.x, pos.y, pos.x, pos.y]
-        });
-        this.stage.layer.add(this.currentLine);
+        if (!this.currentLine) {
+          this.position = pos;
+          this.currentLine = new _konva.default.Line({
+            stroke: color,
+            strokeWidth: 5,
+            globalCompositeOperation: 'source-over',
+            // round cap for smoother lines
+            lineCap: 'round',
+            // add point twice, so we have some drawings even on a simple click
+            points: [pos.x, pos.y, pos.x, pos.y]
+          });
+          this.stage.layer.add(this.currentLine);
+        } else {
+          var newPoints = this.currentLine.points().concat([pos.x, pos.y]);
+          this.currentLine.points(newPoints);
+          this.position = pos;
+        }
       }
     });
     this.stage.stage.on('mouseup touchend', () => {
@@ -33824,7 +33830,9 @@ var Engine = _matterJs.default.Engine,
     Events = _matterJs.default.Events;
 
 class Physic {
+  //
   constructor() {
+    // create engine and render
     this.engine = Engine.create();
     this.render = Render.create({
       element: document.getElementsByTagName('a-scene')[0],
@@ -33835,8 +33843,10 @@ class Physic {
         background: '#800000',
         wireframeBackground: 'none'
       }
-    });
-    this.particles = [];
+    }); // contains all the particles drawn
+
+    this.particles = []; // needed to be refactored
+
     this.motion = [];
     var ground = Bodies.rectangle(400, 610, 1200, 60, {
       isStatic: true
@@ -33927,8 +33937,7 @@ class Stage {
       width: window.innerWidth,
       height: window.innerHeight - 25
     });
-    this.layer = new _konva.default.Layer();
-    this.isPaint = false; // this.layer.add(circle);
+    this.layer = new _konva.default.Layer(); // this.layer.add(circle);
 
     this.stage.add(this.layer);
     this.layer.draw();

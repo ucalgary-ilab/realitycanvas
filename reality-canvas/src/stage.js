@@ -7,7 +7,6 @@ export default class Stage {
             height: window.innerHeight - 25,
         });
         this.layer = new Konva.Layer();
-        this.isPaint = false;
         // this.layer.add(circle);
         this.stage.add(this.layer);
         this.layer.draw();
