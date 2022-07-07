@@ -1,6 +1,8 @@
 .DS_STORE
 bundle.js
 node_modules
+reality-canvas/opencv
+opencv
 scripts/flow/*/.flowconfig
 .flowconfig
 *~
