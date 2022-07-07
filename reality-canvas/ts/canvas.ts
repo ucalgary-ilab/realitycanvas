@@ -3,7 +3,6 @@ import Physic from "./physic.js"
 import Stage from "./stage.js"
 import Konva from 'konva'
 import particle from "./particle.js"
-import { Shape } from "konva/lib/Shape.js"
 
 
 
@@ -59,7 +58,7 @@ export default class Canvas {
                     // round cap for smoother lines
                     lineCap: 'round',
                     // add point twice, so we have some drawings even on a simple click
-                    points: [pos.x, pos.y, pos.x, pos.y],
+                    points: [pos.x, pos.y],
                 });
                 this.stage.layer.add(this.currentLine);
             }
