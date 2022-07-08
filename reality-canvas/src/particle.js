@@ -1,6 +1,7 @@
 import Konva from 'konva'
 import Matter from 'matter-js'
 
+import _ from 'lodash'
 
 var Bodies = Matter.Bodies
 
@@ -49,7 +50,7 @@ export default class particle {
         // get the offset
         let x_offset = this.lastPos.x - this.physicBody.position.x;
         let y_offset = this.lastPos.y - this.physicBody.position.y;
-        this.lastPos = Object.assign(this.physicBody.position);
+        this.lastPos = _.cloneDeep(this.physicBody.position);
 
 
         // apply the offsets

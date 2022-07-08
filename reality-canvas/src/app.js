@@ -15,6 +15,25 @@ class App {
         video.width = window.innerWidth;
         video.height = window.innerHeight;
 
+        let src;
+        let dst;
+        let cap;
+        let low;
+        let high;
+
+        let output = document.getElementById("canvasOutput");
+
+        output.addEventListener("click", (e) => {
+            // console.log(e);
+            let color = src.ucharPtr(e.clientX, e.clientY);
+            console.log(color);
+            low = new cv.Mat(src.rows, src.cols, src.type(), [color[0]-50,color[1]-50,color[2]-50,color[3]-100]);
+
+            high = new cv.Mat(src.rows, src.cols, src.type(), [color[0]+50,color[1]+50,color[2]+50,color[3]]);
+        });
+
+
+
         navigator.mediaDevices
             .getUserMedia({ video: true, audio: false })
             .then(function (stream) {
@@ -22,9 +41,11 @@ class App {
                 video.play();
 
 
-                let src = new cv.Mat(video.height, video.width, cv.CV_8UC4);
-                let dst = new cv.Mat(video.height, video.width, cv.CV_8UC1);
-                let cap = new cv.VideoCapture(video);
+                src = new cv.Mat(video.height, video.width, cv.CV_8UC4);
+                dst = new cv.Mat(video.height, video.width, cv.CV_8UC4);
+                cap = new cv.VideoCapture(video);
+
+
 
                 const FPS = 30;
                 function processVideo() {
@@ -33,14 +54,20 @@ class App {
                         let begin = Date.now();
                         // start processing.
                         cap.read(src);
-                        cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY);
-                        // let low = new cv.Mat(src.rows, src.cols, src.type(), [0, 0, 0, 0]);
+                        // cv.cvtColor(src, src, cv.COLOR_RGBA2);
+                        
+                        if(low&&high)
+                        {
+                            cv.inRange(src, low, high, dst);
 
-                        console.log(src.type())
-                        // let high = new cv.Mat(src.rows, src.cols, src.type(), [150, 150, 150, 255]);
-                        // cv.inRange(src, low, high, dst);
+                            cv.imshow("canvasOutput", dst);
+                        }
+                        else 
+                        {
 
-                        cv.imshow("canvasOutput", dst);
+                            cv.imshow("canvasOutput", src);
+                        }
+
                         // schedule the next one.
                         let delay = 1000 / FPS - (Date.now() - begin);
                         setTimeout(processVideo, delay);
