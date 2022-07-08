@@ -35,6 +35,8 @@ class App {
                         cap.read(src);
                         // cv.cvtColor(src, dst, cv.COLOR_RGBA2BGR);
                         let low = new cv.Mat(src.rows, src.cols, src.type(), [0, 0, 0, 0]);
+
+                        console.log(src.type())
                         let high = new cv.Mat(src.rows, src.cols, src.type(), [150, 150, 150, 255]);
                         cv.inRange(src, low, high, dst);
 
