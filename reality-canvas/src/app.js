@@ -23,7 +23,7 @@ class App {
 
 
                 let src = new cv.Mat(video.height, video.width, cv.CV_8UC4);
-                let dst = new cv.Mat(video.height, video.width, cv.CV_8UC4);
+                let dst = new cv.Mat(video.height, video.width, cv.CV_8UC1);
                 let cap = new cv.VideoCapture(video);
 
                 const FPS = 30;
@@ -33,12 +33,12 @@ class App {
                         let begin = Date.now();
                         // start processing.
                         cap.read(src);
-                        // cv.cvtColor(src, dst, cv.COLOR_RGBA2BGR);
-                        let low = new cv.Mat(src.rows, src.cols, src.type(), [0, 0, 0, 0]);
+                        cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY);
+                        // let low = new cv.Mat(src.rows, src.cols, src.type(), [0, 0, 0, 0]);
 
                         console.log(src.type())
-                        let high = new cv.Mat(src.rows, src.cols, src.type(), [150, 150, 150, 255]);
-                        cv.inRange(src, low, high, dst);
+                        // let high = new cv.Mat(src.rows, src.cols, src.type(), [150, 150, 150, 255]);
+                        // cv.inRange(src, low, high, dst);
 
                         cv.imshow("canvasOutput", dst);
                         // schedule the next one.

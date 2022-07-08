@@ -12,6 +12,7 @@ body {
 
 #videoInput {
     position: fixed;
+    display: none;
 }
 
 #save_button {
