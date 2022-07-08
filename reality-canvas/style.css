@@ -5,6 +5,15 @@ body {
     overflow: hidden;
 }
 
+#canvasOutput {
+    position:fixed;
+    z-index: 2;
+}
+
+#videoInput {
+    position: fixed;
+}
+
 #save_button {
     position: fixed;
     left: 100px;
