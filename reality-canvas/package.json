@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "browserify ./src/app.js -p esmify > bundle.js",
+    "watch": "watchify -p esmify ./src/app.js -o bundle.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

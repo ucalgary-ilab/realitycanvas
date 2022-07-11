@@ -25,30 +25,19 @@ class App {
         let output = document.getElementById("canvasOutput");
 
         output.addEventListener("click", (e) => {
-            console.log(e);
-            console.log('image width: ' + src.cols + '\n' +
-            'image height: ' + src.rows + '\n' +
-            'image size: ' + src.size().width + '*' + src.size().height + '\n' +
-            'image depth: ' + src.depth() + '\n' +
-            'image channels ' + src.channels() + '\n' +
-            'image type: ' + src.type() + '\n');
+           
 
-            // for(let i=0;i<src.rows;i++)
-            // {
-            //     for(let  j=0;j<src.cols;j++)
-            //     {
-            //         if(src.ucharPtr(i,j)==[0,0,0,0]){
-            //             console.log(i,j);
-            //             break;
-            //         }
-            //     }
-            // }
+            /*
+                Man! I have been struggled so long!
 
-            console.log(src.ucharPtr(e.clientY,e.clientX));
+                It turns out that I need to supply ucharPtr with (y,x) instead of (x,y)
+            */
 
-            // low = new cv.Mat(src.rows, src.cols, src.type(), [color[0]-50,color[1]-50,color[2]-50,color[3]-100]);
 
-            // high = new cv.Mat(src.rows, src.cols, src.type(), [color[0]+50,color[1]+50,color[2]+50,color[3]]);
+            let color = src.ucharPtr(e.clientY,e.clientX);
+            
+            low = new cv.Mat(src.rows, src.cols, src.type(), [color[0]-20,color[1]-20,color[2]-20,color[3]]);
+            high = new cv.Mat(src.rows, src.cols, src.type(), [color[0]+20,color[1]+20,color[2]+20,color[3]]);
         });
 
 
@@ -75,17 +64,44 @@ class App {
                         cap.read(src);
                         // cv.cvtColor(src, src, cv.COLOR_RGBA2);
                         
-                        // if(low&&high)
-                        // {
-                        //     cv.inRange(src, low, high, dst);
 
-                        //     cv.imshow("canvasOutput", dst);
-                        // }
-                        // else 
-                        // {
+                        if(low&&high)
+                        {
+                            cv.inRange(src, low, high, dst);
+                            let contours = new cv.MatVector();
+                            let hierarchy = new cv.Mat();
+                            cv.findContours(dst, contours, hierarchy, cv.RETR_CCOMP, cv.CHAIN_APPROX_SIMPLE);
+    
+                            let maxArea = 0;
+                            let maxCnt = null;
+
+                            for(let i=0; i < contours.size(); i++){
+                                let cnt = contours.get(i);
+                                let area = cv.contourArea(cnt, false);
+                                
+                                if(area > maxArea)
+                                {
+                                    maxArea = area 
+                                    maxCnt = cnt
+                                }
+                            }
+
+                            if(maxCnt){
+
+                                let toDraw = new cv.MatVector();
+                                toDraw.push_back(maxCnt);
+                                console.log(maxCnt);
+                                let color = new cv.Scalar(255, 0, 0)
+                
+                                for (let i = 0; i < toDraw.size(); ++i) {
+                                    
+                                    cv.drawContours(src, toDraw, i, color, 5, cv.LINE_8, hierarchy, 0);
+                                }
+                            }
+
+                        }
 
                         cv.imshow("canvasOutput", src);
-                        // }
 
                         // schedule the next one.
                         let delay = 1000 / FPS - (Date.now() - begin);
