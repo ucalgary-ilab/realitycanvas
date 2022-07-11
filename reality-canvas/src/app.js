@@ -10,11 +10,12 @@ class App {
 
     constructor() {
 
-
+        // alert("working")
         let video = document.getElementById("videoInput"); // video is the id of video tag
         video.width = window.innerWidth;
         video.height = window.innerHeight;
-
+        // video.width = 720
+        // video.height = 480
         let src;
         let dst;
         let cap;
@@ -24,12 +25,30 @@ class App {
         let output = document.getElementById("canvasOutput");
 
         output.addEventListener("click", (e) => {
-            // console.log(e);
-            let color = src.ucharPtr(e.clientX, e.clientY);
-            console.log(color);
-            low = new cv.Mat(src.rows, src.cols, src.type(), [color[0]-50,color[1]-50,color[2]-50,color[3]-100]);
+            console.log(e);
+            console.log('image width: ' + src.cols + '\n' +
+            'image height: ' + src.rows + '\n' +
+            'image size: ' + src.size().width + '*' + src.size().height + '\n' +
+            'image depth: ' + src.depth() + '\n' +
+            'image channels ' + src.channels() + '\n' +
+            'image type: ' + src.type() + '\n');
 
-            high = new cv.Mat(src.rows, src.cols, src.type(), [color[0]+50,color[1]+50,color[2]+50,color[3]]);
+            // for(let i=0;i<src.rows;i++)
+            // {
+            //     for(let  j=0;j<src.cols;j++)
+            //     {
+            //         if(src.ucharPtr(i,j)==[0,0,0,0]){
+            //             console.log(i,j);
+            //             break;
+            //         }
+            //     }
+            // }
+
+            console.log(src.ucharPtr(e.clientY,e.clientX));
+
+            // low = new cv.Mat(src.rows, src.cols, src.type(), [color[0]-50,color[1]-50,color[2]-50,color[3]-100]);
+
+            // high = new cv.Mat(src.rows, src.cols, src.type(), [color[0]+50,color[1]+50,color[2]+50,color[3]]);
         });
 
 
@@ -56,17 +75,17 @@ class App {
                         cap.read(src);
                         // cv.cvtColor(src, src, cv.COLOR_RGBA2);
                         
-                        if(low&&high)
-                        {
-                            cv.inRange(src, low, high, dst);
+                        // if(low&&high)
+                        // {
+                        //     cv.inRange(src, low, high, dst);
 
-                            cv.imshow("canvasOutput", dst);
-                        }
-                        else 
-                        {
+                        //     cv.imshow("canvasOutput", dst);
+                        // }
+                        // else 
+                        // {
 
-                            cv.imshow("canvasOutput", src);
-                        }
+                        cv.imshow("canvasOutput", src);
+                        // }
 
                         // schedule the next one.
                         let delay = 1000 / FPS - (Date.now() - begin);
