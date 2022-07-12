@@ -12,8 +12,8 @@ class App {
 
         // alert("working")
         let video = document.getElementById("videoInput"); // video is the id of video tag
-        video.width = window.innerWidth;
-        video.height = window.innerHeight;
+        video.width = 1280;
+        video.height = 720;
         // video.width = 720
         // video.height = 480
         let src;
@@ -23,6 +23,8 @@ class App {
         let high;
 
         let output = document.getElementById("canvasOutput");
+        // output.setAttribute("width",video.videoWidth)
+        // output.setAttribute("height",video.videoHeight)
 
         output.addEventListener("click", (e) => {
            
@@ -33,9 +35,12 @@ class App {
                 It turns out that I need to supply ucharPtr with (y,x) instead of (x,y)
             */
 
+            let color = src.ucharPtr(e.layerY,e.layerX);
+            console.log(e, color);
 
-            let color = src.ucharPtr(e.clientY,e.clientX);
-            
+            let r = color[0];
+            let g = color[1];
+            let b = color[2];
             low = new cv.Mat(src.rows, src.cols, src.type(), [color[0]-20,color[1]-20,color[2]-20,color[3]]);
             high = new cv.Mat(src.rows, src.cols, src.type(), [color[0]+20,color[1]+20,color[2]+20,color[3]]);
         });
@@ -48,6 +53,7 @@ class App {
                 video.srcObject = stream;
                 video.play();
 
+                console.log(video)
 
                 src = new cv.Mat(video.height, video.width, cv.CV_8UC4);
                 dst = new cv.Mat(video.height, video.width, cv.CV_8UC4);
@@ -90,12 +96,15 @@ class App {
 
                                 let toDraw = new cv.MatVector();
                                 toDraw.push_back(maxCnt);
-                                console.log(maxCnt);
+                                // console.log(maxCnt);
                                 let color = new cv.Scalar(255, 0, 0)
                 
+                                console.log(toDraw.get(0).data32S[0], toDraw.get(0).data32S[1]);
+                                // alert('halt')
                                 for (let i = 0; i < toDraw.size(); ++i) {
+                                    // console.log(toDraw);
                                     
-                                    cv.drawContours(src, toDraw, i, color, 5, cv.LINE_8, hierarchy, 0);
+                                    cv.drawContours(src, toDraw, i, color, 5, cv.LINE_8, new cv.Mat(), 0);
                                 }
                             }
 

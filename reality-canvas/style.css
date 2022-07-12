@@ -5,6 +5,12 @@ body {
     overflow: hidden;
 }
 
+
+video {
+    margin: 0;
+    padding: 0;
+}
+
 #canvasOutput {
     position:fixed;
     z-index: 2;
@@ -47,7 +53,7 @@ a-scene{
 canvas {
     background: transparent;
     position: relative;
-    top: -100px;
+    /* top: 100px; */
     /* z-index: 2; */
     -webkit-touch-callout: none;
     -webkit-user-select: none;
