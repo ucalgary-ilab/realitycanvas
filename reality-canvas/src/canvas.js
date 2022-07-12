@@ -1,8 +1,8 @@
 // @ts-ignore
-import Physic from "./physic.js"
+// import Physic from "./physic.js"
 import Stage from "./stage.js"
 import Konva from 'konva'
-import particle from "./particle.js"
+// import particle from "./particle.js"
 
 
 
@@ -13,20 +13,23 @@ export default class Canvas {
 
     // currentLine keeps current drawing line, might be a very bad name
     currentLine
-    
+
+    offsetX = 0;
+    offsetY = 0;
+
+
     // shape is defined by an array of konva lines
     currentShape = []
     savedShapes = []
-    
+
     // motion line 
     motionLine = []
 
-    physic = new Physic()
+    // physic = new Physic()
     stage = new Stage()
 
 
     constructor() {
-
 
         this.stage.stage.on('mousedown touchstart', e => {
             // put down the pen, i.e, painting
@@ -35,16 +38,15 @@ export default class Canvas {
             let pos = this.stage.stage.getPointerPosition();
 
             let color;
-            switch(this.mode)
-            {
+            switch (this.mode) {
                 case 'emitting':
-                    color='#3cb043';    // emitting = green
+                    color = '#3cb043';    // emitting = green
                     break;
                 case 'motion':
-                    color='#29446f';    // motion = blue
+                    color = '#29446f';    // motion = blue
                     break;
                 default:
-                    color='#df4b26';    // drawing = red
+                    color = '#df4b26';    // drawing = red
             }
 
             // if the pos is not null
@@ -99,9 +101,9 @@ export default class Canvas {
             // prevent scrolling on touch devices
             e.evt.preventDefault();
 
-             // get the current pointed position on the stage
+            // get the current pointed position on the stage
             let pos = this.stage.stage.getPointerPosition();
-            
+
             /* if the position is not empty and this position is not equal to last position,
                 expand the currentLine by appending new points.
 
@@ -124,35 +126,49 @@ export default class Canvas {
 
 
     save_particle() {
-        // save current shape
+        // save current shape, savedShape is an array of array of konva lines
         this.savedShapes.push(this.currentShape);
         // reset current shape
         this.currentShape = [];
     }
 
 
-    add_motion(){
-        let motionVertex = this.currentLine.attrs.points;
-
-        // transform to something that matter needs
-        let motionVertexSet = []
-        for (let i = 0; i < motionVertex.length; i += 2) {
-            motionVertexSet.push({ x: motionVertex[i], y: motionVertex[i + 1] })
+    update() {
+        if (this.savedShapes[0]) {
+            this.savedShapes[0].map(line => {
+                let newPoints = [];
+                for (let i = 0; i < line.attrs.points.length; i += 2) {
+                    newPoints.push(line.attrs.points[i] + this.offsetX);
+                    newPoints.push(line.attrs.points[i + 1] + this.offsetY);
+                }
+                // update the points
+                line.points(newPoints);
+            });
         }
-        this.physic.add_motion(motionVertexSet);
     }
 
-    emit() {
-        this.savedShapes.map(shape => {
-            console.log(shape);
-            this.physic.add_particle(new particle({
-                x: this.currentLine.attrs.points[0],
-                y: this.currentLine.attrs.points[1],
-            }
-                , shape));
-        });
 
-    }
+    // add_motion(){
+    //     let motionVertex = this.currentLine.attrs.points;
+
+    //     // transform to something that matter needs
+    //     let motionVertexSet = []
+    //     for (let i = 0; i < motionVertex.length; i += 2) {
+    //         motionVertexSet.push({ x: motionVertex[i], y: motionVertex[i + 1] })
+    //     }
+    //     this.physic.add_motion(motionVertexSet);
+    // }
+
+    // emit() {
+    //     this.savedShapes.map(shape => {
+    //         console.log(shape);
+    //         this.physic.add_particle(new particle({
+    //             x: this.currentLine.attrs.points[0],
+    //             y: this.currentLine.attrs.points[1],
+    //         }
+    //             , shape));
+    //     });
+    // }
 }
 
 

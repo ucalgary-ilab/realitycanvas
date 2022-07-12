@@ -6,14 +6,24 @@ body {
 }
 
 
-video {
-    margin: 0;
-    padding: 0;
+
+/* #canvasOutput {
+    position:fixed;
+    top:0px;
+    left:0px;
+} */
+
+
+#opencv{
+    position:fixed;
+    top:0px;
+    left:0px;
 }
 
-#canvasOutput {
+#konva{
     position:fixed;
-    z-index: 2;
+    top:0px;
+    left:0px;
 }
 
 #videoInput {
@@ -21,33 +31,46 @@ video {
     display: none;
 }
 
+#select_button {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    z-index: 2;
+}
+
+#draw_button {
+    position: fixed;
+    top: 0px;
+    left: 100px;
+    z-index: 2;
+}
+
 #save_button {
     position: fixed;
-    left: 100px;
+    top: 0px;
+    left: 200px;
     z-index: 2;
 }
 
 #emit_button {
     position: fixed;
+    top: 0px;
     left: 300px;
     z-index: 2;
 }
 
 #motion_button {
     position: fixed;
-    left: 500px;
+    top: 0px;
+    left: 400px;
     z-index: 2;
 }
 
-#container {
+/* #container {
     position: fixed;
-    z-index: 1 ;
-}
-
-a-scene{
-    position:fixed;
-    z-index: 0;
-}
+    top: 0px;
+    left: 0px;
+} */
 
 
 canvas {
@@ -64,5 +87,4 @@ canvas {
     outline: none;
     -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
     /* mobile webkit */
-
 }

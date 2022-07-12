@@ -21,7 +21,7 @@ export default class Physic {
     // create engine and render
     engine = Engine.create()
     render = Render.create({
-        element: document.getElementsByTagName('a-scene')[0],
+        element: document.getElementById('opencv'),
         engine: this.engine,
         options: {
             showPositions: true,
@@ -37,8 +37,6 @@ export default class Physic {
     // needed to be refactored
     motion =[];
 
-
-    //
     constructor() {
         var ground = Bodies.rectangle(400, 610, 1200, 60, { isStatic: true });
 
@@ -85,7 +83,6 @@ export default class Physic {
             result.x = this.motion[i+1].x-this.motion[i].x;
             result.y = this.motion[i+1].y-this.motion[i].y;
         }
-        // console.log({result});
         
         return result;
     }

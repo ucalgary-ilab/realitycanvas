@@ -3,46 +3,57 @@ import Canvas from "./canvas.js";
 import Physic from "./physic.js"
 import Stage from "./stage.js"
 import cv from "../opencv/opencv"
+import { lstat } from "fs";
 
 
 class App {
-    // canvas = new Canvas();
+    canvas = new Canvas();
 
     constructor() {
 
-        // alert("working")
         let video = document.getElementById("videoInput"); // video is the id of video tag
         video.width = 1280;
         video.height = 720;
-        // video.width = 720
-        // video.height = 480
         let src;
         let dst;
         let cap;
         let low;
         let high;
+        let lastX;
+        let lastY;
 
         let output = document.getElementById("canvasOutput");
-        // output.setAttribute("width",video.videoWidth)
-        // output.setAttribute("height",video.videoHeight)
-
+        
         output.addEventListener("click", (e) => {
-           
 
-            /*
-                Man! I have been struggled so long!
+            let color = src.ucharPtr(e.layerY, e.layerX);
+            let range = 15;
 
-                It turns out that I need to supply ucharPtr with (y,x) instead of (x,y)
-            */
+            let color_low = [];
+            let color_high = [];
+            
+            for (let i = 0; i < color.length - 1; i++) {
+                
+                if (color_low[i] - range < 0) {
+                    color_low.push(0);
+                }
+                else {
+                    color_low.push(color[i] - range);
+                }
+                if (color_high[i] + range > 255) {
+                    color_high.push(255);
+                }
+                else {
+                    color_high.push(color[i]+range);
+                }
+            }
+            color_low.push(255);
+            color_high.push(255);
 
-            let color = src.ucharPtr(e.layerY,e.layerX);
-            console.log(e, color);
+            console.log(color, color_low, color_high);
 
-            let r = color[0];
-            let g = color[1];
-            let b = color[2];
-            low = new cv.Mat(src.rows, src.cols, src.type(), [color[0]-20,color[1]-20,color[2]-20,color[3]]);
-            high = new cv.Mat(src.rows, src.cols, src.type(), [color[0]+20,color[1]+20,color[2]+20,color[3]]);
+            low = new cv.Mat(src.rows, src.cols, src.type(), color_low);
+            high = new cv.Mat(src.rows, src.cols, src.type(), color_high);
         });
 
 
@@ -53,13 +64,10 @@ class App {
                 video.srcObject = stream;
                 video.play();
 
-                console.log(video)
 
                 src = new cv.Mat(video.height, video.width, cv.CV_8UC4);
                 dst = new cv.Mat(video.height, video.width, cv.CV_8UC4);
                 cap = new cv.VideoCapture(video);
-
-
 
                 const FPS = 30;
                 function processVideo() {
@@ -69,41 +77,52 @@ class App {
                         // start processing.
                         cap.read(src);
                         // cv.cvtColor(src, src, cv.COLOR_RGBA2);
-                        
 
-                        if(low&&high)
-                        {
+
+                        if (low && high) {
                             cv.inRange(src, low, high, dst);
                             let contours = new cv.MatVector();
                             let hierarchy = new cv.Mat();
                             cv.findContours(dst, contours, hierarchy, cv.RETR_CCOMP, cv.CHAIN_APPROX_SIMPLE);
-    
+
                             let maxArea = 0;
                             let maxCnt = null;
 
-                            for(let i=0; i < contours.size(); i++){
+                            for (let i = 0; i < contours.size(); i++) {
                                 let cnt = contours.get(i);
                                 let area = cv.contourArea(cnt, false);
-                                
-                                if(area > maxArea)
-                                {
-                                    maxArea = area 
+
+                                if (area > maxArea) {
+                                    maxArea = area
                                     maxCnt = cnt
                                 }
                             }
 
-                            if(maxCnt){
+                            if (maxCnt && maxCnt.data32S) {
 
                                 let toDraw = new cv.MatVector();
                                 toDraw.push_back(maxCnt);
-                                // console.log(maxCnt);
-                                let color = new cv.Scalar(255, 0, 0)
-                
-                                console.log(toDraw.get(0).data32S[0], toDraw.get(0).data32S[1]);
-                                // alert('halt')
+                                let color = new cv.Scalar(255, 0, 0);
+
+
+
+                                let allPoints = maxCnt.data32S;
+                                let sumX=0;
+                                let sumY=0;
+                                let numPoints = allPoints.length/2;
+                                for(let i=0; i<allPoints.length; i+=2){
+                                    sumX += allPoints[i];
+                                    sumY += allPoints[i+1];
+                                }
+
+                                
+                                app.canvas.offsetX = Math.floor(sumX/numPoints) - lastX;
+                                app.canvas.offsetY = Math.floor(sumY/numPoints) - lastY;
+
+                                lastX = Math.floor(sumX/numPoints);
+                                lastY = Math.floor(sumY/numPoints);
+
                                 for (let i = 0; i < toDraw.size(); ++i) {
-                                    // console.log(toDraw);
-                                    
                                     cv.drawContours(src, toDraw, i, color, 5, cv.LINE_8, new cv.Mat(), 0);
                                 }
                             }
@@ -112,6 +131,7 @@ class App {
 
                         cv.imshow("canvasOutput", src);
 
+                        app.canvas.update();
                         // schedule the next one.
                         let delay = 1000 / FPS - (Date.now() - begin);
                         setTimeout(processVideo, delay);
@@ -119,7 +139,7 @@ class App {
                         console.error(err);
                     }
                 }
-
+                
                 // schedule the first one.
                 setTimeout(processVideo, 0);
             })
@@ -134,22 +154,38 @@ class App {
 // create application instance
 const app = new App();
 
-// // register button event handlers
-// const save = () => {
-//     app.canvas.save_particle();
-// }
-// document.getElementById('save_button')?.addEventListener('click', save)
+let opencvPlane = document.getElementById('opencv');
+let konvaPlane = document.getElementById('konva');
+
+const select = () => {
+    opencvPlane.style.zIndex = "1";
+    konvaPlane.style.zIndex = "0";
+}
+document.getElementById('select_button')?.addEventListener('click', select)
 
 
-// const emit = () => {
-//     app.canvas.mode = "emitting";
-// }
+const draw = () => {
+    opencvPlane.style.zIndex = "0";
+    konvaPlane.style.zIndex = "1";
+}
+document.getElementById('draw_button')?.addEventListener('click', draw)
 
-// document.getElementById('emit_button')?.addEventListener('click', emit)
+// register button event handlers
+const save = () => {
+    app.canvas.save_particle();
+}
+document.getElementById('save_button')?.addEventListener('click', save)
 
-// const motion = () => {
-//     app.canvas.mode = "motion";
-// }
-// document.getElementById('motion_button')?.addEventListener('click', motion)
+
+const emit = () => {
+    app.canvas.mode = "emitting";
+}
+
+document.getElementById('emit_button')?.addEventListener('click', emit)
+
+const motion = () => {
+    app.canvas.mode = "motion";
+}
+document.getElementById('motion_button')?.addEventListener('click', motion)
 
 
