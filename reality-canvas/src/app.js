@@ -12,8 +12,18 @@ class App {
     constructor() {
 
         let video = document.getElementById("videoInput"); // video is the id of video tag
-        video.width = 1280;
-        video.height = 720;
+        video.width = 1;
+        video.height = 1;
+        
+        const videoLoadingPromise = new Promise((resolve)=>{
+            video.addEventListener( "loadedmetadata", function (_) {
+                video.width = this.videoWidth;
+                video.height = this.videoHeight;
+                resolve();
+            });
+        })
+
+
         let src;
         let dst;
         let cap;
@@ -60,12 +70,20 @@ class App {
 
         navigator.mediaDevices
             .getUserMedia({ video: true, audio: false })
-            .then(function (stream) {
+            .then(async function (stream) {
+                // videoWidth / videoHeight = width / height = innerWidth / x
+                // x/innerWidth = videoHeight /videoWidth =?> 
+                // console.log(video)
+                // console.log(video.videoWidth, video.videoHeight)
+                // video.width = video.videoWidth
+                // video.height = video.videoHeight 
 
-                
+
                 video.srcObject = stream;
                 video.play();
 
+                await Promise.resolve(videoLoadingPromise);
+                
 
                 src = new cv.Mat(video.height, video.width, cv.CV_8UC4);
                 dst = new cv.Mat(video.height, video.width, cv.CV_8UC4);
