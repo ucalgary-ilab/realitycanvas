@@ -4,20 +4,13 @@ import Stage from "./stage.js"
 import Konva from 'konva'
 // import particle from "./particle.js"
 
-
-
 export default class Canvas {
     isPaint = false
     mode = "drawing"
-    lastPosition = { x: 0, y: 0 }
-
+    lastPosition = [0, 0]
+    currPosition = [0, 0]
     // currentLine keeps current drawing line, might be a very bad name
     currentLine
-
-    offsetX = 0;
-    offsetY = 0;
-
-
     // shape is defined by an array of konva lines
     currentShape = []
     savedShapes = []
@@ -28,9 +21,10 @@ export default class Canvas {
     // physic = new Physic()
     stage = new Stage()
 
-
+    contourPoints = []
+    sortedPoints = []
+    // contourAngles = []
     constructor() {
-
         this.stage.stage.on('mousedown touchstart', e => {
             // put down the pen, i.e, painting
             this.isPaint = true;
@@ -132,20 +126,93 @@ export default class Canvas {
         this.currentShape = [];
     }
 
+    // set the position of the tracked object
+    setPosition(x, y) {
+        this.lastPosition = this.currPosition;
+        this.currPosition = [x, y];
+    }
+
+    setContourPoints(points) {
+        this.contourPoints = points;
+
+        //  calculating the center
+        let sumX=0;
+        let sumY=0;
+        let numPoints = points.length/2;
+        for(let i=0; i<points.length; i+=2){
+            sumX += points[i];
+            sumY += points[i+1];
+        }
+
+        // set center
+        this.setPosition(Math.floor(sumX/numPoints), Math.floor(sumY/numPoints));
+        // this.setContourPoints();
+        this.sortContourPoints();
+    }
+
+
+    sortContourPoints() {
+        let angles = []
+
+        // get angles with respect to the center
+        for(let i=0; i<this.contourPoints.length; i+=2){
+            let x = this.contourPoints[i];
+            let y = this.contourPoints[i+1];
+            angles.push( { x:x, y:y, angle: Math.atan2(y - this.currPosition[1], x - this.currPosition[0]) * 180 / Math.PI });
+        }
+
+        this.sortedPoints = angles.sort((a, b) => a.angle - b.angle);
+    }
+
 
     update() {
+        switch (this.mode) {
+            case "binding":
+                this.binding();
+                break;
+            case "contouring":
+                this.contouring();
+                break;
+            default:
+                ;
+        }
+    }
+
+    binding() {
+        let offsetX = this.currPosition[0] - this.lastPosition[0];
+        let offsetY = this.currPosition[1] - this.lastPosition[1];
+
         if (this.savedShapes[0]) {
             this.savedShapes[0].map(line => {
                 let newPoints = [];
                 for (let i = 0; i < line.attrs.points.length; i += 2) {
-                    newPoints.push(line.attrs.points[i] + this.offsetX);
-                    newPoints.push(line.attrs.points[i + 1] + this.offsetY);
+                    newPoints.push(line.attrs.points[i] + offsetX);
+                    newPoints.push(line.attrs.points[i + 1] + offsetY);
                 }
                 // update the points
                 line.points(newPoints);
             });
         }
     }
+
+
+    contouring() {
+        if (this.savedShapes[0]) {
+            this.savedShapes[0].map(line => {
+                let newPoints = [];
+
+                for (let i = 0; i < line.attrs.points.length; i += 2) {
+                    newPoints.push(line.attrs.points[i] + offsetX);
+                    newPoints.push(line.attrs.points[i + 1] + offsetY);
+                }
+                // update the points
+                line.points(newPoints);
+            });
+        }
+    }
+
+
+
 
 
     // add_motion(){

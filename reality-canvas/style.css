@@ -66,6 +66,13 @@ body {
     z-index: 2;
 }
 
+#contour_button {
+    position: fixed;
+    top: 0px;
+    left: 500px;
+    z-index: 2;
+}
+
 /* #container {
     position: fixed;
     top: 0px;
