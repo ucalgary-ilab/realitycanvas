@@ -199,7 +199,7 @@ document.getElementById('save_button')?.addEventListener('click', save)
 
 const contour = () => {
     app.canvas.save_particle();
-    app.canvas.mode = "contour";
+    app.canvas.mode = "contouring";
 }
 document.getElementById('contour_button')?.addEventListener('click', contour)
 

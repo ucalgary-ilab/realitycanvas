@@ -136,16 +136,16 @@ export default class Canvas {
         this.contourPoints = points;
 
         //  calculating the center
-        let sumX=0;
-        let sumY=0;
-        let numPoints = points.length/2;
-        for(let i=0; i<points.length; i+=2){
+        let sumX = 0;
+        let sumY = 0;
+        let numPoints = points.length / 2;
+        for (let i = 0; i < points.length; i += 2) {
             sumX += points[i];
-            sumY += points[i+1];
+            sumY += points[i + 1];
         }
 
         // set center
-        this.setPosition(Math.floor(sumX/numPoints), Math.floor(sumY/numPoints));
+        this.setPosition(Math.floor(sumX / numPoints), Math.floor(sumY / numPoints));
         // this.setContourPoints();
         this.sortContourPoints();
     }
@@ -155,13 +155,15 @@ export default class Canvas {
         let angles = []
 
         // get angles with respect to the center
-        for(let i=0; i<this.contourPoints.length; i+=2){
+        for (let i = 0; i < this.contourPoints.length; i += 2) {
             let x = this.contourPoints[i];
-            let y = this.contourPoints[i+1];
-            angles.push( { x:x, y:y, angle: Math.atan2(y - this.currPosition[1], x - this.currPosition[0]) * 180 / Math.PI });
+            let y = this.contourPoints[i + 1];
+            angles.push({ x: x, y: y, angle: Math.atan2(y - this.currPosition[1], x - this.currPosition[0]) * 180 / Math.PI + 180 });
         }
 
         this.sortedPoints = angles.sort((a, b) => a.angle - b.angle);
+        console.log(this.sortedPoints);
+        // alert('halt');
     }
 
 
@@ -197,18 +199,36 @@ export default class Canvas {
 
 
     contouring() {
-        if (this.savedShapes[0]) {
+
+        if (this.savedShapes[0] && this.sortedPoints.length>0) {
             this.savedShapes[0].map(line => {
                 let newPoints = [];
 
-                for (let i = 0; i < line.attrs.points.length; i += 2) {
-                    newPoints.push(line.attrs.points[i] + offsetX);
-                    newPoints.push(line.attrs.points[i + 1] + offsetY);
+                for (let i = 2; i < line.attrs.points.length; i += 2) {
+                    newPoints.push(line.attrs.points[i]);
+                    newPoints.push(line.attrs.points[i + 1]);
                 }
+                // get the head
+                let x = newPoints[newPoints.length - 2];
+                let y = newPoints[newPoints.length - 1];
+                let head = { x: x, y: y, angle: Math.atan2(y - this.currPosition[1], x - this.currPosition[0]) * 180 / Math.PI + 180 };
+
+                let i = 0;
+                while (i < this.sortedPoints.length && head.angle > this.sortedPoints[i].angle) {
+                    i++;
+                }
+
+                let nextPoint = i < this.sortedPoints.length - 1 ? this.sortedPoints[i + 1] : this.sortedPoints[0];
+                newPoints.push(nextPoint.x);
+                newPoints.push(nextPoint.y);
+
                 // update the points
                 line.points(newPoints);
             });
         }
+
+
+
     }
 
 
