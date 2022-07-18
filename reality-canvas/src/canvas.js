@@ -2,6 +2,7 @@
 // import Physic from "./physic.js"
 import Stage from "./stage.js"
 import Konva from 'konva'
+// import _ from 'lodash'
 // import particle from "./particle.js"
 
 export default class Canvas {
@@ -23,6 +24,16 @@ export default class Canvas {
 
     contourPoints = []
     sortedPoints = []
+
+
+    // particle effects
+    particle1 = { countdown: 0, speedX: 0, speedY: 0, lines: [] }
+    particle2 = { countdown: 0, speedX: 0, speedY: 0, lines: [] }
+    particle3 = { countdown: 0, speedX: 0, speedY: 0, lines: [] }
+
+    particles = [this.particle1, this.particle2, this.particle3]
+
+
     // contourAngles = []
     constructor() {
         this.stage.stage.on('mousedown touchstart', e => {
@@ -162,7 +173,7 @@ export default class Canvas {
         }
 
         this.sortedPoints = angles.sort((a, b) => a.angle - b.angle);
-        console.log(this.sortedPoints);
+        // console.log(this.sortedPoints);
         // alert('halt');
     }
 
@@ -175,6 +186,8 @@ export default class Canvas {
             case "contouring":
                 this.contouring();
                 break;
+            case "emitting2":
+                this.emitting();
             default:
                 ;
         }
@@ -200,7 +213,7 @@ export default class Canvas {
 
     contouring() {
 
-        if (this.savedShapes[0] && this.sortedPoints.length>0) {
+        if (this.savedShapes[0] && this.sortedPoints.length > 0) {
             this.savedShapes[0].map(line => {
                 let newPoints = [];
 
@@ -246,16 +259,95 @@ export default class Canvas {
     //     this.physic.add_motion(motionVertexSet);
     // }
 
-    // emit() {
-    //     this.savedShapes.map(shape => {
-    //         console.log(shape);
-    //         this.physic.add_particle(new particle({
-    //             x: this.currentLine.attrs.points[0],
-    //             y: this.currentLine.attrs.points[1],
-    //         }
-    //             , shape));
-    //     });
-    // }
+    emit() {
+        let k = 0;
+
+        this.particles.map(particle => {
+            k++;
+            if (k == 1) {
+                particle.lines = this.savedShapes[0];
+            }
+            else {
+                this.savedShapes[0].map(line => {
+                    let points = []
+                    for (let i = 0; i < line.attrs.points.length; i++) {
+                        points.push(line.attrs.points[i]);
+                    }
+
+                    let copiedLine = new Konva.Line({
+                        stroke: '#df4b26',
+                        strokeWidth: 5,
+                        globalCompositeOperation: 'source-over',
+                        // round cap for smoother lines
+                        lineCap: 'round',
+                        // add point twice, so we have some drawings even on a simple click
+                        points: points,
+                    });
+                    particle.lines.push(copiedLine);
+                    this.stage.layer.add(copiedLine);
+                });
+            }
+        });
+        this.mode = "emitting2";
+
+    }
+
+    emitting() {
+        let offsetX = this.currPosition[0] - this.lastPosition[0];
+        let offsetY = this.currPosition[1] - this.lastPosition[1];
+
+        let newPoints = [];
+        for (let i = 0; i < this.currentLine.attrs.points.length; i += 2) {
+            newPoints.push(this.currentLine.attrs.points[i] + offsetX);
+            newPoints.push(this.currentLine.attrs.points[i + 1] + offsetY);
+        }
+        // update the points
+        this.currentLine.points(newPoints);
+
+
+        this.particles.map(particle=>{
+            if(particle.countdown==0){
+                particle.countdown = 20 + Math.floor(Math.random() * 50);
+                particle.speedX = -1 + Math.random() * 2;
+                particle.speedY =  12 + Math.random() * 0.5;
+
+
+                // pick a point on the line
+                let point = Math.floor(Math.random()*((this.currentLine.attrs.points.length-1)/2))*2;
+                let pointX = this.currentLine.attrs.points[point];
+                let pointY = this.currentLine.attrs.points[point+1];
+
+                particle.lines.map(line => {
+                    let newPoints = [];
+
+                    let pointX1 = line.attrs.points[0];
+                    let pointY1 = line.attrs.points[1];
+                    let offsetX = pointX-pointX1;
+                    let offsetY = pointY-pointY1;
+                    for (let i = 0; i < line.attrs.points.length; i += 2) {
+                        newPoints.push(line.attrs.points[i] + offsetX);
+                        newPoints.push(line.attrs.points[i + 1] + offsetY);
+                    }
+                    // update the points
+                    line.points(newPoints);
+                });
+
+            }  
+            else 
+            {
+                particle.countdown--;
+                particle.lines.map(line => {
+                    let newPoints = [];
+                    for (let i = 0; i < line.attrs.points.length; i += 2) {
+                        newPoints.push(line.attrs.points[i] + particle.speedX);
+                        newPoints.push(line.attrs.points[i + 1] + particle.speedY);
+                    }
+                    // update the points
+                    line.points(newPoints);
+                });
+            }
+        })
+    }
 }
 
 
