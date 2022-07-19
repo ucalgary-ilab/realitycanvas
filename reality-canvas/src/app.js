@@ -81,8 +81,6 @@ let dst;
 let cap;
 let low;
 let high;
-let lastX;
-let lastY;
 
 // get canvas output, opencv would draw on this element
 let output = document.getElementById("canvasOutput");
@@ -126,14 +124,10 @@ output.addEventListener("click", (e) => {
 // navigator.getUserMedia = navigator.getUserMedia ||
 //     navigator.webkitGetUserMedia ||
 //     navigator.mozGetUserMedia;
-video.setAttribute('autoplay', '');
-video.setAttribute('muted', '');
-video.setAttribute('playsinline', '');
+
 var constraints = {
     audio: false,
-    video: {
-        facingMode: 'user'
-    }
+    video: {facingMode: 'environment'},
 }
 
 navigator.mediaDevices.getUserMedia(constraints)
@@ -142,9 +136,10 @@ navigator.mediaDevices.getUserMedia(constraints)
         video.srcObject = stream;
         video.play();
         video.onloadedmetadata = function (e) {
-            console.log('here');
-            video.width = video.videoWidth;
-            video.height = video.videoHeight;
+            console.log(video.videoHeight);
+            video.width = 1280;
+            video.height = 960;
+            console.log(video.height, video.width)
             // src = copy of video frame
             src = new cv.Mat(video.height, video.width, cv.CV_8UC4);
             // dst = store the processed frame
