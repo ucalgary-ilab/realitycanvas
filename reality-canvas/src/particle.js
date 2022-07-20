@@ -6,17 +6,9 @@ import _ from 'lodash'
 var Bodies = Matter.Bodies
 
 export default class particle {
-    physicBody
-
 
     // stage shape should be an array of konva lines
     stageShape
-
-    // last position: this is {x,y}(I think it is the mass) pair used by matter-js 
-    // we keep a track of this last position to calculate offset and apply to the konva lines
-    // i.e, associate the graphic part of the object with the physic part of the object
-    lastPos
-
 
     constructor(position,shape) {
 

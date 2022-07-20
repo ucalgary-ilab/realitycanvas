@@ -24,7 +24,7 @@ export default class Canvas {
 
     contourPoints = []
     sortedPoints = []
-
+    velocity = 0
 
     // particle effects
     particle1 = { countdown: 0, speedX: 0, speedY: 0, lines: [] }
@@ -34,6 +34,7 @@ export default class Canvas {
     particles = [this.particle1, this.particle2, this.particle3]
 
 
+    FPScount = 0
     // contourAngles = []
     constructor() {
         this.stage.stage.on('mousedown touchstart', e => {
@@ -51,7 +52,7 @@ export default class Canvas {
                     color = '#29446f';    // motion = blue
                     break;
                 default:
-                    color = '#df4b26';    // drawing = red
+                    color = '#ffffff';    // drawing = red
             }
 
             // if the pos is not null
@@ -60,7 +61,7 @@ export default class Canvas {
                 this.lastPosition = pos;
                 this.currentLine = new Konva.Line({
                     stroke: color,
-                    strokeWidth: 5,
+                    strokeWidth: 8,
                     globalCompositeOperation: 'source-over',
                     // round cap for smoother lines
                     lineCap: 'round',
@@ -139,6 +140,7 @@ export default class Canvas {
 
     // set the position of the tracked object
     setPosition(x, y) {
+        this.velocity = Math.floor(Math.sqrt((x - this.currPosition[0]) * (x - this.currPosition[0]) + (y - this.currPosition[1]) * (y - this.currPosition[1])));
         this.lastPosition = this.currPosition;
         this.currPosition = [x, y];
     }
@@ -188,10 +190,30 @@ export default class Canvas {
                 break;
             case "emitting2":
                 this.emitting();
+            case "trailing":
+                this.trailing();
             default:
                 ;
         }
     }
+    show(){
+
+        if (this.savedShapes[0]) {
+            this.savedShapes[0].map(line => {
+                line.show();
+            });
+        }
+    }
+
+    hide(){
+
+        if (this.savedShapes[0]) {
+            this.savedShapes[0].map(line => {
+                line.hide();
+            });
+        }
+    }
+
 
     binding() {
         let offsetX = this.currPosition[0] - this.lastPosition[0];
@@ -245,7 +267,36 @@ export default class Canvas {
     }
 
 
+    trailing_setup() {
+        this.currentLine = new Konva.Line({
+            stroke: "#add8e6",
+            strokeWidth: 5,
+            globalCompositeOperation: 'source-over',
+            // round cap for smoother lines
+            lineCap: 'round',
+            // add point twice, so we have some drawings even on a simple click
+            points: [],
+        });
+        this.stage.layer.add(this.currentLine);
+    }
 
+
+
+    trailing() {
+        let points = this.currentLine.attrs.points;
+        let length = points.length;
+
+        if (this.velocity < 20) {
+            if (length > 4)
+                points = points.slice(4)
+            else
+                points = points.slice(length)
+        }
+
+        points.push(this.currPosition[0]);
+        points.push(this.contourPoints[1]);
+        this.currentLine.points(points);
+    }
 
 
     // add_motion(){
@@ -305,25 +356,25 @@ export default class Canvas {
         this.currentLine.points(newPoints);
 
 
-        this.particles.map(particle=>{
-            if(particle.countdown==0){
+        this.particles.map(particle => {
+            if (particle.countdown == 0) {
                 particle.countdown = 20 + Math.floor(Math.random() * 50);
                 particle.speedX = -1 + Math.random() * 2;
-                particle.speedY =  12 + Math.random() * 0.5;
+                particle.speedY = 12 + Math.random() * 0.5;
 
 
                 // pick a point on the line
-                let point = Math.floor(Math.random()*((this.currentLine.attrs.points.length-1)/2))*2;
+                let point = Math.floor(Math.random() * ((this.currentLine.attrs.points.length - 1) / 2)) * 2;
                 let pointX = this.currentLine.attrs.points[point];
-                let pointY = this.currentLine.attrs.points[point+1];
+                let pointY = this.currentLine.attrs.points[point + 1];
 
                 particle.lines.map(line => {
                     let newPoints = [];
 
                     let pointX1 = line.attrs.points[0];
                     let pointY1 = line.attrs.points[1];
-                    let offsetX = pointX-pointX1;
-                    let offsetY = pointY-pointY1;
+                    let offsetX = pointX - pointX1;
+                    let offsetY = pointY - pointY1;
                     for (let i = 0; i < line.attrs.points.length; i += 2) {
                         newPoints.push(line.attrs.points[i] + offsetX);
                         newPoints.push(line.attrs.points[i + 1] + offsetY);
@@ -332,9 +383,8 @@ export default class Canvas {
                     line.points(newPoints);
                 });
 
-            }  
-            else 
-            {
+            }
+            else {
                 particle.countdown--;
                 particle.lines.map(line => {
                     let newPoints = [];

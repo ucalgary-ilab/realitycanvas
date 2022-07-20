@@ -55,7 +55,8 @@ const emit = () => {
 document.getElementById('emit_button')?.addEventListener('click', emit)
 
 const motion = () => {
-    app.canvas.mode = "motion";
+    app.canvas.trailing_setup();
+    app.canvas.mode = "trailing";
 }
 document.getElementById('motion_button')?.addEventListener('click', motion)
 
@@ -227,6 +228,19 @@ navigator.mediaDevices.getUserMedia(constraints)
     ).catch(err => {
         console.log(err);
     })
+
+
+window.addEventListener('keydown',(e)=>{
+    console.log("key pressed");
+    app.canvas.show();
+})
+
+window.addEventListener('keyup',(e)=>{
+    console.log("key released");
+    app.canvas.hide();
+})
+
+
 
 
     // async function (stream) {
