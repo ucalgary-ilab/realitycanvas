@@ -1,5 +1,9 @@
 
 const videoElement = document.getElementsByClassName('input_video')[0];
+const canvas = document.getElementById('drawing_canvas');
+const context = canvas.getContext('2d');
+
+
 const MIN_VISIBILITY = 0.8;
 const WIDTH = 1280;
 const HEIGHT = 720;
@@ -45,6 +49,12 @@ function onResults(results) {
 
   if (currentPart) {
     console.log(currentPart);
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    
+    context.beginPath();
+    context.arc(bodyParts[currentPart].x*WIDTH, bodyParts[currentPart].y*HEIGHT, 20, 0, 2 * Math.PI);
+    context.stroke();
+    // console.log(currentPart);
   }
 
 }

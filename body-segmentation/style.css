@@ -1,0 +1,12 @@
+#input_video{
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    z-index: 1;
+}
+
+#drawing_canvas{
+    position: fixed;
+    top: 0px;
+    left: 0px;
+}
