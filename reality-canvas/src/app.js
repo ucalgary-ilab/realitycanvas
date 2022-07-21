@@ -145,7 +145,7 @@ navigator.mediaDevices.getUserMedia(constraints)
             src = new cv.Mat(video.height, video.width, cv.CV_8UC4);
             // dst = store the processed frame
             dst = new cv.Mat(video.height, video.width, cv.CV_8UC4);
-
+            
             cap = new cv.VideoCapture(video);
 
             const FPS = 30;
