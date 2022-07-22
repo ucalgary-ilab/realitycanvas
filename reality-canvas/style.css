@@ -20,6 +20,12 @@ body {
     left:0px;
 }
 
+#media{
+    position:fixed;
+    top:0px;
+    left:0px;
+}
+
 #konva{
     position:fixed;
     top:0px;

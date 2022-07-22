@@ -196,6 +196,7 @@ export default class Canvas {
                 ;
         }
     }
+
     show(){
 
         if (this.savedShapes[0]) {
@@ -206,14 +207,12 @@ export default class Canvas {
     }
 
     hide(){
-
         if (this.savedShapes[0]) {
             this.savedShapes[0].map(line => {
                 line.hide();
             });
         }
     }
-
 
     binding() {
         let offsetX = this.currPosition[0] - this.lastPosition[0];

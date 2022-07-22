@@ -4,8 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "browserify ./src/app.js -p esmify > bundle.js",
-    "watch": "watchify -p esmify ./src/app.js -o bundle.js",
+    "build-body": "browserify ./src/body_tracking.js -p esmify > body_bundle.js",
+    "watch-body": "watchify -p esmify ./src/body_tracking.js -o body_bundle.js",
+    "build-color": "browserify ./src/color_tracking.js -p esmify > color_bundle.js",
+    "watch-color": "watchify -p esmify ./src/color_tracking.js -o color_bundle.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -13,6 +15,11 @@
   "license": "ISC",
   "dependencies": {
     "@babel/preset-env": "^7.18.2",
+    "@mediapipe/camera_utils": "^0.3.1640029074",
+    "@mediapipe/control_utils": "^0.6.1629159505",
+    "@mediapipe/control_utils_3d": "^0.3.1635987963",
+    "@mediapipe/drawing_utils": "^0.3.1620248257",
+    "@mediapipe/pose": "^0.5.1635988162",
     "browserify": "^17.0.0",
     "imutils": "^1.0.2",
     "konva": "^8.3.9",
