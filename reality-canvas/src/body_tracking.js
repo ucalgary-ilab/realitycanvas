@@ -1,4 +1,5 @@
 
+import { update } from "lodash";
 import Canvas from "./canvas.js";
 
 const WIDTH = 1280;
@@ -111,6 +112,7 @@ function onResults(results) {
 
   // update highlights
   app.canvas.update_highlights(bodyParts);
+  app.canvas.update(bodyParts);
 }
 
 const pose = new Pose({

@@ -8,8 +8,8 @@ import Konva from 'konva'
 export default class Canvas {
     isPaint = false
     mode = "drawing"
-    
-    
+
+
     lastPosition = [0, 0]
     currPosition = [0, 0]
 
@@ -18,7 +18,7 @@ export default class Canvas {
     currentLine
     // shape is defined by an array of konva lines
     currentShape = []
-    savedShapes = []
+
     // motion line 
     motionLine = []
     stage = new Stage()
@@ -27,16 +27,10 @@ export default class Canvas {
     sortedPoints = []
     velocity = 0
 
-    // // particle effects
-    // particle1 = { countdown: 0, speedX: 0, speedY: 0, lines: [] }
-    // particle2 = { countdown: 0, speedX: 0, speedY: 0, lines: [] }
-    // particle3 = { countdown: 0, speedX: 0, speedY: 0, lines: [] }
-
-    // particles = [this.particle1, this.particle2, this.particle3]
-
-
     bodyPartID = []
     bodyPartHighlights = []
+    savedShapes = []
+    firstPointOffset = []
 
 
     FPScount = 0
@@ -140,6 +134,14 @@ export default class Canvas {
 
 
     save_particle() {
+        this.firstPointOffset.push({
+            x: this.bodyPartHighlights[this.bodyPartHighlights.length - 1].absolutePosition().x - this.currentShape[0].attrs.points[0],
+            y: this.bodyPartHighlights[this.bodyPartHighlights.length - 1].absolutePosition().y - this.currentShape[0].attrs.points[1]
+        })
+
+        
+        console.log(this.firstPointOffset[this.bodyPartHighlights.length - 1]);
+
         // save current shape, savedShape is an array of array of konva lines
         this.savedShapes.push(this.currentShape);
         // reset current shape
@@ -191,18 +193,20 @@ export default class Canvas {
         }
     }
 
-    update() {
+    update(bodyParts) {
         switch (this.mode) {
             case "binding":
-                this.binding();
+                this.binding(bodyParts);
                 break;
             case "contouring":
                 this.contouring();
                 break;
             case "emitting2":
                 this.emitting();
+                break;
             case "trailing":
                 this.trailing();
+                break;
             default:
                 ;
         }
@@ -211,28 +215,15 @@ export default class Canvas {
 
 
 
-    // show(){
-    //     if (this.savedShapes[0]) {
-    //         this.savedShapes[0].map(line => {
-    //             line.show();
-    //         });
-    //     }
-    // }
+    binding(bodyParts) {
 
-    // hide(){
-    //     if (this.savedShapes[0]) {
-    //         this.savedShapes[0].map(line => {
-    //             line.hide();
-    //         });
-    //     }
-    // }
+        for (let i = 0; i < this.savedShapes.length; i++) {
+            let bodyPart = bodyParts[this.bodyPartID[i]];
+            let offsetX = Math.floor(bodyPart.x * this.WIDTH + this.firstPointOffset[i].x - this.savedShapes[i][0].attrs.points[0]);
+            let offsetY = Math.floor(bodyPart.y * this.HEIGHT + this.firstPointOffset[i].y - this.savedShapes[i][0].attrs.points[1]);
+            console.log(offsetX, offsetY);
 
-    binding() {
-        let offsetX = this.currPosition[0] - this.lastPosition[0];
-        let offsetY = this.currPosition[1] - this.lastPosition[1];
-
-        if (this.savedShapes[0]) {
-            this.savedShapes[0].map(line => {
+            this.savedShapes[i].map(line => {
                 let newPoints = [];
                 for (let i = 0; i < line.attrs.points.length; i += 2) {
                     newPoints.push(line.attrs.points[i] + offsetX);
@@ -241,6 +232,7 @@ export default class Canvas {
                 // update the points
                 line.points(newPoints);
             });
+
         }
     }
 
