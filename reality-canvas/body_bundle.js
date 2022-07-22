@@ -23138,9 +23138,11 @@ class Canvas {
 
   binding(bodyParts) {
     for (let i = 0; i < this.savedShapes.length; i++) {
-      let bodyPart = bodyParts[this.bodyPartID[i]];
-      let offsetX = Math.floor(bodyPart.x * this.WIDTH + this.firstPointOffset[i].x - this.savedShapes[i][0].attrs.points[0]);
-      let offsetY = Math.floor(bodyPart.y * this.HEIGHT + this.firstPointOffset[i].y - this.savedShapes[i][0].attrs.points[1]);
+      let bodyPart = bodyParts[this.bodyPartID[i]]; // 500
+
+      let offsetX = Math.floor(bodyPart.x * this.WIDTH - this.firstPointOffset[i].x - this.savedShapes[i][0].attrs.points[0]); // 40
+
+      let offsetY = Math.floor(bodyPart.y * this.HEIGHT - this.firstPointOffset[i].y - this.savedShapes[i][0].attrs.points[1]);
       console.log(offsetX, offsetY);
       this.savedShapes[i].map(line => {
         let newPoints = [];
