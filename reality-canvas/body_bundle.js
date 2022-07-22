@@ -13326,8 +13326,11 @@ var _canvas = _interopRequireDefault(require("./canvas.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+const WIDTH = 1280;
+const HEIGHT = 720;
+
 class App {
-  canvas = new _canvas.default();
+  canvas = new _canvas.default(WIDTH, HEIGHT);
 
   constructor() {}
 
@@ -13381,10 +13384,7 @@ const motion = () => {
 document.getElementById('motion_button')?.addEventListener('click', motion);
 const inputVideo = document.getElementById('input_video');
 const MIN_VISIBILITY = 0.8;
-const WIDTH = 1280;
-const HEIGHT = 720;
 let bodyParts;
-let currentPart;
 inputVideo.addEventListener("click", e => {
   let theClosetPart; // loop through all the body parts to find the closet part to the clicking point
 
@@ -13406,21 +13406,20 @@ inputVideo.addEventListener("click", e => {
   }
 
   if (theClosetPart) {
-    currentPart = theClosetPart;
+    //
+    app.canvas.select(theClosetPart, bodyParts[theClosetPart]);
+    draw();
   }
-});
+}); // event loop
 
 function onResults(results) {
   if (!results.poseLandmarks) {
     return;
   }
 
-  bodyParts = results.poseLandmarks;
+  bodyParts = results.poseLandmarks; // update highlights
 
-  if (currentPart) {
-    // console.log(currentPart);
-    console.log(currentPart);
-  }
+  app.canvas.update_highlights(bodyParts);
 }
 
 const pose = new Pose({
@@ -13477,35 +13476,25 @@ class Canvas {
   currentShape = [];
   savedShapes = []; // motion line 
 
-  motionLine = []; // physic = new Physic()
-
+  motionLine = [];
   stage = new _stage.default();
   contourPoints = [];
   sortedPoints = [];
-  velocity = 0; // particle effects
+  velocity = 0; // // particle effects
+  // particle1 = { countdown: 0, speedX: 0, speedY: 0, lines: [] }
+  // particle2 = { countdown: 0, speedX: 0, speedY: 0, lines: [] }
+  // particle3 = { countdown: 0, speedX: 0, speedY: 0, lines: [] }
+  // particles = [this.particle1, this.particle2, this.particle3]
 
-  particle1 = {
-    countdown: 0,
-    speedX: 0,
-    speedY: 0,
-    lines: []
-  };
-  particle2 = {
-    countdown: 0,
-    speedX: 0,
-    speedY: 0,
-    lines: []
-  };
-  particle3 = {
-    countdown: 0,
-    speedX: 0,
-    speedY: 0,
-    lines: []
-  };
-  particles = [this.particle1, this.particle2, this.particle3];
-  FPScount = 0; // contourAngles = []
+  bodyPartID = [];
+  bodyPartHighlights = [];
+  FPScount = 0;
+  WIDTH = 0;
+  HEIGHT = 0;
 
-  constructor() {
+  constructor(width, height) {
+    this.WIDTH = width;
+    this.HEIGHT = height;
     this.stage.stage.on('mousedown touchstart', e => {
       // put down the pen, i.e, painting
       this.isPaint = true; // get the current pointed position on the stage
@@ -13598,48 +13587,45 @@ class Canvas {
     this.savedShapes.push(this.currentShape); // reset current shape
 
     this.currentShape = [];
-  } // set the position of the tracked object
-
-
-  setPosition(x, y) {
-    this.velocity = Math.floor(Math.sqrt((x - this.currPosition[0]) * (x - this.currPosition[0]) + (y - this.currPosition[1]) * (y - this.currPosition[1])));
-    this.lastPosition = this.currPosition;
-    this.currPosition = [x, y];
   }
 
-  setContourPoints(points) {
-    this.contourPoints = points; //  calculating the center
+  select(id, bodyPart) {
+    if (!this.bodyPartID.includes(bodyPart.id)) {
+      // get id of the body part
+      this.bodyPartID.push(id);
+      let highlight = new _konva.default.Circle({
+        radius: 2,
+        fill: 'green',
+        stroke: 'green',
+        strokeWidth: 3
+      }); // set position
 
-    let sumX = 0;
-    let sumY = 0;
-    let numPoints = points.length / 2;
+      highlight.absolutePosition({
+        x: Math.floor(bodyPart.x * this.WIDTH),
+        y: Math.floor(bodyPart.y * this.HEIGHT)
+      }); // show on stage
 
-    for (let i = 0; i < points.length; i += 2) {
-      sumX += points[i];
-      sumY += points[i + 1];
-    } // set center
+      this.stage.layer.add(highlight); // record
 
-
-    this.setPosition(Math.floor(sumX / numPoints), Math.floor(sumY / numPoints)); // this.setContourPoints();
-
-    this.sortContourPoints();
-  }
-
-  sortContourPoints() {
-    let angles = []; // get angles with respect to the center
-
-    for (let i = 0; i < this.contourPoints.length; i += 2) {
-      let x = this.contourPoints[i];
-      let y = this.contourPoints[i + 1];
-      angles.push({
-        x: x,
-        y: y,
-        angle: Math.atan2(y - this.currPosition[1], x - this.currPosition[0]) * 180 / Math.PI + 180
-      });
+      this.bodyPartHighlights.push(highlight);
     }
+  }
 
-    this.sortedPoints = angles.sort((a, b) => a.angle - b.angle); // console.log(this.sortedPoints);
-    // alert('halt');
+  update_highlights(bodyParts) {
+    for (let i = 0; i < this.bodyPartID.length; i++) {
+      // get the id of tracking body part
+      let id = this.bodyPartID[i]; // get the corresponding body part in the landmarks
+
+      let bodyPart = bodyParts[id]; // if it is visible
+
+      if (bodyPart.visibility > 0.8) {
+        // update the position
+        this.bodyPartHighlights[i].absolutePosition({
+          x: Math.floor(bodyPart.x * this.WIDTH),
+          y: Math.floor(bodyPart.y * this.HEIGHT)
+        });
+      }
+    }
   }
 
   update() {
@@ -13661,23 +13647,21 @@ class Canvas {
       default:
         ;
     }
-  }
+  } // show(){
+  //     if (this.savedShapes[0]) {
+  //         this.savedShapes[0].map(line => {
+  //             line.show();
+  //         });
+  //     }
+  // }
+  // hide(){
+  //     if (this.savedShapes[0]) {
+  //         this.savedShapes[0].map(line => {
+  //             line.hide();
+  //         });
+  //     }
+  // }
 
-  show() {
-    if (this.savedShapes[0]) {
-      this.savedShapes[0].map(line => {
-        line.show();
-      });
-    }
-  }
-
-  hide() {
-    if (this.savedShapes[0]) {
-      this.savedShapes[0].map(line => {
-        line.hide();
-      });
-    }
-  }
 
   binding() {
     let offsetX = this.currPosition[0] - this.lastPosition[0];
@@ -13696,160 +13680,174 @@ class Canvas {
         line.points(newPoints);
       });
     }
-  }
-
-  contouring() {
-    if (this.savedShapes[0] && this.sortedPoints.length > 0) {
-      this.savedShapes[0].map(line => {
-        let newPoints = [];
-
-        for (let i = 2; i < line.attrs.points.length; i += 2) {
-          newPoints.push(line.attrs.points[i]);
-          newPoints.push(line.attrs.points[i + 1]);
-        } // get the head
-
-
-        let x = newPoints[newPoints.length - 2];
-        let y = newPoints[newPoints.length - 1];
-        let head = {
-          x: x,
-          y: y,
-          angle: Math.atan2(y - this.currPosition[1], x - this.currPosition[0]) * 180 / Math.PI + 180
-        };
-        let i = 0;
-
-        while (i < this.sortedPoints.length && head.angle > this.sortedPoints[i].angle) {
-          i++;
-        }
-
-        let nextPoint = i < this.sortedPoints.length - 1 ? this.sortedPoints[i + 1] : this.sortedPoints[0];
-        newPoints.push(nextPoint.x);
-        newPoints.push(nextPoint.y); // update the points
-
-        line.points(newPoints);
-      });
-    }
-  }
-
-  trailing_setup() {
-    this.currentLine = new _konva.default.Line({
-      stroke: "#add8e6",
-      strokeWidth: 5,
-      globalCompositeOperation: 'source-over',
-      // round cap for smoother lines
-      lineCap: 'round',
-      // add point twice, so we have some drawings even on a simple click
-      points: []
-    });
-    this.stage.layer.add(this.currentLine);
-  }
-
-  trailing() {
-    let points = this.currentLine.attrs.points;
-    let length = points.length;
-
-    if (this.velocity < 20) {
-      if (length > 4) points = points.slice(4);else points = points.slice(length);
-    }
-
-    points.push(this.currPosition[0]);
-    points.push(this.contourPoints[1]);
-    this.currentLine.points(points);
-  } // add_motion(){
-  //     let motionVertex = this.currentLine.attrs.points;
-  //     // transform to something that matter needs
-  //     let motionVertexSet = []
-  //     for (let i = 0; i < motionVertex.length; i += 2) {
-  //         motionVertexSet.push({ x: motionVertex[i], y: motionVertex[i + 1] })
+  } // // set the position of the tracked object
+  // setPosition(x, y) {
+  //     this.velocity = Math.floor(Math.sqrt((x - this.currPosition[0]) * (x - this.currPosition[0]) + (y - this.currPosition[1]) * (y - this.currPosition[1])));
+  //     this.lastPosition = this.currPosition;
+  //     this.currPosition = [x, y];
+  // }
+  // setContourPoints(points) {
+  //     this.contourPoints = points;
+  //     //  calculating the center
+  //     let sumX = 0;
+  //     let sumY = 0;
+  //     let numPoints = points.length / 2;
+  //     for (let i = 0; i < points.length; i += 2) {
+  //         sumX += points[i];
+  //         sumY += points[i + 1];
   //     }
-  //     this.physic.add_motion(motionVertexSet);
+  //     // set center
+  //     this.setPosition(Math.floor(sumX / numPoints), Math.floor(sumY / numPoints));
+  //     // this.setContourPoints();
+  //     this.sortContourPoints();
+  // }
+  // sortContourPoints() {
+  //     let angles = []
+  //     // get angles with respect to the center
+  //     for (let i = 0; i < this.contourPoints.length; i += 2) {
+  //         let x = this.contourPoints[i];
+  //         let y = this.contourPoints[i + 1];
+  //         angles.push({ x: x, y: y, angle: Math.atan2(y - this.currPosition[1], x - this.currPosition[0]) * 180 / Math.PI + 180 });
+  //     }
+  //     this.sortedPoints = angles.sort((a, b) => a.angle - b.angle);
+  //     // console.log(this.sortedPoints);
+  //     // alert('halt');
+  // }
+  // contouring() {
+  //     if (this.savedShapes[0] && this.sortedPoints.length > 0) {
+  //         this.savedShapes[0].map(line => {
+  //             let newPoints = [];
+  //             for (let i = 2; i < line.attrs.points.length; i += 2) {
+  //                 newPoints.push(line.attrs.points[i]);
+  //                 newPoints.push(line.attrs.points[i + 1]);
+  //             }
+  //             // get the head
+  //             let x = newPoints[newPoints.length - 2];
+  //             let y = newPoints[newPoints.length - 1];
+  //             let head = { x: x, y: y, angle: Math.atan2(y - this.currPosition[1], x - this.currPosition[0]) * 180 / Math.PI + 180 };
+  //             let i = 0;
+  //             while (i < this.sortedPoints.length && head.angle > this.sortedPoints[i].angle) {
+  //                 i++;
+  //             }
+  //             let nextPoint = i < this.sortedPoints.length - 1 ? this.sortedPoints[i + 1] : this.sortedPoints[0];
+  //             newPoints.push(nextPoint.x);
+  //             newPoints.push(nextPoint.y);
+  //             // update the points
+  //             line.points(newPoints);
+  //         });
+  //     }
+  // }
+  // trailing_setup() {
+  //     this.currentLine = new Konva.Line({
+  //         stroke: "#add8e6",
+  //         strokeWidth: 5,
+  //         globalCompositeOperation: 'source-over',
+  //         // round cap for smoother lines
+  //         lineCap: 'round',
+  //         // add point twice, so we have some drawings even on a simple click
+  //         points: [],
+  //     });
+  //     this.stage.layer.add(this.currentLine);
+  // }
+  // trailing() {
+  //     let points = this.currentLine.attrs.points;
+  //     let length = points.length;
+  //     if (this.velocity < 20) {
+  //         if (length > 4)
+  //             points = points.slice(4)
+  //         else
+  //             points = points.slice(length)
+  //     }
+  //     points.push(this.currPosition[0]);
+  //     points.push(this.contourPoints[1]);
+  //     this.currentLine.points(points);
+  // }
+  // // add_motion(){
+  // //     let motionVertex = this.currentLine.attrs.points;
+  // //     // transform to something that matter needs
+  // //     let motionVertexSet = []
+  // //     for (let i = 0; i < motionVertex.length; i += 2) {
+  // //         motionVertexSet.push({ x: motionVertex[i], y: motionVertex[i + 1] })
+  // //     }
+  // //     this.physic.add_motion(motionVertexSet);
+  // // }
+  // emit() {
+  //     let k = 0;
+  //     this.particles.map(particle => {
+  //         k++;
+  //         if (k == 1) {
+  //             particle.lines = this.savedShapes[0];
+  //         }
+  //         else {
+  //             this.savedShapes[0].map(line => {
+  //                 let points = []
+  //                 for (let i = 0; i < line.attrs.points.length; i++) {
+  //                     points.push(line.attrs.points[i]);
+  //                 }
+  //                 let copiedLine = new Konva.Line({
+  //                     stroke: '#df4b26',
+  //                     strokeWidth: 5,
+  //                     globalCompositeOperation: 'source-over',
+  //                     // round cap for smoother lines
+  //                     lineCap: 'round',
+  //                     // add point twice, so we have some drawings even on a simple click
+  //                     points: points,
+  //                 });
+  //                 particle.lines.push(copiedLine);
+  //                 this.stage.layer.add(copiedLine);
+  //             });
+  //         }
+  //     });
+  //     this.mode = "emitting2";
+  // }
+  // emitting() {
+  //     let offsetX = this.currPosition[0] - this.lastPosition[0];
+  //     let offsetY = this.currPosition[1] - this.lastPosition[1];
+  //     let newPoints = [];
+  //     for (let i = 0; i < this.currentLine.attrs.points.length; i += 2) {
+  //         newPoints.push(this.currentLine.attrs.points[i] + offsetX);
+  //         newPoints.push(this.currentLine.attrs.points[i + 1] + offsetY);
+  //     }
+  //     // update the points
+  //     this.currentLine.points(newPoints);
+  //     this.particles.map(particle => {
+  //         if (particle.countdown == 0) {
+  //             particle.countdown = 20 + Math.floor(Math.random() * 50);
+  //             particle.speedX = -1 + Math.random() * 2;
+  //             particle.speedY = 12 + Math.random() * 0.5;
+  //             // pick a point on the line
+  //             let point = Math.floor(Math.random() * ((this.currentLine.attrs.points.length - 1) / 2)) * 2;
+  //             let pointX = this.currentLine.attrs.points[point];
+  //             let pointY = this.currentLine.attrs.points[point + 1];
+  //             particle.lines.map(line => {
+  //                 let newPoints = [];
+  //                 let pointX1 = line.attrs.points[0];
+  //                 let pointY1 = line.attrs.points[1];
+  //                 let offsetX = pointX - pointX1;
+  //                 let offsetY = pointY - pointY1;
+  //                 for (let i = 0; i < line.attrs.points.length; i += 2) {
+  //                     newPoints.push(line.attrs.points[i] + offsetX);
+  //                     newPoints.push(line.attrs.points[i + 1] + offsetY);
+  //                 }
+  //                 // update the points
+  //                 line.points(newPoints);
+  //             });
+  //         }
+  //         else {
+  //             particle.countdown--;
+  //             particle.lines.map(line => {
+  //                 let newPoints = [];
+  //                 for (let i = 0; i < line.attrs.points.length; i += 2) {
+  //                     newPoints.push(line.attrs.points[i] + particle.speedX);
+  //                     newPoints.push(line.attrs.points[i + 1] + particle.speedY);
+  //                 }
+  //                 // update the points
+  //                 line.points(newPoints);
+  //             });
+  //         }
+  //     })
   // }
 
-
-  emit() {
-    let k = 0;
-    this.particles.map(particle => {
-      k++;
-
-      if (k == 1) {
-        particle.lines = this.savedShapes[0];
-      } else {
-        this.savedShapes[0].map(line => {
-          let points = [];
-
-          for (let i = 0; i < line.attrs.points.length; i++) {
-            points.push(line.attrs.points[i]);
-          }
-
-          let copiedLine = new _konva.default.Line({
-            stroke: '#df4b26',
-            strokeWidth: 5,
-            globalCompositeOperation: 'source-over',
-            // round cap for smoother lines
-            lineCap: 'round',
-            // add point twice, so we have some drawings even on a simple click
-            points: points
-          });
-          particle.lines.push(copiedLine);
-          this.stage.layer.add(copiedLine);
-        });
-      }
-    });
-    this.mode = "emitting2";
-  }
-
-  emitting() {
-    let offsetX = this.currPosition[0] - this.lastPosition[0];
-    let offsetY = this.currPosition[1] - this.lastPosition[1];
-    let newPoints = [];
-
-    for (let i = 0; i < this.currentLine.attrs.points.length; i += 2) {
-      newPoints.push(this.currentLine.attrs.points[i] + offsetX);
-      newPoints.push(this.currentLine.attrs.points[i + 1] + offsetY);
-    } // update the points
-
-
-    this.currentLine.points(newPoints);
-    this.particles.map(particle => {
-      if (particle.countdown == 0) {
-        particle.countdown = 20 + Math.floor(Math.random() * 50);
-        particle.speedX = -1 + Math.random() * 2;
-        particle.speedY = 12 + Math.random() * 0.5; // pick a point on the line
-
-        let point = Math.floor(Math.random() * ((this.currentLine.attrs.points.length - 1) / 2)) * 2;
-        let pointX = this.currentLine.attrs.points[point];
-        let pointY = this.currentLine.attrs.points[point + 1];
-        particle.lines.map(line => {
-          let newPoints = [];
-          let pointX1 = line.attrs.points[0];
-          let pointY1 = line.attrs.points[1];
-          let offsetX = pointX - pointX1;
-          let offsetY = pointY - pointY1;
-
-          for (let i = 0; i < line.attrs.points.length; i += 2) {
-            newPoints.push(line.attrs.points[i] + offsetX);
-            newPoints.push(line.attrs.points[i + 1] + offsetY);
-          } // update the points
-
-
-          line.points(newPoints);
-        });
-      } else {
-        particle.countdown--;
-        particle.lines.map(line => {
-          let newPoints = [];
-
-          for (let i = 0; i < line.attrs.points.length; i += 2) {
-            newPoints.push(line.attrs.points[i] + particle.speedX);
-            newPoints.push(line.attrs.points[i + 1] + particle.speedY);
-          } // update the points
-
-
-          line.points(newPoints);
-        });
-      }
-    });
-  }
 
 }
 

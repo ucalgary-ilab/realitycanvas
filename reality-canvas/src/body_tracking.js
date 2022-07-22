@@ -1,14 +1,18 @@
 
 import Canvas from "./canvas.js";
 
+const WIDTH = 1280;
+const HEIGHT = 720;
+
 
 class App {
-    canvas = new Canvas();
+  canvas = new Canvas(WIDTH, HEIGHT);
 
-    constructor() {
+  constructor() {
 
-    }
+  }
 };
+
 
 
 // create application instance
@@ -19,44 +23,42 @@ let konvaPlane = document.getElementById('konva');
 
 // hook buttons and handler
 const select = () => {
-    mediaPlane.style.zIndex = "1";
-    konvaPlane.style.zIndex = "0";
+  mediaPlane.style.zIndex = "1";
+  konvaPlane.style.zIndex = "0";
 }
 document.getElementById('select_button')?.addEventListener('click', select)
 
 
 const draw = () => {
-    mediaPlane.style.zIndex = "0";
-    konvaPlane.style.zIndex = "1";
+  mediaPlane.style.zIndex = "0";
+  konvaPlane.style.zIndex = "1";
 }
 document.getElementById('draw_button')?.addEventListener('click', draw)
 
 // register button event handlers
 const save = () => {
-    app.canvas.save_particle();
-    app.canvas.mode = "binding"
+  app.canvas.save_particle();
+  app.canvas.mode = "binding"
 }
 document.getElementById('save_button')?.addEventListener('click', save)
 
 const contour = () => {
-    app.canvas.save_particle();
-    app.canvas.mode = "contouring";
+  app.canvas.save_particle();
+  app.canvas.mode = "contouring";
 }
 document.getElementById('contour_button')?.addEventListener('click', contour)
 
 const emit = () => {
-    app.canvas.mode = "emitting";
+  app.canvas.mode = "emitting";
 }
 
 document.getElementById('emit_button')?.addEventListener('click', emit)
 
 const motion = () => {
-    app.canvas.trailing_setup();
-    app.canvas.mode = "trailing";
+  app.canvas.trailing_setup();
+  app.canvas.mode = "trailing";
 }
 document.getElementById('motion_button')?.addEventListener('click', motion)
-
-
 
 
 
@@ -65,12 +67,8 @@ const inputVideo = document.getElementById('input_video');
 
 const MIN_VISIBILITY = 0.8;
 
-const WIDTH = 1280;
-const HEIGHT = 720;
-
 
 let bodyParts;
-let currentPart;
 
 inputVideo.addEventListener("click", (e) => {
   let theClosetPart;
@@ -88,7 +86,7 @@ inputVideo.addEventListener("click", (e) => {
         let dis1 = Math.pow(bodyParts[theClosetPart].x * WIDTH - e.layerX, 2) + Math.pow(bodyParts[theClosetPart].y * HEIGHT - e.layerY, 2);
         let dis2 = Math.pow(thisPart.x * WIDTH - e.layerX, 2) + Math.pow(thisPart.y * HEIGHT - e.layerY, 2);
 
-        
+
         if (dis2 < dis1) {
           theClosetPart = i;
         }
@@ -97,22 +95,22 @@ inputVideo.addEventListener("click", (e) => {
   }
 
   if (theClosetPart) {
-    currentPart = theClosetPart;
+    //
+    app.canvas.select(theClosetPart,bodyParts[theClosetPart]);
+    draw();
   }
 })
 
 
+// event loop
 function onResults(results) {
   if (!results.poseLandmarks) {
     return;
   }
   bodyParts = results.poseLandmarks;
 
-  if (currentPart) {
-    // console.log(currentPart);
-    console.log(currentPart);
-  }
-
+  // update highlights
+  app.canvas.update_highlights(bodyParts);
 }
 
 const pose = new Pose({
@@ -133,7 +131,6 @@ pose.setOptions({
 
 pose.onResults(onResults);
 
-
 const camera = new Camera(inputVideo, {
   onFrame: async () => {
     await pose.send({ image: inputVideo });
@@ -141,7 +138,6 @@ const camera = new Camera(inputVideo, {
   width: WIDTH,
   height: HEIGHT
 });
-
 
 camera.start();
 
