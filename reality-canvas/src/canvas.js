@@ -3,7 +3,9 @@
 import Stage from "./stage.js"
 import Konva from 'konva'
 // import _ from 'lodash'
-// import particle from "./particle.js"
+import particle from "./particle.js"
+import { assert } from "console"
+
 
 export default class Canvas {
     isPaint = false
@@ -40,6 +42,9 @@ export default class Canvas {
 
     particles = []
 
+    color 
+
+
     constructor(width, height) {
         this.WIDTH = width;
         this.HEIGHT = height;
@@ -50,16 +55,15 @@ export default class Canvas {
             // get the current pointed position on the stage
             let pos = this.stage.stage.getPointerPosition();
 
-            let color;
             switch (this.mode) {
-                case 'emitting':
-                    color = '#3cb043';    // emitting = green
+                case 'emit':
+                    this.color = '#3cb043';    // emitting = green
                     break;
                 case 'motion':
-                    color = '#29446f';    // motion = blue
+                    this.color = '#29446f';    // motion = blue
                     break;
                 default:
-                    color = '#ffffff';    // drawing = red
+                    this.color = '#ffffff';    // drawing = red
             }
 
             // if the pos is not null
@@ -67,7 +71,7 @@ export default class Canvas {
                 //  create new konva line, store it in the this.currentLine
                 this.lastPosition = pos;
                 this.currentLine = new Konva.Line({
-                    stroke: color,
+                    stroke: this.color,
                     strokeWidth: 8,
                     globalCompositeOperation: 'source-over',
                     // round cap for smoother lines
@@ -84,8 +88,8 @@ export default class Canvas {
             this.isPaint = false;
 
             switch (this.mode) {
-                case "emitting":
-                    this.emit();
+                case "emit":
+                    this.emit_setup();
                     break;
                 case "motion":
                     this.add_motion();
@@ -136,16 +140,15 @@ export default class Canvas {
     }
 
 
-    save_particle() {
 
+
+    save_particle() {
         // calculate the offset of first point of the first line of the shape to the tracking point
         this.firstPointOffset.push({
             x: this.bodyPartHighlights[this.bodyPartHighlights.length - 1].absolutePosition().x - this.currentShape[0].attrs.points[0],
             y: this.bodyPartHighlights[this.bodyPartHighlights.length - 1].absolutePosition().y - this.currentShape[0].attrs.points[1]
-        })
-
-        
-        console.log(this.firstPointOffset[this.bodyPartHighlights.length - 1]);
+        })        
+    
 
         // save current shape, savedShape is an array of array of konva lines
         this.savedShapes.push(this.currentShape);
@@ -153,13 +156,51 @@ export default class Canvas {
         this.currentShape = [];
     }
 
+    // initialize the particles with the current shape
+    // this function should only be called once when the emit line is created
     emit_setup(){
-        let numberOfParticles = 100;
+        let numberOfParticles = 1;
         for(let i=0; i < numberOfParticles; i++){
-            this.particles.push(new );
+            this.particles.push(new particle(this.currentShape, this.stage, this.color));
         }
+        
+        // remove the prototype from the staging area
+        this.currentShape.map(line=>{
+            let newPoints = []
+            line.attrs.points.map(v=>{
+                newPoints.push(v+50);
+            })
+            
+            this.stage.layer.add(new Konva.Line({
+                stroke: this.color,
+                strokeWidth: 8,
+                globalCompositeOperation: 'source-over',
+                // round cap for smoother lines
+                lineCap: 'round',
+
+                // copy the points from the prototype
+                points: newPoints,
+            }));
+        })
+
+        // empty the currentShape
+        this.currentShape = [];
+        this.mode = "emitting"
     }
 
+
+    // keep emitting the particle
+    emitting(){
+        // update every particles
+        this.particles.map(particle=>{
+            particle.update();
+        })
+    }
+
+
+
+
+    // select a body part to bind the drawing
     select(id, bodyPart) {
         if (!this.bodyPartID.includes(bodyPart.id)) {
             // get id of the body part
@@ -213,7 +254,7 @@ export default class Canvas {
             case "contouring":
                 this.contouring();
                 break;
-            case "emitting2":
+            case "emitting":
                 this.emitting();
                 break;
             case "trailing":
@@ -236,9 +277,6 @@ export default class Canvas {
             let offsetX = Math.floor((bodyPart.x * this.WIDTH) - this.firstPointOffset[i].x - this.savedShapes[i][0].attrs.points[0]);
             // 40
             let offsetY = Math.floor((bodyPart.y * this.HEIGHT) - this.firstPointOffset[i].y - this.savedShapes[i][0].attrs.points[1]);
-
-
-            console.log(offsetX, offsetY);
 
             this.savedShapes[i].map(line => {
                 let newPoints = [];

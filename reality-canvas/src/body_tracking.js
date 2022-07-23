@@ -50,7 +50,7 @@ const contour = () => {
 document.getElementById('contour_button')?.addEventListener('click', contour)
 
 const emit = () => {
-  app.canvas.mode = "emitting";
+  app.canvas.mode = "emit";
 }
 
 document.getElementById('emit_button')?.addEventListener('click', emit)
