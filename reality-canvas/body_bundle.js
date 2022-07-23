@@ -22962,7 +22962,9 @@ class Canvas {
 
   currentShape = []; // motion line 
 
-  motionLine = [];
+  motionLine; // emit line
+
+  emitLine;
   stage = new _stage.default();
   contourPoints = [];
   sortedPoints = [];
@@ -22975,7 +22977,7 @@ class Canvas {
   WIDTH = 0;
   HEIGHT = 0;
   particles = [];
-  color;
+  color = '#FFFFFF';
 
   constructor(width, height) {
     this.WIDTH = width;
@@ -22985,20 +22987,21 @@ class Canvas {
       this.isPaint = true; // get the current pointed position on the stage
 
       let pos = this.stage.stage.getPointerPosition();
+      let color;
 
       switch (this.mode) {
         case 'emit':
-          this.color = '#3cb043'; // emitting = green
+          color = '#3cb043'; // emitting = green
 
           break;
 
         case 'motion':
-          this.color = '#29446f'; // motion = blue
+          color = '#29446f'; // motion = blue
 
           break;
 
         default:
-          this.color = '#ffffff';
+          color = this.color;
         // drawing = red
       } // if the pos is not null
 
@@ -23007,7 +23010,7 @@ class Canvas {
         //  create new konva line, store it in the this.currentLine
         this.lastPosition = pos;
         this.currentLine = new _konva.default.Line({
-          stroke: this.color,
+          stroke: color,
           strokeWidth: 8,
           globalCompositeOperation: 'source-over',
           // round cap for smoother lines
@@ -23024,6 +23027,8 @@ class Canvas {
       switch (this.mode) {
         case "emit":
           this.emit_setup();
+          this.emitLine = this.currentLine;
+          this.currentLine = null;
           break;
 
         case "motion":
@@ -23089,19 +23094,7 @@ class Canvas {
 
 
     this.currentShape.map(line => {
-      let newPoints = [];
-      line.attrs.points.map(v => {
-        newPoints.push(v + 50);
-      });
-      this.stage.layer.add(new _konva.default.Line({
-        stroke: this.color,
-        strokeWidth: 8,
-        globalCompositeOperation: 'source-over',
-        // round cap for smoother lines
-        lineCap: 'round',
-        // copy the points from the prototype
-        points: newPoints
-      }));
+      line.destroy();
     }); // empty the currentShape
 
     this.currentShape = [];
@@ -23114,7 +23107,9 @@ class Canvas {
     this.particles.map(particle => {
       particle.update();
     });
-  } // select a body part to bind the drawing
+  } // update_emit_line(){
+  // }
+  // select a body part to bind the drawing
 
 
   select(id, bodyPart) {
@@ -23400,7 +23395,7 @@ class particle {
     shape.map(line => {
       let copiedLine = new _konva.default.Line({
         stroke: color,
-        strokeWidth: 8,
+        strokeWidth: 4,
         globalCompositeOperation: 'source-over',
         // round cap for smoother lines
         lineCap: 'round',

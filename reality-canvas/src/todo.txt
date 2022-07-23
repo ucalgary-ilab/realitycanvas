@@ -1,4 +1,20 @@
 1. highlight the selected point (done)
 2. object augmentation  (done)
+
+
 3. hardcoded particle rain 
+    What is the difference between object augmentation and emit?
+    Obj Augmentation:
+        select -> draw graph-> save(bind)
+    Emit:
+        select -> draw particle -> emit line:
+            Here, the emit line is binding to the object, instead of the particle.
+            The particle can spawn on the emit line; anyway, it is just like the 
+            object augmentation, select => bind.
+
+    How to implement?
+        By creating the Emitter Class.
+        The Emitter class handle the creation, update and destruction of the particles.
+
+        
 4. hardcoded trailing effect

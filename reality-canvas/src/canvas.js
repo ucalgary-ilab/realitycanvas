@@ -22,7 +22,10 @@ export default class Canvas {
     currentShape = []
 
     // motion line 
-    motionLine = []
+    motionLine 
+    // emit line
+    emitLine 
+
     stage = new Stage()
 
     contourPoints = []
@@ -42,7 +45,7 @@ export default class Canvas {
 
     particles = []
 
-    color 
+    color = '#FFFFFF'
 
 
     constructor(width, height) {
@@ -55,15 +58,16 @@ export default class Canvas {
             // get the current pointed position on the stage
             let pos = this.stage.stage.getPointerPosition();
 
+            let color
             switch (this.mode) {
                 case 'emit':
-                    this.color = '#3cb043';    // emitting = green
+                    color = '#3cb043';    // emitting = green
                     break;
                 case 'motion':
-                    this.color = '#29446f';    // motion = blue
+                    color = '#29446f';    // motion = blue
                     break;
                 default:
-                    this.color = '#ffffff';    // drawing = red
+                    color = this.color;    // drawing = red
             }
 
             // if the pos is not null
@@ -71,7 +75,7 @@ export default class Canvas {
                 //  create new konva line, store it in the this.currentLine
                 this.lastPosition = pos;
                 this.currentLine = new Konva.Line({
-                    stroke: this.color,
+                    stroke: color,
                     strokeWidth: 8,
                     globalCompositeOperation: 'source-over',
                     // round cap for smoother lines
@@ -90,6 +94,8 @@ export default class Canvas {
             switch (this.mode) {
                 case "emit":
                     this.emit_setup();
+                    this.emitLine = this.currentLine;
+                    this.currentLine = null;
                     break;
                 case "motion":
                     this.add_motion();
@@ -166,23 +172,8 @@ export default class Canvas {
         
         // remove the prototype from the staging area
         this.currentShape.map(line=>{
-            let newPoints = []
-            line.attrs.points.map(v=>{
-                newPoints.push(v+50);
-            })
-            
-            this.stage.layer.add(new Konva.Line({
-                stroke: this.color,
-                strokeWidth: 8,
-                globalCompositeOperation: 'source-over',
-                // round cap for smoother lines
-                lineCap: 'round',
-
-                // copy the points from the prototype
-                points: newPoints,
-            }));
+            line.destroy();
         })
-
         // empty the currentShape
         this.currentShape = [];
         this.mode = "emitting"
@@ -197,6 +188,9 @@ export default class Canvas {
         })
     }
 
+    // update_emit_line(){
+        
+    // }
 
 
 

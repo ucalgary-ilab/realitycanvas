@@ -15,7 +15,7 @@ export default class particle {
         shape.map(line=>{
             let copiedLine = new Konva.Line({
                     stroke: color,
-                    strokeWidth: 8,
+                    strokeWidth: 4,
                     globalCompositeOperation: 'source-over',
                     // round cap for smoother lines
                     lineCap: 'round',
