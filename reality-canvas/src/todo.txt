@@ -1,2 +1,4 @@
-1. highlight the selected point
-2. object augmentation
+1. highlight the selected point (done)
+2. object augmentation  (done)
+3. hardcoded particle rain 
+4. hardcoded trailing effect

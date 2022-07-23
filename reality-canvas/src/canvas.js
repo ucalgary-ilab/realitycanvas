@@ -33,9 +33,12 @@ export default class Canvas {
     firstPointOffset = []
 
 
+
     FPScount = 0
     WIDTH = 0
     HEIGHT = 0
+
+    particles = []
 
     constructor(width, height) {
         this.WIDTH = width;
@@ -134,6 +137,8 @@ export default class Canvas {
 
 
     save_particle() {
+
+        // calculate the offset of first point of the first line of the shape to the tracking point
         this.firstPointOffset.push({
             x: this.bodyPartHighlights[this.bodyPartHighlights.length - 1].absolutePosition().x - this.currentShape[0].attrs.points[0],
             y: this.bodyPartHighlights[this.bodyPartHighlights.length - 1].absolutePosition().y - this.currentShape[0].attrs.points[1]
@@ -146,6 +151,13 @@ export default class Canvas {
         this.savedShapes.push(this.currentShape);
         // reset current shape
         this.currentShape = [];
+    }
+
+    emit_setup(){
+        let numberOfParticles = 100;
+        for(let i=0; i < numberOfParticles; i++){
+            this.particles.push(new );
+        }
     }
 
     select(id, bodyPart) {
