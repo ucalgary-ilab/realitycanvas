@@ -43,8 +43,11 @@ const save = () => {
 document.getElementById('save_button')?.addEventListener('click', save)
 
 const contour = () => {
-  app.canvas.bind_drawing();
-  app.canvas.mode = "contouring";
+  // app.canvas.bind_drawing();
+  // app.canvas.mode = "contouring";
+  app.canvas.elbowToHand = true;
+  app.canvas.contourFirstPoint.x = app.canvas.currentShape[0].attrs.points[0] - Math.floor(bodyParts[13].x*WIDTH);
+  app.canvas.contourFirstPoint.y = app.canvas.currentShape[0].attrs.points[1] - Math.floor(bodyParts[13].y*HEIGHT);
 }
 document.getElementById('contour_button')?.addEventListener('click', contour)
 

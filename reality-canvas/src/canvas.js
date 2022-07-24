@@ -42,6 +42,11 @@ export default class Canvas {
     color = '#FFFFFF'
 
 
+    elbowToHand = false 
+    contourFirstPoint = {x:0, y:0}
+    hipToFeet = false
+    progress = 0
+
     constructor(width, height) {
         this.WIDTH = width;
         this.HEIGHT = height;
@@ -273,7 +278,41 @@ export default class Canvas {
                 this.bindedObjects[i].update(bodyParts);
             }
         }
+
+        if(this.elbowToHand){
+            this.hardcoded_elbowToHand(bodyParts);
+        }
     }
+
+
+
+    hardcoded_elbowToHand(bodyParts){
+        // assumption hand is on top of elbow
+        if(this.progress==100){
+            this.progress=0;
+        }
+        else{
+            let xPos = Math.floor(bodyParts[13].x*this.WIDTH + this.progress/100*(bodyParts[19].x*this.WIDTH-bodyParts[13].x*this.WIDTH))
+            let yPos = Math.floor(bodyParts[13].y*this.HEIGHT + this.progress/100*(bodyParts[19].y*this.HEIGHT-bodyParts[13].y*this.HEIGHT))
+    
+
+            let offsetX = -this.currentShape[0].attrs.points[0] - this.contourFirstPoint.x + xPos;
+            let offsetY = -this.currentShape[0].attrs.points[1] - this.contourFirstPoint.y + yPos;
+            
+            console.log(xPos, yPos, offsetX, offsetY)
+
+            let newPoints = [];
+            for(let i=0; i<this.currentShape[0].attrs.points.length; i+=2){
+                newPoints.push(this.currentShape[0].attrs.points[i]-offsetX);
+                newPoints.push(this.currentShape[0].attrs.points[i+1]-offsetY);
+            }
+            this.currentShape[0].points(newPoints);
+            
+            this.progress+=5;
+        }
+    }
+
+
 
 }
 

@@ -22846,8 +22846,11 @@ const save = () => {
 document.getElementById('save_button')?.addEventListener('click', save);
 
 const contour = () => {
-  app.canvas.bind_drawing();
-  app.canvas.mode = "contouring";
+  // app.canvas.bind_drawing();
+  // app.canvas.mode = "contouring";
+  app.canvas.elbowToHand = true;
+  app.canvas.contourFirstPoint.x = app.canvas.currentShape[0].attrs.points[0] - Math.floor(bodyParts[13].x * WIDTH);
+  app.canvas.contourFirstPoint.y = app.canvas.currentShape[0].attrs.points[1] - Math.floor(bodyParts[13].y * HEIGHT);
 };
 
 document.getElementById('contour_button')?.addEventListener('click', contour);
@@ -22973,6 +22976,13 @@ class Canvas {
   HEIGHT = 0;
   particles = [];
   color = '#FFFFFF';
+  elbowToHand = false;
+  contourFirstPoint = {
+    x: 0,
+    y: 0
+  };
+  hipToFeet = false;
+  progress = 0;
 
   constructor(width, height) {
     this.WIDTH = width;
@@ -23172,6 +23182,32 @@ class Canvas {
       } else {
         this.bindedObjects[i].update(bodyParts);
       }
+    }
+
+    if (this.elbowToHand) {
+      this.hardcoded_elbowToHand(bodyParts);
+    }
+  }
+
+  hardcoded_elbowToHand(bodyParts) {
+    // assumption hand is on top of elbow
+    if (this.progress == 100) {
+      this.progress = 0;
+    } else {
+      let xPos = Math.floor(bodyParts[13].x * this.WIDTH + this.progress / 100 * (bodyParts[19].x * this.WIDTH - bodyParts[13].x * this.WIDTH));
+      let yPos = Math.floor(bodyParts[13].y * this.HEIGHT + this.progress / 100 * (bodyParts[19].y * this.HEIGHT - bodyParts[13].y * this.HEIGHT));
+      let offsetX = -this.currentShape[0].attrs.points[0] - this.contourFirstPoint.x + xPos;
+      let offsetY = -this.currentShape[0].attrs.points[1] - this.contourFirstPoint.y + yPos;
+      console.log(xPos, yPos, offsetX, offsetY);
+      let newPoints = [];
+
+      for (let i = 0; i < this.currentShape[0].attrs.points.length; i += 2) {
+        newPoints.push(this.currentShape[0].attrs.points[i] - offsetX);
+        newPoints.push(this.currentShape[0].attrs.points[i + 1] - offsetY);
+      }
+
+      this.currentShape[0].points(newPoints);
+      this.progress += 5;
     }
   }
 
