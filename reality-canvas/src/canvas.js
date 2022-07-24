@@ -4,7 +4,6 @@ import Stage from "./stage.js"
 import Konva from 'konva'
 // import _ from 'lodash'
 import emitter from "./emitter.js"
-import { assert } from "console"
 
 export default class Canvas {
     isPaint = false
@@ -87,7 +86,6 @@ export default class Canvas {
             this.isPaint = false;
             switch (this.mode) {
                 case "emit":
-                    console.log("In switch", this.currentLine);
                     this.emitLine = this.currentLine;
                     this.currentLine = null;
                     this.emit_setup();
@@ -97,7 +95,6 @@ export default class Canvas {
                     break;
                 default:
                     // save the line into current shape
-                    console.log("This makes no sense", this.currentLine);
                     this.currentShape.push(this.currentLine);
                     // reset current line
                     this.currentLine = null;
@@ -169,7 +166,6 @@ export default class Canvas {
         })
 
 
-        console.log("before constructor", this.emitLine);
         let newEmitter = new emitter(
             this.bodyPartID[this.bodyPartID.length-1],
             this.emitLine,

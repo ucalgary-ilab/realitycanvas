@@ -6,7 +6,7 @@ export default class particle {
     // stage shape should be an array of konva lines
     stageShape = []
     stage 
-    yspeed = 1
+    yspeed = Math.floor(Math.random()*20+5)
     xspeed = 0
     position
 
@@ -16,8 +16,8 @@ export default class particle {
         this.position = position;
 
         // the first point of the drawing would match the position
-        let offsetX = position.x - shape[0].attrs.points[0];
-        let offsetY = position.y - shape[0].attrs.points[1];
+        let offsetX = this.position.x - shape[0].attrs.points[0];
+        let offsetY = this.position.y - shape[0].attrs.points[1];
 
 
         shape.map(line=>{
@@ -46,15 +46,30 @@ export default class particle {
     
 
     update(x, y) {
-       this.stageShape.map(line=>{
-            let newPoints = [];
-            for(let i=0; i<line.attrs.points.length; i+=2){
-                newPoints.push(line.attrs.points[i]+this.xspeed);
-                newPoints.push(line.attrs.points[i+1]+this.yspeed);
-            }
-            line.points(newPoints);
-       });
        this.position.x += x;
        this.position.y += y;
+       
+       let offsetX = this.position.x - this.stageShape[0].attrs.points[0];
+       let offsetY = this.position.y - this.stageShape[0].attrs.points[1];
+       if(this.stageShape[0].attrs.points[1]>720){
+            this.stageShape.map(line=>{
+                let newPoints = [];
+                for(let i=0; i<line.attrs.points.length; i+=2){
+                    newPoints.push(line.attrs.points[i]+offsetX);
+                    newPoints.push(line.attrs.points[i+1]+offsetY);
+                }
+                line.points(newPoints);
+           });
+        }
+        else{
+            this.stageShape.map(line=>{
+                let newPoints = [];
+                for(let i=0; i<line.attrs.points.length; i+=2){
+                    newPoints.push(line.attrs.points[i]+this.xspeed);
+                    newPoints.push(line.attrs.points[i+1]+this.yspeed);
+                }
+                line.points(newPoints);
+            });
+       }
     }
 }
