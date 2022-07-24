@@ -22840,14 +22840,14 @@ const draw = () => {
 document.getElementById('draw_button')?.addEventListener('click', draw); // register button event handlers
 
 const save = () => {
-  app.canvas.save_particle();
+  app.canvas.bind_drawing();
   app.canvas.mode = "binding";
 };
 
 document.getElementById('save_button')?.addEventListener('click', save);
 
 const contour = () => {
-  app.canvas.save_particle();
+  app.canvas.bind_drawing();
   app.canvas.mode = "contouring";
 };
 
@@ -22943,9 +22943,7 @@ var _stage = _interopRequireDefault(require("./stage.js"));
 
 var _konva = _interopRequireDefault(require("konva"));
 
-var _particle = _interopRequireDefault(require("./particle.js"));
-
-var _console = require("console");
+var _emitter = _interopRequireDefault(require("./emitter.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -22966,13 +22964,11 @@ class Canvas {
 
   emitLine;
   stage = new _stage.default();
-  contourPoints = [];
-  sortedPoints = [];
-  velocity = 0;
   bodyPartID = [];
   bodyPartHighlights = [];
-  savedShapes = [];
+  bindedObjects = [];
   firstPointOffset = [];
+  emitters = [];
   FPScount = 0;
   WIDTH = 0;
   HEIGHT = 0;
@@ -23071,14 +23067,14 @@ class Canvas {
     });
   }
 
-  save_particle() {
+  bind_drawing() {
     // calculate the offset of first point of the first line of the shape to the tracking point
     this.firstPointOffset.push({
       x: this.bodyPartHighlights[this.bodyPartHighlights.length - 1].absolutePosition().x - this.currentShape[0].attrs.points[0],
       y: this.bodyPartHighlights[this.bodyPartHighlights.length - 1].absolutePosition().y - this.currentShape[0].attrs.points[1]
     }); // save current shape, savedShape is an array of array of konva lines
 
-    this.savedShapes.push(this.currentShape); // reset current shape
+    this.bindedObjects.push(this.currentShape); // reset current shape
 
     this.currentShape = [];
   } // initialize the particles with the current shape
@@ -23086,26 +23082,31 @@ class Canvas {
 
 
   emit_setup() {
-    let numberOfParticles = 1;
-
-    for (let i = 0; i < numberOfParticles; i++) {
-      this.particles.push(new _particle.default(this.currentShape, this.stage, this.color));
-    } // remove the prototype from the staging area
-
+    // only for consistency, this entry wont be used
+    this.firstPointOffset.push({
+      x: this.bodyPartHighlights[this.bodyPartHighlights.length - 1].absolutePosition().x - this.emitLine.attrs.points[0],
+      y: this.bodyPartHighlights[this.bodyPartHighlights.length - 1].absolutePosition().y - this.emitLine.attrs.points[1]
+    });
+    let emitter = new emitter(this.bodyPartID[this.bodyPartID.length - 1], this.emitLine, this.currentShape, this.stage, this.color, {
+      x: this.bodyPartHighlights[this.bodyPartHighlights.length - 1].absolutePosition().x - this.emitLine.attrs.points[0],
+      y: this.bodyPartHighlights[this.bodyPartHighlights.length - 1].absolutePosition().y - this.emitLine.attrs.points[1]
+    });
+    this.emitters.push(emitter);
+    this.bindedObjects.push(emitter); // remove the prototype from the staging area
 
     this.currentShape.map(line => {
-      line.destroy();
+      line.remove(); // use remove, the node would still exist for prototyping purpose
     }); // empty the currentShape
 
     this.currentShape = [];
-    this.mode = "emitting";
+    this.mode = "drawing";
   } // keep emitting the particle
 
 
-  emitting() {
+  update_emitters(bodyParts) {
     // update every particles
-    this.particles.map(particle => {
-      particle.update();
+    this.emitters.map(emitter => {
+      emitter.update(bodyParts);
     });
   } // update_emit_line(){
   // }
@@ -23175,198 +23176,96 @@ class Canvas {
   }
 
   binding(bodyParts) {
-    for (let i = 0; i < this.savedShapes.length; i++) {
-      let bodyPart = bodyParts[this.bodyPartID[i]]; // 500
+    for (let i = 0; i < this.bindedObjects.length; i++) {
+      if (this.bindedObjects[i] instanceof Array) {
+        let bodyPart = bodyParts[this.bodyPartID[i]];
+        let offsetX = Math.floor(bodyPart.x * this.WIDTH - this.firstPointOffset[i].x - this.bindedObjects[i][0].attrs.points[0]);
+        let offsetY = Math.floor(bodyPart.y * this.HEIGHT - this.firstPointOffset[i].y - this.bindedObjects[i][0].attrs.points[1]);
+        this.bindedObjects[i].map(line => {
+          let newPoints = [];
 
-      let offsetX = Math.floor(bodyPart.x * this.WIDTH - this.firstPointOffset[i].x - this.savedShapes[i][0].attrs.points[0]); // 40
-
-      let offsetY = Math.floor(bodyPart.y * this.HEIGHT - this.firstPointOffset[i].y - this.savedShapes[i][0].attrs.points[1]);
-      this.savedShapes[i].map(line => {
-        let newPoints = [];
-
-        for (let i = 0; i < line.attrs.points.length; i += 2) {
-          newPoints.push(line.attrs.points[i] + offsetX);
-          newPoints.push(line.attrs.points[i + 1] + offsetY);
-        } // update the points
+          for (let i = 0; i < line.attrs.points.length; i += 2) {
+            newPoints.push(line.attrs.points[i] + offsetX);
+            newPoints.push(line.attrs.points[i + 1] + offsetY);
+          } // update the points
 
 
-        line.points(newPoints);
-      });
+          line.points(newPoints);
+        });
+      } else {
+        this.bindedObjects[i].update(bodyParts);
+      }
     }
-  } // // set the position of the tracked object
-  // setPosition(x, y) {
-  //     this.velocity = Math.floor(Math.sqrt((x - this.currPosition[0]) * (x - this.currPosition[0]) + (y - this.currPosition[1]) * (y - this.currPosition[1])));
-  //     this.lastPosition = this.currPosition;
-  //     this.currPosition = [x, y];
-  // }
-  // setContourPoints(points) {
-  //     this.contourPoints = points;
-  //     //  calculating the center
-  //     let sumX = 0;
-  //     let sumY = 0;
-  //     let numPoints = points.length / 2;
-  //     for (let i = 0; i < points.length; i += 2) {
-  //         sumX += points[i];
-  //         sumY += points[i + 1];
-  //     }
-  //     // set center
-  //     this.setPosition(Math.floor(sumX / numPoints), Math.floor(sumY / numPoints));
-  //     // this.setContourPoints();
-  //     this.sortContourPoints();
-  // }
-  // sortContourPoints() {
-  //     let angles = []
-  //     // get angles with respect to the center
-  //     for (let i = 0; i < this.contourPoints.length; i += 2) {
-  //         let x = this.contourPoints[i];
-  //         let y = this.contourPoints[i + 1];
-  //         angles.push({ x: x, y: y, angle: Math.atan2(y - this.currPosition[1], x - this.currPosition[0]) * 180 / Math.PI + 180 });
-  //     }
-  //     this.sortedPoints = angles.sort((a, b) => a.angle - b.angle);
-  //     // console.log(this.sortedPoints);
-  //     // alert('halt');
-  // }
-  // contouring() {
-  //     if (this.savedShapes[0] && this.sortedPoints.length > 0) {
-  //         this.savedShapes[0].map(line => {
-  //             let newPoints = [];
-  //             for (let i = 2; i < line.attrs.points.length; i += 2) {
-  //                 newPoints.push(line.attrs.points[i]);
-  //                 newPoints.push(line.attrs.points[i + 1]);
-  //             }
-  //             // get the head
-  //             let x = newPoints[newPoints.length - 2];
-  //             let y = newPoints[newPoints.length - 1];
-  //             let head = { x: x, y: y, angle: Math.atan2(y - this.currPosition[1], x - this.currPosition[0]) * 180 / Math.PI + 180 };
-  //             let i = 0;
-  //             while (i < this.sortedPoints.length && head.angle > this.sortedPoints[i].angle) {
-  //                 i++;
-  //             }
-  //             let nextPoint = i < this.sortedPoints.length - 1 ? this.sortedPoints[i + 1] : this.sortedPoints[0];
-  //             newPoints.push(nextPoint.x);
-  //             newPoints.push(nextPoint.y);
-  //             // update the points
-  //             line.points(newPoints);
-  //         });
-  //     }
-  // }
-  // trailing_setup() {
-  //     this.currentLine = new Konva.Line({
-  //         stroke: "#add8e6",
-  //         strokeWidth: 5,
-  //         globalCompositeOperation: 'source-over',
-  //         // round cap for smoother lines
-  //         lineCap: 'round',
-  //         // add point twice, so we have some drawings even on a simple click
-  //         points: [],
-  //     });
-  //     this.stage.layer.add(this.currentLine);
-  // }
-  // trailing() {
-  //     let points = this.currentLine.attrs.points;
-  //     let length = points.length;
-  //     if (this.velocity < 20) {
-  //         if (length > 4)
-  //             points = points.slice(4)
-  //         else
-  //             points = points.slice(length)
-  //     }
-  //     points.push(this.currPosition[0]);
-  //     points.push(this.contourPoints[1]);
-  //     this.currentLine.points(points);
-  // }
-  // // add_motion(){
-  // //     let motionVertex = this.currentLine.attrs.points;
-  // //     // transform to something that matter needs
-  // //     let motionVertexSet = []
-  // //     for (let i = 0; i < motionVertex.length; i += 2) {
-  // //         motionVertexSet.push({ x: motionVertex[i], y: motionVertex[i + 1] })
-  // //     }
-  // //     this.physic.add_motion(motionVertexSet);
-  // // }
-  // emit() {
-  //     let k = 0;
-  //     this.particles.map(particle => {
-  //         k++;
-  //         if (k == 1) {
-  //             particle.lines = this.savedShapes[0];
-  //         }
-  //         else {
-  //             this.savedShapes[0].map(line => {
-  //                 let points = []
-  //                 for (let i = 0; i < line.attrs.points.length; i++) {
-  //                     points.push(line.attrs.points[i]);
-  //                 }
-  //                 let copiedLine = new Konva.Line({
-  //                     stroke: '#df4b26',
-  //                     strokeWidth: 5,
-  //                     globalCompositeOperation: 'source-over',
-  //                     // round cap for smoother lines
-  //                     lineCap: 'round',
-  //                     // add point twice, so we have some drawings even on a simple click
-  //                     points: points,
-  //                 });
-  //                 particle.lines.push(copiedLine);
-  //                 this.stage.layer.add(copiedLine);
-  //             });
-  //         }
-  //     });
-  //     this.mode = "emitting2";
-  // }
-  // emitting() {
-  //     let offsetX = this.currPosition[0] - this.lastPosition[0];
-  //     let offsetY = this.currPosition[1] - this.lastPosition[1];
-  //     let newPoints = [];
-  //     for (let i = 0; i < this.currentLine.attrs.points.length; i += 2) {
-  //         newPoints.push(this.currentLine.attrs.points[i] + offsetX);
-  //         newPoints.push(this.currentLine.attrs.points[i + 1] + offsetY);
-  //     }
-  //     // update the points
-  //     this.currentLine.points(newPoints);
-  //     this.particles.map(particle => {
-  //         if (particle.countdown == 0) {
-  //             particle.countdown = 20 + Math.floor(Math.random() * 50);
-  //             particle.speedX = -1 + Math.random() * 2;
-  //             particle.speedY = 12 + Math.random() * 0.5;
-  //             // pick a point on the line
-  //             let point = Math.floor(Math.random() * ((this.currentLine.attrs.points.length - 1) / 2)) * 2;
-  //             let pointX = this.currentLine.attrs.points[point];
-  //             let pointY = this.currentLine.attrs.points[point + 1];
-  //             particle.lines.map(line => {
-  //                 let newPoints = [];
-  //                 let pointX1 = line.attrs.points[0];
-  //                 let pointY1 = line.attrs.points[1];
-  //                 let offsetX = pointX - pointX1;
-  //                 let offsetY = pointY - pointY1;
-  //                 for (let i = 0; i < line.attrs.points.length; i += 2) {
-  //                     newPoints.push(line.attrs.points[i] + offsetX);
-  //                     newPoints.push(line.attrs.points[i + 1] + offsetY);
-  //                 }
-  //                 // update the points
-  //                 line.points(newPoints);
-  //             });
-  //         }
-  //         else {
-  //             particle.countdown--;
-  //             particle.lines.map(line => {
-  //                 let newPoints = [];
-  //                 for (let i = 0; i < line.attrs.points.length; i += 2) {
-  //                     newPoints.push(line.attrs.points[i] + particle.speedX);
-  //                     newPoints.push(line.attrs.points[i + 1] + particle.speedY);
-  //                 }
-  //                 // update the points
-  //                 line.points(newPoints);
-  //             });
-  //         }
-  //     })
-  // }
-
+  }
 
 }
 
 exports.default = Canvas;
 
-},{"./particle.js":60,"./stage.js":61,"console":69,"konva":39}],60:[function(require,module,exports){
+},{"./emitter.js":60,"./stage.js":62,"konva":39}],60:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _particle = _interopRequireDefault(require("./particle.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+class emitter {
+  emitLine;
+  particleShape;
+  firstPointOffset;
+  particles = [];
+  bodyPartID;
+  color;
+  xspeed = 0;
+  yspeed = 1;
+
+  constructor(id, line, shape, stage, color, offset) {
+    this.bodyPartID = id;
+    this.emitLine = line;
+    this.stage = stage;
+    this.color = color;
+    this.particleShape = shape;
+    this.firstPointOffset = offset; // create particles
+
+    for (let i = 0; i < 100; i++) {
+      this.particles.push(new _particle.default(this.particleShape, this.stage, this.color));
+    }
+  }
+
+  update(bodyParts) {
+    // update the emit line
+    this.update_emit_line(bodyParts); // update each particle
+
+    this.particles.map(particle => {
+      particle.update(); // particle is self updating elements, no bodyPart information need
+    });
+  }
+
+  update_emit_line(bodyParts) {
+    let bodyPart = bodyParts[this.bodyPartID];
+    let offsetX = Math.floor(bodyPart.x * this.WIDTH - this.firstPointOffset.x - this.emitLine.attrs.points[0]);
+    let offsetY = Math.floor(bodyPart.y * this.HEIGHT - this.firstPointOffset.y - this.emitLine.attrs.points[1]);
+    let newPoints = [];
+
+    for (let i = 0; i < this.emitLine.attrs.points; i += 2) {
+      newPoints.push(this.emitLine.attrs.points[i] + offsetX);
+      newPoints.push(this.emitLine.attrs.points[i + 1] + offsetY);
+    }
+
+    this.emitLine.points(newPoints);
+  }
+
+}
+
+exports.default = emitter;
+;
+
+},{"./particle.js":61}],61:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -23424,7 +23323,7 @@ class particle {
 
 exports.default = particle;
 
-},{"console":69,"konva":39,"lodash":57}],61:[function(require,module,exports){
+},{"console":70,"konva":39,"lodash":57}],62:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -23459,7 +23358,7 @@ class Stage {
 
 exports.default = Stage;
 
-},{"konva":39}],62:[function(require,module,exports){
+},{"konva":39}],63:[function(require,module,exports){
 (function (global){(function (){
 'use strict';
 
@@ -23969,7 +23868,7 @@ var objectKeys = Object.keys || function (obj) {
 };
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"object-assign":84,"util/":65}],63:[function(require,module,exports){
+},{"object-assign":85,"util/":66}],64:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -23994,14 +23893,14 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],64:[function(require,module,exports){
+},{}],65:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],65:[function(require,module,exports){
+},{}],66:[function(require,module,exports){
 (function (process,global){(function (){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -24591,7 +24490,7 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this)}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":64,"_process":85,"inherits":63}],66:[function(require,module,exports){
+},{"./support/isBuffer":65,"_process":86,"inherits":64}],67:[function(require,module,exports){
 (function (global){(function (){
 'use strict';
 
@@ -24622,7 +24521,7 @@ module.exports = function availableTypedArrays() {
 };
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],67:[function(require,module,exports){
+},{}],68:[function(require,module,exports){
 'use strict';
 
 var GetIntrinsic = require('get-intrinsic');
@@ -24639,7 +24538,7 @@ module.exports = function callBoundIntrinsic(name, allowMissing) {
 	return intrinsic;
 };
 
-},{"./":68,"get-intrinsic":74}],68:[function(require,module,exports){
+},{"./":69,"get-intrinsic":75}],69:[function(require,module,exports){
 'use strict';
 
 var bind = require('function-bind');
@@ -24688,7 +24587,7 @@ if ($defineProperty) {
 	module.exports.apply = applyBind;
 }
 
-},{"function-bind":73,"get-intrinsic":74}],69:[function(require,module,exports){
+},{"function-bind":74,"get-intrinsic":75}],70:[function(require,module,exports){
 (function (global){(function (){
 /*global window, global*/
 var util = require("util")
@@ -24779,7 +24678,7 @@ function consoleAssert(expression) {
 }
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"assert":62,"util":88}],70:[function(require,module,exports){
+},{"assert":63,"util":89}],71:[function(require,module,exports){
 'use strict';
 
 var GetIntrinsic = require('get-intrinsic');
@@ -24796,7 +24695,7 @@ if ($gOPD) {
 
 module.exports = $gOPD;
 
-},{"get-intrinsic":74}],71:[function(require,module,exports){
+},{"get-intrinsic":75}],72:[function(require,module,exports){
 'use strict';
 
 var isCallable = require('is-callable');
@@ -24860,7 +24759,7 @@ var forEach = function forEach(list, iterator, thisArg) {
 
 module.exports = forEach;
 
-},{"is-callable":81}],72:[function(require,module,exports){
+},{"is-callable":82}],73:[function(require,module,exports){
 'use strict';
 
 /* eslint no-invalid-this: 1 */
@@ -24914,14 +24813,14 @@ module.exports = function bind(that) {
     return bound;
 };
 
-},{}],73:[function(require,module,exports){
+},{}],74:[function(require,module,exports){
 'use strict';
 
 var implementation = require('./implementation');
 
 module.exports = Function.prototype.bind || implementation;
 
-},{"./implementation":72}],74:[function(require,module,exports){
+},{"./implementation":73}],75:[function(require,module,exports){
 'use strict';
 
 var undefined;
@@ -25257,7 +25156,7 @@ module.exports = function GetIntrinsic(name, allowMissing) {
 	return value;
 };
 
-},{"function-bind":73,"has":78,"has-symbols":75}],75:[function(require,module,exports){
+},{"function-bind":74,"has":79,"has-symbols":76}],76:[function(require,module,exports){
 'use strict';
 
 var origSymbol = typeof Symbol !== 'undefined' && Symbol;
@@ -25272,7 +25171,7 @@ module.exports = function hasNativeSymbols() {
 	return hasSymbolSham();
 };
 
-},{"./shams":76}],76:[function(require,module,exports){
+},{"./shams":77}],77:[function(require,module,exports){
 'use strict';
 
 /* eslint complexity: [2, 18], max-statements: [2, 33] */
@@ -25316,7 +25215,7 @@ module.exports = function hasSymbols() {
 	return true;
 };
 
-},{}],77:[function(require,module,exports){
+},{}],78:[function(require,module,exports){
 'use strict';
 
 var hasSymbols = require('has-symbols/shams');
@@ -25325,14 +25224,14 @@ module.exports = function hasToStringTagShams() {
 	return hasSymbols() && !!Symbol.toStringTag;
 };
 
-},{"has-symbols/shams":76}],78:[function(require,module,exports){
+},{"has-symbols/shams":77}],79:[function(require,module,exports){
 'use strict';
 
 var bind = require('function-bind');
 
 module.exports = bind.call(Function.call, Object.prototype.hasOwnProperty);
 
-},{"function-bind":73}],79:[function(require,module,exports){
+},{"function-bind":74}],80:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -25361,7 +25260,7 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],80:[function(require,module,exports){
+},{}],81:[function(require,module,exports){
 'use strict';
 
 var hasToStringTag = require('has-tostringtag/shams')();
@@ -25396,7 +25295,7 @@ isStandardArguments.isLegacyArguments = isLegacyArguments; // for tests
 
 module.exports = supportsStandardArguments ? isStandardArguments : isLegacyArguments;
 
-},{"call-bind/callBound":67,"has-tostringtag/shams":77}],81:[function(require,module,exports){
+},{"call-bind/callBound":68,"has-tostringtag/shams":78}],82:[function(require,module,exports){
 'use strict';
 
 var fnToStr = Function.prototype.toString;
@@ -25472,7 +25371,7 @@ module.exports = reflectApply
 		return strClass === fnClass || strClass === genClass;
 	};
 
-},{}],82:[function(require,module,exports){
+},{}],83:[function(require,module,exports){
 'use strict';
 
 var toStr = Object.prototype.toString;
@@ -25512,7 +25411,7 @@ module.exports = function isGeneratorFunction(fn) {
 	return getProto(fn) === GeneratorFunction;
 };
 
-},{"has-tostringtag/shams":77}],83:[function(require,module,exports){
+},{"has-tostringtag/shams":78}],84:[function(require,module,exports){
 (function (global){(function (){
 'use strict';
 
@@ -25576,7 +25475,7 @@ module.exports = function isTypedArray(value) {
 };
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"available-typed-arrays":66,"call-bind/callBound":67,"es-abstract/helpers/getOwnPropertyDescriptor":70,"for-each":71,"has-tostringtag/shams":77}],84:[function(require,module,exports){
+},{"available-typed-arrays":67,"call-bind/callBound":68,"es-abstract/helpers/getOwnPropertyDescriptor":71,"for-each":72,"has-tostringtag/shams":78}],85:[function(require,module,exports){
 /*
 object-assign
 (c) Sindre Sorhus
@@ -25668,7 +25567,7 @@ module.exports = shouldUseNative() ? Object.assign : function (target, source) {
 	return to;
 };
 
-},{}],85:[function(require,module,exports){
+},{}],86:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -25854,9 +25753,9 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],86:[function(require,module,exports){
-arguments[4][64][0].apply(exports,arguments)
-},{"dup":64}],87:[function(require,module,exports){
+},{}],87:[function(require,module,exports){
+arguments[4][65][0].apply(exports,arguments)
+},{"dup":65}],88:[function(require,module,exports){
 // Currently in sync with Node.js lib/internal/util/types.js
 // https://github.com/nodejs/node/commit/112cc7c27551254aa2b17098fb774867f05ed0d9
 
@@ -26192,7 +26091,7 @@ exports.isAnyArrayBuffer = isAnyArrayBuffer;
   });
 });
 
-},{"is-arguments":80,"is-generator-function":82,"is-typed-array":83,"which-typed-array":89}],88:[function(require,module,exports){
+},{"is-arguments":81,"is-generator-function":83,"is-typed-array":84,"which-typed-array":90}],89:[function(require,module,exports){
 (function (process){(function (){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -26911,7 +26810,7 @@ function callbackify(original) {
 exports.callbackify = callbackify;
 
 }).call(this)}).call(this,require('_process'))
-},{"./support/isBuffer":86,"./support/types":87,"_process":85,"inherits":79}],89:[function(require,module,exports){
+},{"./support/isBuffer":87,"./support/types":88,"_process":86,"inherits":80}],90:[function(require,module,exports){
 (function (global){(function (){
 'use strict';
 
@@ -26970,4 +26869,4 @@ module.exports = function whichTypedArray(value) {
 };
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"available-typed-arrays":66,"call-bind/callBound":67,"es-abstract/helpers/getOwnPropertyDescriptor":70,"for-each":71,"has-tostringtag/shams":77,"is-typed-array":83}]},{},[58]);
+},{"available-typed-arrays":67,"call-bind/callBound":68,"es-abstract/helpers/getOwnPropertyDescriptor":71,"for-each":72,"has-tostringtag/shams":78,"is-typed-array":84}]},{},[58]);

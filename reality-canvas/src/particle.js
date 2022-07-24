@@ -25,7 +25,6 @@ export default class particle {
                 });
             
             this.stage.layer.add(copiedLine);
-            
             this.stageShape.push(copiedLine);
         });
         
