@@ -23,13 +23,15 @@ export default class emitter {
 
         // create particles
         for(let i=0; i<100; i++){
-            this.particles.push(new particle(this.particleShape,this.stage,this.color));
+            // let position =
+            this.particles.push(new particle(this.particleShape,this.stage,this.color, position));
         }
     }
 
 
 
     update(bodyParts){
+        console.log("here!!!")
         // update the emit line
         this.update_emit_line(bodyParts);
         

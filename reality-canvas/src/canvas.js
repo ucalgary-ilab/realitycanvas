@@ -4,6 +4,7 @@ import Stage from "./stage.js"
 import Konva from 'konva'
 // import _ from 'lodash'
 import emitter from "./emitter.js"
+import { assert } from "console"
 
 export default class Canvas {
     isPaint = false
@@ -87,9 +88,9 @@ export default class Canvas {
 
             switch (this.mode) {
                 case "emit":
-                    this.emit_setup();
                     this.emitLine = this.currentLine;
                     this.currentLine = null;
+                    this.emit_setup();
                     break;
                 case "motion":
                     this.add_motion();
@@ -154,18 +155,20 @@ export default class Canvas {
         this.bindedObjects.push(this.currentShape);
         // reset current shape
         this.currentShape = [];
+        this.mode = "drawing"
     }
 
     // initialize the particles with the current shape
     // this function should only be called once when the emit line is created
     emit_setup(){
         // only for consistency, this entry wont be used
+    
         this.firstPointOffset.push({
             x: this.bodyPartHighlights[this.bodyPartHighlights.length - 1].absolutePosition().x - this.emitLine.attrs.points[0],
             y: this.bodyPartHighlights[this.bodyPartHighlights.length - 1].absolutePosition().y - this.emitLine.attrs.points[1]
         })
 
-        let emitter = new emitter(
+        let newEmitter = new emitter(
             this.bodyPartID[this.bodyPartID.length-1],
             this.emitLine,
             this.currentShape,
@@ -176,8 +179,8 @@ export default class Canvas {
                 y: this.bodyPartHighlights[this.bodyPartHighlights.length - 1].absolutePosition().y - this.emitLine.attrs.points[1]
             });
 
-        this.emitters.push(emitter);
-        this.bindedObjects.push(emitter);
+        this.emitters.push(newEmitter);
+        this.bindedObjects.push(newEmitter);
 
 
         // remove the prototype from the staging area
@@ -251,28 +254,6 @@ export default class Canvas {
     }
 
     update(bodyParts) {
-        switch (this.mode) {
-            case "binding":
-                this.binding(bodyParts);
-                break;
-            case "contouring":
-                this.contouring();
-                break;
-            case "emitting":
-                this.emitting();
-                break;
-            case "trailing":
-                this.trailing();
-                break;
-            default:
-                ;
-        }
-    }
-
-
-
-
-    binding(bodyParts) {
         for (let i = 0; i < this.bindedObjects.length; i++) {
             if(this.bindedObjects[i] instanceof Array){
                 let bodyPart = bodyParts[this.bodyPartID[i]];
@@ -295,8 +276,6 @@ export default class Canvas {
             }
         }
     }
-
-
 
 }
 

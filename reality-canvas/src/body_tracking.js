@@ -39,7 +39,6 @@ document.getElementById('draw_button')?.addEventListener('click', draw)
 // register button event handlers
 const save = () => {
   app.canvas.bind_drawing();
-  app.canvas.mode = "binding"
 }
 document.getElementById('save_button')?.addEventListener('click', save)
 

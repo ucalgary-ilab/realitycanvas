@@ -22841,7 +22841,6 @@ document.getElementById('draw_button')?.addEventListener('click', draw); // regi
 
 const save = () => {
   app.canvas.bind_drawing();
-  app.canvas.mode = "binding";
 };
 
 document.getElementById('save_button')?.addEventListener('click', save);
@@ -22945,6 +22944,8 @@ var _konva = _interopRequireDefault(require("konva"));
 
 var _emitter = _interopRequireDefault(require("./emitter.js"));
 
+var _console = require("console");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // @ts-ignore
@@ -23022,9 +23023,9 @@ class Canvas {
 
       switch (this.mode) {
         case "emit":
-          this.emit_setup();
           this.emitLine = this.currentLine;
           this.currentLine = null;
+          this.emit_setup();
           break;
 
         case "motion":
@@ -23077,6 +23078,7 @@ class Canvas {
     this.bindedObjects.push(this.currentShape); // reset current shape
 
     this.currentShape = [];
+    this.mode = "drawing";
   } // initialize the particles with the current shape
   // this function should only be called once when the emit line is created
 
@@ -23087,12 +23089,12 @@ class Canvas {
       x: this.bodyPartHighlights[this.bodyPartHighlights.length - 1].absolutePosition().x - this.emitLine.attrs.points[0],
       y: this.bodyPartHighlights[this.bodyPartHighlights.length - 1].absolutePosition().y - this.emitLine.attrs.points[1]
     });
-    let emitter = new emitter(this.bodyPartID[this.bodyPartID.length - 1], this.emitLine, this.currentShape, this.stage, this.color, {
+    let newEmitter = new _emitter.default(this.bodyPartID[this.bodyPartID.length - 1], this.emitLine, this.currentShape, this.stage, this.color, {
       x: this.bodyPartHighlights[this.bodyPartHighlights.length - 1].absolutePosition().x - this.emitLine.attrs.points[0],
       y: this.bodyPartHighlights[this.bodyPartHighlights.length - 1].absolutePosition().y - this.emitLine.attrs.points[1]
     });
-    this.emitters.push(emitter);
-    this.bindedObjects.push(emitter); // remove the prototype from the staging area
+    this.emitters.push(newEmitter);
+    this.bindedObjects.push(newEmitter); // remove the prototype from the staging area
 
     this.currentShape.map(line => {
       line.remove(); // use remove, the node would still exist for prototyping purpose
@@ -23153,29 +23155,6 @@ class Canvas {
   }
 
   update(bodyParts) {
-    switch (this.mode) {
-      case "binding":
-        this.binding(bodyParts);
-        break;
-
-      case "contouring":
-        this.contouring();
-        break;
-
-      case "emitting":
-        this.emitting();
-        break;
-
-      case "trailing":
-        this.trailing();
-        break;
-
-      default:
-        ;
-    }
-  }
-
-  binding(bodyParts) {
     for (let i = 0; i < this.bindedObjects.length; i++) {
       if (this.bindedObjects[i] instanceof Array) {
         let bodyPart = bodyParts[this.bodyPartID[i]];
@@ -23202,7 +23181,7 @@ class Canvas {
 
 exports.default = Canvas;
 
-},{"./emitter.js":60,"./stage.js":62,"konva":39}],60:[function(require,module,exports){
+},{"./emitter.js":60,"./stage.js":62,"console":70,"konva":39}],60:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -23233,12 +23212,14 @@ class emitter {
     this.firstPointOffset = offset; // create particles
 
     for (let i = 0; i < 100; i++) {
-      this.particles.push(new _particle.default(this.particleShape, this.stage, this.color));
+      // let position =
+      this.particles.push(new _particle.default(this.particleShape, this.stage, this.color, position));
     }
   }
 
   update(bodyParts) {
-    // update the emit line
+    console.log("here!!!"); // update the emit line
+
     this.update_emit_line(bodyParts); // update each particle
 
     this.particles.map(particle => {
@@ -23287,11 +23268,35 @@ class particle {
   stage;
   yspeed = 1;
   xspeed = 0;
+  position;
 
-  constructor(shape, stage, color) {
-    console.log(color);
+  constructor(shape, stage, color, position) {
     this.stage = stage;
+    this.position = position;
+    let topMostPoint = {
+      x: 2000,
+      y: 2000
+    };
     shape.map(line => {
+      for (let i = 0; i < line.attrs.points.length; i += 2) {
+        if (line.attrs.points[i + 1] < topMostPoint.y) {
+          topMostPoint.x = line.attrs.points[i];
+          topMostPoint.y = line.attrs.points[i + 1];
+        }
+      }
+    });
+    let offsetX = position.x - topMostPoint.x;
+    let offsetY = position.y - topMostPoint.y;
+    shape.map(line => {
+      let newPoints = [];
+
+      for (let i = 0; i < line.attrs.points.length; i += 2) {
+        if (line.attrs.points[i + 1] < topMostPoint.y) {
+          newPoints.push(line.attrs.points[i] + offsetX);
+          newPoints.push(line.attrs.points[i + 1] + offsetY);
+        }
+      }
+
       let copiedLine = new _konva.default.Line({
         stroke: color,
         strokeWidth: 4,
@@ -23299,7 +23304,7 @@ class particle {
         // round cap for smoother lines
         lineCap: 'round',
         // copy the points from the prototype
-        points: _lodash.default.cloneDeep(line.attrs.points)
+        points: newPoints
       });
       this.stage.layer.add(copiedLine);
       this.stageShape.push(copiedLine);
