@@ -23023,6 +23023,7 @@ class Canvas {
 
       switch (this.mode) {
         case "emit":
+          console.log("In switch", this.currentLine);
           this.emitLine = this.currentLine;
           this.currentLine = null;
           this.emit_setup();
@@ -23034,6 +23035,7 @@ class Canvas {
 
         default:
           // save the line into current shape
+          console.log("This makes no sense", this.currentLine);
           this.currentShape.push(this.currentLine); // reset current line
 
           this.currentLine = null;
@@ -23089,6 +23091,7 @@ class Canvas {
       x: this.bodyPartHighlights[this.bodyPartHighlights.length - 1].absolutePosition().x - this.emitLine.attrs.points[0],
       y: this.bodyPartHighlights[this.bodyPartHighlights.length - 1].absolutePosition().y - this.emitLine.attrs.points[1]
     });
+    console.log("before constructor", this.emitLine);
     let newEmitter = new _emitter.default(this.bodyPartID[this.bodyPartID.length - 1], this.emitLine, this.currentShape, this.stage, this.color, {
       x: this.bodyPartHighlights[this.bodyPartHighlights.length - 1].absolutePosition().x - this.emitLine.attrs.points[0],
       y: this.bodyPartHighlights[this.bodyPartHighlights.length - 1].absolutePosition().y - this.emitLine.attrs.points[1]
@@ -23205,29 +23208,28 @@ class emitter {
 
   constructor(id, line, shape, stage, color, offset) {
     this.bodyPartID = id;
+    console.log("In constructor", line);
     this.emitLine = line;
     this.stage = stage;
     this.color = color;
     this.particleShape = shape;
-    this.firstPointOffset = offset; // create particles
+    this.firstPointOffset = offset; // get the length of the emitter line
+
+    let emitLineLength = this.emitLine.attrs.points.length / 2 - 1; // create particles
 
     for (let i = 0; i < 100; i++) {
-      // let position =
-      this.particles.push(new _particle.default(this.particleShape, this.stage, this.color, position));
+      // select a random point on the line to be the spawning position for the new particle
+      let randomPoint = Math.floor(Math.random() * emitLineLength);
+      this.particles.push(new _particle.default(this.particleShape, this.stage, this.color, {
+        x: this.emitLine.attrs.points[randomPoint * 2],
+        y: this.emitLine.attrs.points[randomPoint * 2 + 1]
+      }));
     }
   }
 
   update(bodyParts) {
-    console.log("here!!!"); // update the emit line
+    console.log(this.emitLine); // update the emit line
 
-    this.update_emit_line(bodyParts); // update each particle
-
-    this.particles.map(particle => {
-      particle.update(); // particle is self updating elements, no bodyPart information need
-    });
-  }
-
-  update_emit_line(bodyParts) {
     let bodyPart = bodyParts[this.bodyPartID];
     let offsetX = Math.floor(bodyPart.x * this.WIDTH - this.firstPointOffset.x - this.emitLine.attrs.points[0]);
     let offsetY = Math.floor(bodyPart.y * this.HEIGHT - this.firstPointOffset.y - this.emitLine.attrs.points[1]);
@@ -23238,7 +23240,11 @@ class emitter {
       newPoints.push(this.emitLine.attrs.points[i + 1] + offsetY);
     }
 
-    this.emitLine.points(newPoints);
+    this.emitLine.points(newPoints); // update each particle
+
+    this.particles.map(particle => {
+      particle.update(offsetX, offsetY); // particle is self updating elements, no bodyPart information need
+    });
   }
 
 }
@@ -23253,8 +23259,6 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
-
-var _console = require("console");
 
 var _konva = _interopRequireDefault(require("konva"));
 
@@ -23272,29 +23276,16 @@ class particle {
 
   constructor(shape, stage, color, position) {
     this.stage = stage;
-    this.position = position;
-    let topMostPoint = {
-      x: 2000,
-      y: 2000
-    };
-    shape.map(line => {
-      for (let i = 0; i < line.attrs.points.length; i += 2) {
-        if (line.attrs.points[i + 1] < topMostPoint.y) {
-          topMostPoint.x = line.attrs.points[i];
-          topMostPoint.y = line.attrs.points[i + 1];
-        }
-      }
-    });
-    let offsetX = position.x - topMostPoint.x;
-    let offsetY = position.y - topMostPoint.y;
+    this.position = position; // the first point of the drawing would match the position
+
+    let offsetX = position.x - shape[0].attrs.points[0];
+    let offsetY = position.y - shape[0].attrs.points[1];
     shape.map(line => {
       let newPoints = [];
 
       for (let i = 0; i < line.attrs.points.length; i += 2) {
-        if (line.attrs.points[i + 1] < topMostPoint.y) {
-          newPoints.push(line.attrs.points[i] + offsetX);
-          newPoints.push(line.attrs.points[i + 1] + offsetY);
-        }
+        newPoints.push(line.attrs.points[i] + offsetX);
+        newPoints.push(line.attrs.points[i + 1] + offsetY);
       }
 
       let copiedLine = new _konva.default.Line({
@@ -23311,7 +23302,7 @@ class particle {
     });
   }
 
-  update() {
+  update(x, y) {
     this.stageShape.map(line => {
       let newPoints = [];
 
@@ -23322,13 +23313,15 @@ class particle {
 
       line.points(newPoints);
     });
+    this.position.x += x;
+    this.position.y += y;
   }
 
 }
 
 exports.default = particle;
 
-},{"console":70,"konva":39,"lodash":57}],62:[function(require,module,exports){
+},{"konva":39,"lodash":57}],62:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {

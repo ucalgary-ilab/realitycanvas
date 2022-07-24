@@ -85,9 +85,9 @@ export default class Canvas {
 
         this.stage.stage.on('mouseup touchend', () => {
             this.isPaint = false;
-
             switch (this.mode) {
                 case "emit":
+                    console.log("In switch", this.currentLine);
                     this.emitLine = this.currentLine;
                     this.currentLine = null;
                     this.emit_setup();
@@ -97,6 +97,7 @@ export default class Canvas {
                     break;
                 default:
                     // save the line into current shape
+                    console.log("This makes no sense", this.currentLine);
                     this.currentShape.push(this.currentLine);
                     // reset current line
                     this.currentLine = null;
@@ -162,12 +163,13 @@ export default class Canvas {
     // this function should only be called once when the emit line is created
     emit_setup(){
         // only for consistency, this entry wont be used
-    
         this.firstPointOffset.push({
             x: this.bodyPartHighlights[this.bodyPartHighlights.length - 1].absolutePosition().x - this.emitLine.attrs.points[0],
             y: this.bodyPartHighlights[this.bodyPartHighlights.length - 1].absolutePosition().y - this.emitLine.attrs.points[1]
         })
 
+
+        console.log("before constructor", this.emitLine);
         let newEmitter = new emitter(
             this.bodyPartID[this.bodyPartID.length-1],
             this.emitLine,
@@ -179,9 +181,9 @@ export default class Canvas {
                 y: this.bodyPartHighlights[this.bodyPartHighlights.length - 1].absolutePosition().y - this.emitLine.attrs.points[1]
             });
 
+
         this.emitters.push(newEmitter);
         this.bindedObjects.push(newEmitter);
-
 
         // remove the prototype from the staging area
         this.currentShape.map(line=>{
