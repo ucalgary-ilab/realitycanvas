@@ -14,12 +14,18 @@
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
   <link rel="stylesheet" href="style.css">
+  <script src="./opencv/opencv.js"></script>
 </head>
 
 
 <body>
   <div id="media">
-    <video id="input_video"></video>
+    <video id="input_video" width="1280" height="720"></video>
+    <canvas id="output_canvas" width="1280" height="720"></canvas>
+  </div>
+  
+  <div id="opencv">
+    <canvas id="canvasOutput"  width="1280" height="720"></canvas>
   </div>
 
   <div id='konva'>

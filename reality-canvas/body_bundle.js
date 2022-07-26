@@ -22803,6 +22803,8 @@ root._=_;}}).call(void 0);
 },{}],58:[function(require,module,exports){
 "use strict";
 
+var _fs = require("fs");
+
 var _lodash = require("lodash");
 
 var _canvas = _interopRequireDefault(require("./canvas.js"));
@@ -22821,19 +22823,20 @@ class App {
 
 ; // create application instance
 
-const app = new App();
-let mediaPlane = document.getElementById('media');
-let konvaPlane = document.getElementById('konva'); // hook buttons and handler
+const app = new App(); // let mediaPlane = document.getElementById('media');
+
+let konvaPlane = document.getElementById('konva');
+let opencvPlane = document.getElementById('opencv'); // hook buttons and handler
 
 const select = () => {
-  mediaPlane.style.zIndex = "1";
+  opencvPlane.style.zIndex = "1";
   konvaPlane.style.zIndex = "0";
 };
 
 document.getElementById('select_button')?.addEventListener('click', select);
 
 const draw = () => {
-  mediaPlane.style.zIndex = "0";
+  opencvPlane.style.zIndex = "0";
   konvaPlane.style.zIndex = "1";
 };
 
@@ -22868,9 +22871,13 @@ const motion = () => {
 
 document.getElementById('motion_button')?.addEventListener('click', motion);
 const inputVideo = document.getElementById('input_video');
+const videoElement = document.getElementById("input_video");
+const canvasElement = document.getElementById("output_canvas");
+const canvasCtx = canvasElement.getContext("2d");
+const cvOutput = document.getElementById("canvasOutput");
 const MIN_VISIBILITY = 0.8;
 let bodyParts;
-inputVideo.addEventListener("click", e => {
+cvOutput.addEventListener("click", e => {
   let theClosetPart; // loop through all the body parts to find the closet part to the clicking point
 
   for (let i = 0; i < bodyParts.length; i++) {
@@ -22895,13 +22902,57 @@ inputVideo.addEventListener("click", e => {
     app.canvas.select(theClosetPart, bodyParts[theClosetPart]);
     draw();
   }
-}); // event loop
+});
+let cap = new cv.VideoCapture(videoElement); // event loop
 
 function onResults(results) {
   if (!results.poseLandmarks) {
     return;
   }
 
+  canvasCtx.save();
+  canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+  canvasCtx.drawImage(results.segmentationMask, 0, 0, canvasElement.width, canvasElement.height);
+  let contourData = canvasCtx.getImageData(0, 0, canvasElement.width, canvasElement.height);
+  let src = cv.matFromImageData(contourData);
+  let dst = new cv.Mat(canvasElement.height, canvasElement.width, cv.CV_8UC4);
+  cap.read(dst);
+  cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY, 0);
+  let contours = new cv.MatVector();
+  let hierarchy = new cv.Mat();
+  cv.findContours(src, contours, hierarchy, cv.RETR_CCOMP, cv.CHAIN_APPROX_SIMPLE);
+  let maxArea = 0;
+  let maxCnt = null;
+
+  for (let i = 0; i < contours.size(); i++) {
+    let cnt = contours.get(i);
+    let area = cv.contourArea(cnt, false);
+
+    if (area > maxArea) {
+      maxArea = area;
+      maxCnt = cnt;
+    }
+  }
+
+  if (maxCnt) {
+    let toDraw = new cv.MatVector();
+    toDraw.push_back(maxCnt);
+    let color = new cv.Scalar(Math.round(Math.random() * 255), Math.round(Math.random() * 255), Math.round(Math.random() * 255));
+
+    for (let i = 0; i < toDraw.size(); ++i) {
+      cv.drawContours(dst, toDraw, i, color, 5, cv.LINE_8, new cv.Mat(), 0);
+    } // color.delete();
+
+
+    toDraw.delete();
+  }
+
+  cv.imshow('canvasOutput', dst);
+  src.delete();
+  dst.delete();
+  contours.delete();
+  hierarchy.delete();
+  canvasCtx.restore();
   bodyParts = results.poseLandmarks; // update highlights
 
   app.canvas.update_highlights(bodyParts);
@@ -22933,7 +22984,7 @@ const camera = new Camera(inputVideo, {
 });
 camera.start();
 
-},{"./canvas.js":59,"lodash":57}],59:[function(require,module,exports){
+},{"./canvas.js":59,"fs":63,"lodash":57}],59:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -23404,4 +23455,6 @@ class Stage {
 
 exports.default = Stage;
 
-},{"konva":39}]},{},[58]);
+},{"konva":39}],63:[function(require,module,exports){
+
+},{}]},{},[58]);
