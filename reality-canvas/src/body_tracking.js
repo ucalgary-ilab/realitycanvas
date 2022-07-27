@@ -48,9 +48,6 @@ const contour = () => {
   contourOn = !contourOn;
   // app.canvas.bind_drawing();
   // app.canvas.mode = "contouring";
-  // app.canvas.elbowToHand = true;
-  // app.canvas.contourFirstPoint.x = app.canvas.currentShape[0].attrs.points[0] - Math.floor(bodyParts[13].x*WIDTH);
-  // app.canvas.contourFirstPoint.y = app.canvas.currentShape[0].attrs.points[1] - Math.floor(bodyParts[13].y*HEIGHT);
 }
 document.getElementById('contour_button')?.addEventListener('click', contour)
 
@@ -67,6 +64,11 @@ const motion = () => {
 document.getElementById('motion_button')?.addEventListener('click', motion)
 
 
+const action = () => {
+  app.canvas.action_setup();
+  // app.canvas.mode = "trailing";
+}
+document.getElementById('action_button')?.addEventListener('click', action)
 
 
 const inputVideo = document.getElementById('input_video');
@@ -107,7 +109,7 @@ cvOutput.addEventListener("click", (e) => {
 
   if (theClosetPart) {
     //
-    app.canvas.select(theClosetPart,bodyParts[theClosetPart]);
+    app.canvas.select(theClosetPart, bodyParts[theClosetPart]);
     draw();
   }
 })
@@ -123,24 +125,24 @@ function onResults(results) {
   canvasCtx.save();
   canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
   canvasCtx.drawImage(
-      results.segmentationMask,
-      0,
-      0,
-      canvasElement.width,
-      canvasElement.height
+    results.segmentationMask,
+    0,
+    0,
+    canvasElement.width,
+    canvasElement.height
   );
 
- 
+
   let contourData = canvasCtx.getImageData(0, 0, canvasElement.width, canvasElement.height);
   let src = cv.matFromImageData(contourData);
   let dst = new cv.Mat(canvasElement.height, canvasElement.width, cv.CV_8UC4);
   cap.read(dst);
 
-  cv.cvtColor(src,src,cv.COLOR_RGBA2GRAY, 0);
+  cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY, 0);
   let contours = new cv.MatVector();
   let hierarchy = new cv.Mat();
   cv.findContours(src, contours, hierarchy, cv.RETR_CCOMP, cv.CHAIN_APPROX_SIMPLE);
-  
+
   let maxArea = 0;
   let maxCnt = null;
   for (let i = 0; i < contours.size(); i++) {
@@ -148,19 +150,19 @@ function onResults(results) {
     let area = cv.contourArea(cnt, false);
 
     if (area > maxArea) {
-        maxArea = area
-        maxCnt = cnt
+      maxArea = area
+      maxCnt = cnt
     }
   }
 
 
-  if (contourOn&&maxCnt) { 
+  if (contourOn && maxCnt) {
     let toDraw = new cv.MatVector();
     toDraw.push_back(maxCnt);
     let color = new cv.Scalar(Math.round(Math.random() * 255), Math.round(Math.random() * 255),
-        Math.round(Math.random() * 255));
+      Math.round(Math.random() * 255));
     for (let i = 0; i < toDraw.size(); ++i) {
-        cv.drawContours(dst, toDraw, i, color, 5, cv.LINE_8, new cv.Mat(), 0);
+      cv.drawContours(dst, toDraw, i, color, 5, cv.LINE_8, new cv.Mat(), 0);
     }
     // color.delete();
     toDraw.delete();
@@ -171,8 +173,8 @@ function onResults(results) {
   dst.delete();
   contours.delete();
   hierarchy.delete();
-  
-  
+
+
   canvasCtx.restore();
 
   bodyParts = results.poseLandmarks;

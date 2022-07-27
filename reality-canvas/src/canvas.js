@@ -30,6 +30,11 @@ export default class Canvas {
     bodyPartID = []
     bodyPartHighlights = []
     bindedObjects = []
+    hiddenObject
+    down = false;
+    up = false;
+
+
     firstPointOffset = []
 
     emitters = []
@@ -162,6 +167,59 @@ export default class Canvas {
         this.mode = "drawing"
     }
 
+    action_setup() {
+        this.bind_drawing();
+        this.hiddenObject = this.bindedObjects.length - 1;
+        this.bindedObjects[this.hiddenObject].map(line => {
+            this.stage.layer.remove(line);
+        })
+    }
+
+    update_hidden(bodyParts) {
+        if (!this.hiddenObject) {
+            return;
+        }
+
+        let A = { x: bodyParts[11].x * this.WIDTH, y: bodyParts[11].y * this.HEIGHT };
+        let B = { x: bodyParts[23].x * this.WIDTH, y: bodyParts[23].y * this.HEIGHT };
+        let C = { x: bodyParts[25].x * this.WIDTH, y: bodyParts[25].y * this.HEIGHT };
+        let AB = Math.sqrt(Math.pow(B.x - A.x, 2) + Math.pow(B.y - A.y, 2));
+        let BC = Math.sqrt(Math.pow(B.x - C.x, 2) + Math.pow(B.y - C.y, 2));
+        let AC = Math.sqrt(Math.pow(C.x - A.x, 2) + Math.pow(C.y - A.y, 2));
+        let angle = Math.acos((BC * BC + AB * AB - AC * AC) / (2 * BC * AB)) * 180 / Math.PI;
+
+        if (angle <= 99 && this.FPScount == 0) {
+            console.log("down");
+            this.down = true;
+        }
+
+        if (this.down && angle >= 100 && this.FPScount == 0) {
+            console.log("up");
+            this.up = true;
+        }
+
+        if (this.up && this.FPScount == 0) {
+            this.FPScount = 20;
+            this.bindedObjects[this.hiddenObject].map(line => {
+                console.log("line added");
+                this.stage.layer.add(line);
+            })
+            console.log("one situp");
+            this.up = false;
+            this.down = false;
+        }
+
+        if (this.FPScount > 0) {
+            this.FPScount--;
+        }
+
+        if (this.FPScount == 0) {
+            this.hiddenObject.map(line => {
+                this.stage.layer.remove(line);
+            })
+        }
+    }
+
     trailing_setup() {
         let trailingLine = new Konva.Line({
             stroke: "#ADD8E6",
@@ -272,6 +330,8 @@ export default class Canvas {
     }
 
     update(bodyParts) {
+        this.update_hidden(bodyParts);
+
         for (let i = 0; i < this.bindedObjects.length; i++) {
             if (this.bindedObjects[i] instanceof Array) {
                 let bodyPart = bodyParts[this.bodyPartID[i]];
