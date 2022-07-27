@@ -23021,7 +23021,7 @@ class Canvas {
   bodyPartID = [];
   bodyPartHighlights = [];
   bindedObjects = [];
-  hiddenObject;
+  hiddenObject = -1;
   down = false;
   up = false;
   firstPointOffset = [];
@@ -23148,26 +23148,26 @@ class Canvas {
     this.bind_drawing();
     this.hiddenObject = this.bindedObjects.length - 1;
     this.bindedObjects[this.hiddenObject].map(line => {
-      this.stage.layer.remove(line);
+      line.hide();
     });
   }
 
   update_hidden(bodyParts) {
-    if (!this.hiddenObject) {
+    if (this.hiddenObject < 0) {
       return;
     }
 
     let A = {
-      x: bodyParts[11].x * this.WIDTH,
-      y: bodyParts[11].y * this.HEIGHT
+      x: bodyParts[12].x * this.WIDTH,
+      y: bodyParts[12].y * this.HEIGHT
     };
     let B = {
-      x: bodyParts[23].x * this.WIDTH,
-      y: bodyParts[23].y * this.HEIGHT
+      x: bodyParts[14].x * this.WIDTH,
+      y: bodyParts[14].y * this.HEIGHT
     };
     let C = {
-      x: bodyParts[25].x * this.WIDTH,
-      y: bodyParts[25].y * this.HEIGHT
+      x: bodyParts[16].x * this.WIDTH,
+      y: bodyParts[16].y * this.HEIGHT
     };
     let AB = Math.sqrt(Math.pow(B.x - A.x, 2) + Math.pow(B.y - A.y, 2));
     let BC = Math.sqrt(Math.pow(B.x - C.x, 2) + Math.pow(B.y - C.y, 2));
@@ -23187,8 +23187,8 @@ class Canvas {
     if (this.up && this.FPScount == 0) {
       this.FPScount = 20;
       this.bindedObjects[this.hiddenObject].map(line => {
-        console.log("line added");
-        this.stage.layer.add(line);
+        console.log("line added", line.attrs.points);
+        line.show();
       });
       console.log("one situp");
       this.up = false;
@@ -23200,8 +23200,8 @@ class Canvas {
     }
 
     if (this.FPScount == 0) {
-      this.hiddenObject.map(line => {
-        this.stage.layer.remove(line);
+      this.bindedObjects[this.hiddenObject].map(line => {
+        line.hide();
       });
     }
   }
@@ -23249,9 +23249,7 @@ class Canvas {
     this.emitters.map(emitter => {
       emitter.update(bodyParts);
     });
-  } // update_emit_line(){
-  // }
-  // select a body part to bind the drawing
+  } // select a body part to bind the drawing
 
 
   select(id, bodyPart) {

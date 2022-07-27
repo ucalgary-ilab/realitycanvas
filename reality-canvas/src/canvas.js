@@ -30,9 +30,9 @@ export default class Canvas {
     bodyPartID = []
     bodyPartHighlights = []
     bindedObjects = []
-    hiddenObject
-    down = false;
-    up = false;
+    hiddenObject = -1
+    down = false
+    up = false
 
 
     firstPointOffset = []
@@ -171,22 +171,23 @@ export default class Canvas {
         this.bind_drawing();
         this.hiddenObject = this.bindedObjects.length - 1;
         this.bindedObjects[this.hiddenObject].map(line => {
-            this.stage.layer.remove(line);
+            line.hide();
         })
     }
 
     update_hidden(bodyParts) {
-        if (!this.hiddenObject) {
+        if (this.hiddenObject < 0) {
             return;
         }
 
-        let A = { x: bodyParts[11].x * this.WIDTH, y: bodyParts[11].y * this.HEIGHT };
-        let B = { x: bodyParts[23].x * this.WIDTH, y: bodyParts[23].y * this.HEIGHT };
-        let C = { x: bodyParts[25].x * this.WIDTH, y: bodyParts[25].y * this.HEIGHT };
+        let A = { x: bodyParts[12].x * this.WIDTH, y: bodyParts[12].y * this.HEIGHT };
+        let B = { x: bodyParts[14].x * this.WIDTH, y: bodyParts[14].y * this.HEIGHT };
+        let C = { x: bodyParts[16].x * this.WIDTH, y: bodyParts[16].y * this.HEIGHT };
         let AB = Math.sqrt(Math.pow(B.x - A.x, 2) + Math.pow(B.y - A.y, 2));
         let BC = Math.sqrt(Math.pow(B.x - C.x, 2) + Math.pow(B.y - C.y, 2));
         let AC = Math.sqrt(Math.pow(C.x - A.x, 2) + Math.pow(C.y - A.y, 2));
         let angle = Math.acos((BC * BC + AB * AB - AC * AC) / (2 * BC * AB)) * 180 / Math.PI;
+
 
         if (angle <= 99 && this.FPScount == 0) {
             console.log("down");
@@ -201,8 +202,8 @@ export default class Canvas {
         if (this.up && this.FPScount == 0) {
             this.FPScount = 20;
             this.bindedObjects[this.hiddenObject].map(line => {
-                console.log("line added");
-                this.stage.layer.add(line);
+                console.log("line added", line.attrs.points);
+                line.show();
             })
             console.log("one situp");
             this.up = false;
@@ -214,8 +215,8 @@ export default class Canvas {
         }
 
         if (this.FPScount == 0) {
-            this.hiddenObject.map(line => {
-                this.stage.layer.remove(line);
+            this.bindedObjects[this.hiddenObject].map(line => {
+                line.hide()
             })
         }
     }
@@ -259,6 +260,7 @@ export default class Canvas {
         this.emitters.push(newEmitter);
         this.bindedObjects.push(newEmitter);
 
+
         // remove the prototype from the staging area
         this.currentShape.map(line => {
             line.remove(); // use remove, the node would still exist for prototyping purpose
@@ -277,10 +279,6 @@ export default class Canvas {
             emitter.update(bodyParts);
         })
     }
-
-    // update_emit_line(){
-
-    // }
 
 
 
