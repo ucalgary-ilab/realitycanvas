@@ -4,6 +4,7 @@ import Stage from "./stage.js"
 import Konva from 'konva'
 // import _ from 'lodash'
 import emitter from "./emitter.js"
+import particle from "./particle.js"
 
 export default class Canvas {
     isPaint = false
@@ -19,9 +20,9 @@ export default class Canvas {
     currentShape = []
 
     // motion line 
-    motionLine 
+    motionLine
     // emit line
-    emitLine 
+    emitLine
 
     stage = new Stage()
 
@@ -42,8 +43,8 @@ export default class Canvas {
     color = '#FFFFFF'
 
 
-    elbowToHand = false 
-    contourFirstPoint = {x:0, y:0}
+    elbowToHand = false
+    contourFirstPoint = { x: 0, y: 0 }
     hipToFeet = false
     progress = 0
 
@@ -151,8 +152,8 @@ export default class Canvas {
         this.firstPointOffset.push({
             x: this.bodyPartHighlights[this.bodyPartHighlights.length - 1].absolutePosition().x - this.currentShape[0].attrs.points[0],
             y: this.bodyPartHighlights[this.bodyPartHighlights.length - 1].absolutePosition().y - this.currentShape[0].attrs.points[1]
-        })        
-    
+        })
+
 
         // save current shape, savedShape is an array of array of konva lines
         this.bindedObjects.push(this.currentShape);
@@ -161,9 +162,23 @@ export default class Canvas {
         this.mode = "drawing"
     }
 
+    trailing_setup() {
+        let trailingLine = new Konva.Line({
+            stroke: "#ADD8E6",
+            strokeWidth: 10,
+            globalCompositeOperation: 'source-over',
+            // round cap for smoother lines
+            lineCap: 'round',
+            // add point twice, so we have some drawings even on a simple click
+            points: [],
+        });
+        this.stage.layer.add(trailingLine);
+        this.bindedObjects.push(trailingLine);
+    }
+
     // initialize the particles with the current shape
     // this function should only be called once when the emit line is created
-    emit_setup(){
+    emit_setup() {
         // only for consistency, this entry wont be used
         this.firstPointOffset.push({
             x: this.bodyPartHighlights[this.bodyPartHighlights.length - 1].absolutePosition().x - this.emitLine.attrs.points[0],
@@ -172,7 +187,7 @@ export default class Canvas {
 
 
         let newEmitter = new emitter(
-            this.bodyPartID[this.bodyPartID.length-1],
+            this.bodyPartID[this.bodyPartID.length - 1],
             this.emitLine,
             this.currentShape,
             this.stage,
@@ -187,7 +202,7 @@ export default class Canvas {
         this.bindedObjects.push(newEmitter);
 
         // remove the prototype from the staging area
-        this.currentShape.map(line=>{
+        this.currentShape.map(line => {
             line.remove(); // use remove, the node would still exist for prototyping purpose
         })
 
@@ -198,15 +213,15 @@ export default class Canvas {
 
 
     // keep emitting the particle
-    update_emitters(bodyParts){
+    update_emitters(bodyParts) {
         // update every particles
-        this.emitters.map(emitter=>{
+        this.emitters.map(emitter => {
             emitter.update(bodyParts);
         })
     }
 
     // update_emit_line(){
-        
+
     // }
 
 
@@ -258,12 +273,12 @@ export default class Canvas {
 
     update(bodyParts) {
         for (let i = 0; i < this.bindedObjects.length; i++) {
-            if(this.bindedObjects[i] instanceof Array){
+            if (this.bindedObjects[i] instanceof Array) {
                 let bodyPart = bodyParts[this.bodyPartID[i]];
-            
+
                 let offsetX = Math.floor((bodyPart.x * this.WIDTH) - this.firstPointOffset[i].x - this.bindedObjects[i][0].attrs.points[0]);
                 let offsetY = Math.floor((bodyPart.y * this.HEIGHT) - this.firstPointOffset[i].y - this.bindedObjects[i][0].attrs.points[1]);
-    
+
                 this.bindedObjects[i].map(line => {
                     let newPoints = [];
                     for (let i = 0; i < line.attrs.points.length; i += 2) {
@@ -274,45 +289,60 @@ export default class Canvas {
                     line.points(newPoints);
                 });
             }
-            else{
+            else if (this.bindedObjects[i] instanceof emitter) {
                 this.bindedObjects[i].update(bodyParts);
             }
-        }
+            else {
+                let bodyPart = bodyParts[this.bodyPartID[i]];
+                let newX = Math.floor(bodyPart.x * this.WIDTH);
+                let newY = Math.floor(bodyPart.y * this.HEIGHT);
 
-        if(this.elbowToHand){
-            this.hardcoded_elbowToHand(bodyParts);
-        }
-    }
+                let newPoints = []
 
+                for (let j = 0; j < this.bindedObjects[i].attrs.points.length; j++) {
+                    newPoints.push(this.bindedObjects[i].attrs.points[j]);
+                }
+                newPoints.push(newX);
+                newPoints.push(newY);
 
+                if (newPoints.length > 35) {
+                    newPoints = newPoints.slice(2);
+                }
 
-    hardcoded_elbowToHand(bodyParts){
-        // assumption hand is on top of elbow
-        if(this.progress==100){
-            this.progress=0;
-        }
-        else{
-            let xPos = Math.floor(bodyParts[13].x*this.WIDTH + this.progress/100*(bodyParts[19].x*this.WIDTH-bodyParts[13].x*this.WIDTH))
-            let yPos = Math.floor(bodyParts[13].y*this.HEIGHT + this.progress/100*(bodyParts[19].y*this.HEIGHT-bodyParts[13].y*this.HEIGHT))
-    
-
-            let offsetX = -this.currentShape[0].attrs.points[0] - this.contourFirstPoint.x + xPos;
-            let offsetY = -this.currentShape[0].attrs.points[1] - this.contourFirstPoint.y + yPos;
-            
-            console.log(xPos, yPos, offsetX, offsetY)
-
-            let newPoints = [];
-            for(let i=0; i<this.currentShape[0].attrs.points.length; i+=2){
-                newPoints.push(this.currentShape[0].attrs.points[i]-offsetX);
-                newPoints.push(this.currentShape[0].attrs.points[i+1]-offsetY);
+                this.bindedObjects[i].points(newPoints);
+                console.log("points", this.bindedObjects[i].attrs.points)
             }
-            this.currentShape[0].points(newPoints);
-            
-            this.progress+=5;
         }
+
     }
 
 
+
+    // hardcoded_elbowToHand(bodyParts){
+    //     // assumption hand is on top of elbow
+    //     if(this.progress==100){
+    //         this.progress=0;
+    //     }
+    //     else{
+    //         let xPos = Math.floor(bodyParts[13].x*this.WIDTH + this.progress/100*(bodyParts[19].x*this.WIDTH-bodyParts[13].x*this.WIDTH))
+    //         let yPos = Math.floor(bodyParts[13].y*this.HEIGHT + this.progress/100*(bodyParts[19].y*this.HEIGHT-bodyParts[13].y*this.HEIGHT))
+
+
+    //         let offsetX = -this.currentShape[0].attrs.points[0] - this.contourFirstPoint.x + xPos;
+    //         let offsetY = -this.currentShape[0].attrs.points[1] - this.contourFirstPoint.y + yPos;
+
+    //         console.log(xPos, yPos, offsetX, offsetY)
+
+    //         let newPoints = [];
+    //         for(let i=0; i<this.currentShape[0].attrs.points.length; i+=2){
+    //             newPoints.push(this.currentShape[0].attrs.points[i]-offsetX);
+    //             newPoints.push(this.currentShape[0].attrs.points[i+1]-offsetY);
+    //         }
+    //         this.currentShape[0].points(newPoints);
+
+    //         this.progress+=5;
+    //     }
+    // }
 
 }
 

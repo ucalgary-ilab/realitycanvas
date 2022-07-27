@@ -22803,10 +22803,6 @@ root._=_;}}).call(void 0);
 },{}],58:[function(require,module,exports){
 "use strict";
 
-var _fs = require("fs");
-
-var _lodash = require("lodash");
-
 var _canvas = _interopRequireDefault(require("./canvas.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -22866,8 +22862,7 @@ const emit = () => {
 document.getElementById('emit_button')?.addEventListener('click', emit);
 
 const motion = () => {
-  app.canvas.trailing_setup();
-  app.canvas.mode = "trailing";
+  app.canvas.trailing_setup(); // app.canvas.mode = "trailing";
 };
 
 document.getElementById('motion_button')?.addEventListener('click', motion);
@@ -22985,7 +22980,7 @@ const camera = new Camera(inputVideo, {
 });
 camera.start();
 
-},{"./canvas.js":59,"fs":63,"lodash":57}],59:[function(require,module,exports){
+},{"./canvas.js":59}],59:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -22998,6 +22993,8 @@ var _stage = _interopRequireDefault(require("./stage.js"));
 var _konva = _interopRequireDefault(require("konva"));
 
 var _emitter = _interopRequireDefault(require("./emitter.js"));
+
+var _particle = _interopRequireDefault(require("./particle.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -23139,6 +23136,20 @@ class Canvas {
 
     this.currentShape = [];
     this.mode = "drawing";
+  }
+
+  trailing_setup() {
+    let trailingLine = new _konva.default.Line({
+      stroke: "#ADD8E6",
+      strokeWidth: 10,
+      globalCompositeOperation: 'source-over',
+      // round cap for smoother lines
+      lineCap: 'round',
+      // add point twice, so we have some drawings even on a simple click
+      points: []
+    });
+    this.stage.layer.add(trailingLine);
+    this.bindedObjects.push(trailingLine);
   } // initialize the particles with the current shape
   // this function should only be called once when the emit line is created
 
@@ -23231,43 +23242,56 @@ class Canvas {
 
           line.points(newPoints);
         });
-      } else {
+      } else if (this.bindedObjects[i] instanceof _emitter.default) {
         this.bindedObjects[i].update(bodyParts);
+      } else {
+        let bodyPart = bodyParts[this.bodyPartID[i]];
+        let newX = Math.floor(bodyPart.x * this.WIDTH);
+        let newY = Math.floor(bodyPart.y * this.HEIGHT);
+        let newPoints = [];
+
+        for (let j = 0; j < this.bindedObjects[i].attrs.points.length; j++) {
+          newPoints.push(this.bindedObjects[i].attrs.points[j]);
+        }
+
+        newPoints.push(newX);
+        newPoints.push(newY);
+
+        if (newPoints.length > 35) {
+          newPoints = newPoints.slice(2);
+        }
+
+        this.bindedObjects[i].points(newPoints);
+        console.log("points", this.bindedObjects[i].attrs.points);
       }
     }
+  } // hardcoded_elbowToHand(bodyParts){
+  //     // assumption hand is on top of elbow
+  //     if(this.progress==100){
+  //         this.progress=0;
+  //     }
+  //     else{
+  //         let xPos = Math.floor(bodyParts[13].x*this.WIDTH + this.progress/100*(bodyParts[19].x*this.WIDTH-bodyParts[13].x*this.WIDTH))
+  //         let yPos = Math.floor(bodyParts[13].y*this.HEIGHT + this.progress/100*(bodyParts[19].y*this.HEIGHT-bodyParts[13].y*this.HEIGHT))
+  //         let offsetX = -this.currentShape[0].attrs.points[0] - this.contourFirstPoint.x + xPos;
+  //         let offsetY = -this.currentShape[0].attrs.points[1] - this.contourFirstPoint.y + yPos;
+  //         console.log(xPos, yPos, offsetX, offsetY)
+  //         let newPoints = [];
+  //         for(let i=0; i<this.currentShape[0].attrs.points.length; i+=2){
+  //             newPoints.push(this.currentShape[0].attrs.points[i]-offsetX);
+  //             newPoints.push(this.currentShape[0].attrs.points[i+1]-offsetY);
+  //         }
+  //         this.currentShape[0].points(newPoints);
+  //         this.progress+=5;
+  //     }
+  // }
 
-    if (this.elbowToHand) {
-      this.hardcoded_elbowToHand(bodyParts);
-    }
-  }
-
-  hardcoded_elbowToHand(bodyParts) {
-    // assumption hand is on top of elbow
-    if (this.progress == 100) {
-      this.progress = 0;
-    } else {
-      let xPos = Math.floor(bodyParts[13].x * this.WIDTH + this.progress / 100 * (bodyParts[19].x * this.WIDTH - bodyParts[13].x * this.WIDTH));
-      let yPos = Math.floor(bodyParts[13].y * this.HEIGHT + this.progress / 100 * (bodyParts[19].y * this.HEIGHT - bodyParts[13].y * this.HEIGHT));
-      let offsetX = -this.currentShape[0].attrs.points[0] - this.contourFirstPoint.x + xPos;
-      let offsetY = -this.currentShape[0].attrs.points[1] - this.contourFirstPoint.y + yPos;
-      console.log(xPos, yPos, offsetX, offsetY);
-      let newPoints = [];
-
-      for (let i = 0; i < this.currentShape[0].attrs.points.length; i += 2) {
-        newPoints.push(this.currentShape[0].attrs.points[i] - offsetX);
-        newPoints.push(this.currentShape[0].attrs.points[i + 1] - offsetY);
-      }
-
-      this.currentShape[0].points(newPoints);
-      this.progress += 5;
-    }
-  }
 
 }
 
 exports.default = Canvas;
 
-},{"./emitter.js":60,"./stage.js":62,"konva":39}],60:[function(require,module,exports){
+},{"./emitter.js":60,"./particle.js":61,"./stage.js":62,"konva":39}],60:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -23456,6 +23480,4 @@ class Stage {
 
 exports.default = Stage;
 
-},{"konva":39}],63:[function(require,module,exports){
-
-},{}]},{},[58]);
+},{"konva":39}]},{},[58]);

@@ -1,6 +1,4 @@
 
-import { read } from "fs";
-import { update } from "lodash";
 import Canvas from "./canvas.js";
 
 const WIDTH = 1280;
@@ -64,7 +62,7 @@ document.getElementById('emit_button')?.addEventListener('click', emit)
 
 const motion = () => {
   app.canvas.trailing_setup();
-  app.canvas.mode = "trailing";
+  // app.canvas.mode = "trailing";
 }
 document.getElementById('motion_button')?.addEventListener('click', motion)
 
