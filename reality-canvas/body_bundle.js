@@ -23158,16 +23158,16 @@ class Canvas {
     }
 
     let A = {
-      x: bodyParts[12].x * this.WIDTH,
-      y: bodyParts[12].y * this.HEIGHT
+      x: bodyParts[11].x * this.WIDTH,
+      y: bodyParts[11].y * this.HEIGHT
     };
     let B = {
-      x: bodyParts[14].x * this.WIDTH,
-      y: bodyParts[14].y * this.HEIGHT
+      x: bodyParts[23].x * this.WIDTH,
+      y: bodyParts[23].y * this.HEIGHT
     };
     let C = {
-      x: bodyParts[16].x * this.WIDTH,
-      y: bodyParts[16].y * this.HEIGHT
+      x: bodyParts[25].x * this.WIDTH,
+      y: bodyParts[25].y * this.HEIGHT
     };
     let AB = Math.sqrt(Math.pow(B.x - A.x, 2) + Math.pow(B.y - A.y, 2));
     let BC = Math.sqrt(Math.pow(B.x - C.x, 2) + Math.pow(B.y - C.y, 2));
