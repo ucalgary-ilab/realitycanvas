@@ -22813,6 +22813,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 const WIDTH = 1280;
 const HEIGHT = 720;
+let contourOn = false;
 
 class App {
   canvas = new _canvas.default(WIDTH, HEIGHT);
@@ -22849,11 +22850,11 @@ const save = () => {
 document.getElementById('save_button')?.addEventListener('click', save);
 
 const contour = () => {
-  // app.canvas.bind_drawing();
+  contourOn = !contourOn; // app.canvas.bind_drawing();
   // app.canvas.mode = "contouring";
-  app.canvas.elbowToHand = true;
-  app.canvas.contourFirstPoint.x = app.canvas.currentShape[0].attrs.points[0] - Math.floor(bodyParts[13].x * WIDTH);
-  app.canvas.contourFirstPoint.y = app.canvas.currentShape[0].attrs.points[1] - Math.floor(bodyParts[13].y * HEIGHT);
+  // app.canvas.elbowToHand = true;
+  // app.canvas.contourFirstPoint.x = app.canvas.currentShape[0].attrs.points[0] - Math.floor(bodyParts[13].x*WIDTH);
+  // app.canvas.contourFirstPoint.y = app.canvas.currentShape[0].attrs.points[1] - Math.floor(bodyParts[13].y*HEIGHT);
 };
 
 document.getElementById('contour_button')?.addEventListener('click', contour);
@@ -22934,7 +22935,7 @@ function onResults(results) {
     }
   }
 
-  if (maxCnt) {
+  if (contourOn && maxCnt) {
     let toDraw = new cv.MatVector();
     toDraw.push_back(maxCnt);
     let color = new cv.Scalar(Math.round(Math.random() * 255), Math.round(Math.random() * 255), Math.round(Math.random() * 255));
