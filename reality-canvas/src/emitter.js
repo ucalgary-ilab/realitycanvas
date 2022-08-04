@@ -1,6 +1,4 @@
 import particle from "./particle.js"
-
-
 export default class emitter {
     emitLine
     particleShape
@@ -9,15 +7,15 @@ export default class emitter {
     particles = []
     bodyPartID
 
-    color 
+    color
     xspeed = 0
     yspeed = 1
     WIDTH = 1280
     HEIGHT = 720
 
-    constructor(id, line, shape, stage, color, offset){
+    constructor(id, line, shape, stage, color, offset) {
         this.bodyPartID = id;
-        
+
         this.emitLine = line;
         this.stage = stage;
         this.color = color;
@@ -26,24 +24,24 @@ export default class emitter {
 
 
         // get the length of the emitter line
-        let emitLineLength = this.emitLine.attrs.points.length/2-1;
+        let emitLineLength = this.emitLine.attrs.points.length / 2 - 1;
         // create particles
-        for(let i=0; i<40; i++){
+        for (let i = 0; i < 40; i++) {
             // select a random point on the line to be the spawning position for the new particle
-            let randomPoint = Math.floor(Math.random()*emitLineLength);
+            let randomPoint = Math.floor(Math.random() * emitLineLength);
             this.particles.push(new particle(
                 this.particleShape,
                 this.stage,
                 this.color,
-                {   
-                 x: this.emitLine.attrs.points[randomPoint*2],
-                 y: this.emitLine.attrs.points[randomPoint*2+1]
+                {
+                    x: this.emitLine.attrs.points[randomPoint * 2],
+                    y: this.emitLine.attrs.points[randomPoint * 2 + 1]
                 }));
         }
     }
 
 
-    update(bodyParts){
+    update(bodyParts) {
 
         // update the emit line
         let bodyPart = bodyParts[this.bodyPartID];
@@ -54,15 +52,15 @@ export default class emitter {
 
         let newPoints = [];
 
-        for(let i=0; i<this.emitLine.attrs.points.length; i+=2){
-            newPoints.push(this.emitLine.attrs.points[i]+offsetX);
-            newPoints.push(this.emitLine.attrs.points[i+1]+offsetY);
+        for (let i = 0; i < this.emitLine.attrs.points.length; i += 2) {
+            newPoints.push(this.emitLine.attrs.points[i] + offsetX);
+            newPoints.push(this.emitLine.attrs.points[i + 1] + offsetY);
         }
         this.emitLine.points(newPoints);
-        
+
         // update each particle
-        this.particles.map(particle=>{
-            particle.update(offsetX,offsetY); // particle is self updating elements, no bodyPart information need
+        this.particles.map(particle => {
+            particle.update(offsetX, offsetY); // particle is self updating elements, no bodyPart information need
         })
     }
 

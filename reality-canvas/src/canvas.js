@@ -1,10 +1,7 @@
-// @ts-ignore
-// import Physic from "./physic.js"
+
 import Stage from "./stage.js"
 import Konva from 'konva'
-// import _ from 'lodash'
 import emitter from "./emitter.js"
-import particle from "./particle.js"
 
 export default class Canvas {
     isPaint = false

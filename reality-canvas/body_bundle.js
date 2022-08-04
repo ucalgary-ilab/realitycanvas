@@ -22998,13 +22998,8 @@ var _konva = _interopRequireDefault(require("konva"));
 
 var _emitter = _interopRequireDefault(require("./emitter.js"));
 
-var _particle = _interopRequireDefault(require("./particle.js"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-// @ts-ignore
-// import Physic from "./physic.js"
-// import _ from 'lodash'
 class Canvas {
   isPaint = false;
   mode = "drawing";
@@ -23340,7 +23335,7 @@ class Canvas {
 
 exports.default = Canvas;
 
-},{"./emitter.js":60,"./particle.js":61,"./stage.js":62,"konva":39}],60:[function(require,module,exports){
+},{"./emitter.js":60,"./stage.js":62,"konva":39}],60:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
