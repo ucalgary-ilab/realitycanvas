@@ -11,7 +11,12 @@ export default class emitter {
     xspeed = 0
     yspeed = 1
     WIDTH = 1280
-    HEIGHT = 720
+    HEIGHT = 720/* #container {
+        position: fixed;
+        top: 0px;
+        left: 0px;
+    } */
+    
 
     constructor(id, line, shape, stage, color, offset) {
         this.bodyPartID = id;
