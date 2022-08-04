@@ -1,5 +1,5 @@
 
-export default class frames {
+export default class Frames {
     stage
     firstPointOffsets
     bodyPartID

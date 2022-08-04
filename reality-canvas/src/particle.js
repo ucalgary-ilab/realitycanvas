@@ -2,7 +2,7 @@
 import Konva from 'konva'
 import _ from 'lodash'
 
-export default class particle {
+export default class Particle {
     // stage shape should be an array of konva lines
     stageShape = []
     stage

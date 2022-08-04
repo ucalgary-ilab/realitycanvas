@@ -1,7 +1,7 @@
 
 import Stage from "./stage.js"
 import Konva from 'konva'
-import emitter from "./emitter.js"
+import Emitter from "./emitter.js"
 
 export default class Canvas {
     isPaint = false
@@ -240,7 +240,7 @@ export default class Canvas {
         })
 
 
-        let newEmitter = new emitter(
+        let newEmitter = new Emitter(
             this.bodyPartID[this.bodyPartID.length - 1],
             this.emitLine,
             this.currentShape,
@@ -322,6 +322,8 @@ export default class Canvas {
         }
     }
 
+
+    
     update(bodyParts) {
 
         this.update_hidden(bodyParts);
@@ -343,7 +345,7 @@ export default class Canvas {
                     line.points(newPoints);
                 });
             }
-            else if (this.bindedObjects[i] instanceof emitter) {
+            else if (this.bindedObjects[i] instanceof Emitter) {
                 this.bindedObjects[i].update(bodyParts);
             }
             else {

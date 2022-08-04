@@ -1,5 +1,5 @@
-import particle from "./particle.js"
-export default class emitter {
+import Particle from "./particle.js"
+export default class Emitter {
     emitLine
     particleShape
     firstPointOffset
@@ -16,7 +16,7 @@ export default class emitter {
         top: 0px;
         left: 0px;
     } */
-    
+
 
     constructor(id, line, shape, stage, color, offset) {
         this.bodyPartID = id;
@@ -34,7 +34,7 @@ export default class emitter {
         for (let i = 0; i < 40; i++) {
             // select a random point on the line to be the spawning position for the new particle
             let randomPoint = Math.floor(Math.random() * emitLineLength);
-            this.particles.push(new particle(
+            this.particles.push(new Particle(
                 this.particleShape,
                 this.stage,
                 this.color,
