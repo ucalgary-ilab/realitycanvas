@@ -141,9 +141,26 @@ export default class Canvas {
     }
 
 
-    new_animation(){
-        this.animations.push(new Animation());
+    new_animation(bodyPartID) {
+        this.animations.push(new Animation(bodyPartID, this.stage));
     }
+
+    new_frame(bodyParts) {
+        let firstPointOffset = { x: 0, y: 0 };
+        let animation = this.animations[this.animations.length - 1]
+        let bodyPart = bodyParts[animation.bodyPartID]
+        firstPointOffset.x = bodyPart.x * this.WIDTH - this.currentShape[0].attrs.points[0];
+        firstPointOffset.y = bodyPart.y * this.HEIGHT - this.currentShape[0].attrs.points[1];
+        // add the new frame into animation
+        animation.add_frame(this.currentShape, firstPointOffset);
+
+        // empty the current shape to prepare next frame
+        this.currentShape = [];
+    }
+
+
+
+
 
     bind_drawing() {
         // calculate the offset of first point of the first line of the shape to the tracking point

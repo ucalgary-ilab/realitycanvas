@@ -5,13 +5,12 @@ export default class Animation {
     bodyPartID
     frames = []
     fpsCount = -1
+    finished = false
 
-    constructor(id, stage, bodyPartID) {
+    constructor(id, stage) {
         this.bodyPartID = id;
         this.stage = stage;
-        this.bodyPartID = bodyPartID;
     }
-
 
     add_frame(frame, offset) {
         // hide the frame
@@ -36,6 +35,11 @@ export default class Animation {
     }
 
     update(x, y) {
+        if (!this.finished) {
+            return;
+        }
+
+
         for (let i = 0; i < this.frames.length; i++) {
             let frame = this.frames[i];
             // update frames' positions

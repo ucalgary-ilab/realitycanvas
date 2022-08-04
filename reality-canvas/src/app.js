@@ -35,8 +35,17 @@ document.getElementById('select_button')?.addEventListener('click', select)
 const draw = () => {
   opencvPlane.style.zIndex = "0";
   konvaPlane.style.zIndex = "1";
+  app.canvas.new_animation(theClosetPart);
 }
 document.getElementById('draw_button')?.addEventListener('click', draw)
+
+
+// this function should add a new frame 
+const frame = () => {
+  app.canvas.new_animation(theClosetPart);
+}
+document.getElementById('frame_button')?.addEventListener('click', frame)
+
 
 // register button event handlers
 const save = () => {
