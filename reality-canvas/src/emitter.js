@@ -50,7 +50,7 @@ export default class emitter {
         let offsetX = Math.floor((bodyPart.x * this.WIDTH) - this.firstPointOffset.x - this.emitLine.attrs.points[0]);
         let offsetY = Math.floor((bodyPart.y * this.HEIGHT) - this.firstPointOffset.y - this.emitLine.attrs.points[1]);
 
-        console.log(offsetX, offsetY)
+        // console.log(offsetX, offsetY)
 
         let newPoints = [];
 

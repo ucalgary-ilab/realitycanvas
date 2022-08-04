@@ -157,6 +157,8 @@ function onResults(results) {
 
 
   if (contourOn && maxCnt) {
+
+    window.contour = maxCnt.data32S;
     let toDraw = new cv.MatVector();
     toDraw.push_back(maxCnt);
     let color = new cv.Scalar(Math.round(Math.random() * 255), Math.round(Math.random() * 255),

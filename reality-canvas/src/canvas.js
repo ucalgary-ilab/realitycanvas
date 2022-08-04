@@ -150,8 +150,6 @@ export default class Canvas {
     }
 
 
-
-
     bind_drawing() {
         // calculate the offset of first point of the first line of the shape to the tracking point
         this.firstPointOffset.push({
@@ -328,6 +326,7 @@ export default class Canvas {
     }
 
     update(bodyParts) {
+        
         this.update_hidden(bodyParts);
 
         for (let i = 0; i < this.bindedObjects.length; i++) {
@@ -371,37 +370,7 @@ export default class Canvas {
                 console.log("points", this.bindedObjects[i].attrs.points)
             }
         }
-
     }
-
-
-
-    // hardcoded_elbowToHand(bodyParts){
-    //     // assumption hand is on top of elbow
-    //     if(this.progress==100){
-    //         this.progress=0;
-    //     }
-    //     else{
-    //         let xPos = Math.floor(bodyParts[13].x*this.WIDTH + this.progress/100*(bodyParts[19].x*this.WIDTH-bodyParts[13].x*this.WIDTH))
-    //         let yPos = Math.floor(bodyParts[13].y*this.HEIGHT + this.progress/100*(bodyParts[19].y*this.HEIGHT-bodyParts[13].y*this.HEIGHT))
-
-
-    //         let offsetX = -this.currentShape[0].attrs.points[0] - this.contourFirstPoint.x + xPos;
-    //         let offsetY = -this.currentShape[0].attrs.points[1] - this.contourFirstPoint.y + yPos;
-
-    //         console.log(xPos, yPos, offsetX, offsetY)
-
-    //         let newPoints = [];
-    //         for(let i=0; i<this.currentShape[0].attrs.points.length; i+=2){
-    //             newPoints.push(this.currentShape[0].attrs.points[i]-offsetX);
-    //             newPoints.push(this.currentShape[0].attrs.points[i+1]-offsetY);
-    //         }
-    //         this.currentShape[0].points(newPoints);
-
-    //         this.progress+=5;
-    //     }
-    // }
-
 }
 
 

@@ -18,3 +18,10 @@
 
         
 4. hardcoded trailing effect
+
+
+
+# 2022-08-03
+
+Attempt 1:
+    support flip book authoring

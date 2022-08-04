@@ -22934,6 +22934,7 @@ function onResults(results) {
   }
 
   if (contourOn && maxCnt) {
+    window.contour = maxCnt.data32S;
     let toDraw = new cv.MatVector();
     toDraw.push_back(maxCnt);
     let color = new cv.Scalar(Math.round(Math.random() * 255), Math.round(Math.random() * 255), Math.round(Math.random() * 255));
@@ -23333,27 +23334,7 @@ class Canvas {
         console.log("points", this.bindedObjects[i].attrs.points);
       }
     }
-  } // hardcoded_elbowToHand(bodyParts){
-  //     // assumption hand is on top of elbow
-  //     if(this.progress==100){
-  //         this.progress=0;
-  //     }
-  //     else{
-  //         let xPos = Math.floor(bodyParts[13].x*this.WIDTH + this.progress/100*(bodyParts[19].x*this.WIDTH-bodyParts[13].x*this.WIDTH))
-  //         let yPos = Math.floor(bodyParts[13].y*this.HEIGHT + this.progress/100*(bodyParts[19].y*this.HEIGHT-bodyParts[13].y*this.HEIGHT))
-  //         let offsetX = -this.currentShape[0].attrs.points[0] - this.contourFirstPoint.x + xPos;
-  //         let offsetY = -this.currentShape[0].attrs.points[1] - this.contourFirstPoint.y + yPos;
-  //         console.log(xPos, yPos, offsetX, offsetY)
-  //         let newPoints = [];
-  //         for(let i=0; i<this.currentShape[0].attrs.points.length; i+=2){
-  //             newPoints.push(this.currentShape[0].attrs.points[i]-offsetX);
-  //             newPoints.push(this.currentShape[0].attrs.points[i+1]-offsetY);
-  //         }
-  //         this.currentShape[0].points(newPoints);
-  //         this.progress+=5;
-  //     }
-  // }
-
+  }
 
 }
 
@@ -23407,8 +23388,8 @@ class emitter {
     // update the emit line
     let bodyPart = bodyParts[this.bodyPartID];
     let offsetX = Math.floor(bodyPart.x * this.WIDTH - this.firstPointOffset.x - this.emitLine.attrs.points[0]);
-    let offsetY = Math.floor(bodyPart.y * this.HEIGHT - this.firstPointOffset.y - this.emitLine.attrs.points[1]);
-    console.log(offsetX, offsetY);
+    let offsetY = Math.floor(bodyPart.y * this.HEIGHT - this.firstPointOffset.y - this.emitLine.attrs.points[1]); // console.log(offsetX, offsetY)
+
     let newPoints = [];
 
     for (let i = 0; i < this.emitLine.attrs.points.length; i += 2) {
