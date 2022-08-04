@@ -1,5 +1,5 @@
 
-export default class Frames {
+export default class Animation {
     stage
     firstPointOffsets
     bodyPartID
@@ -36,8 +36,6 @@ export default class Frames {
     }
 
     update(x, y) {
-
-
         for (let i = 0; i < this.frames.length; i++) {
             let frame = this.frames[i];
             // update frames' positions

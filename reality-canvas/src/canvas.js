@@ -2,6 +2,7 @@
 import Stage from "./stage.js"
 import Konva from 'konva'
 import Emitter from "./emitter.js"
+import Animation from "./animation.js"
 
 export default class Canvas {
     isPaint = false
@@ -10,22 +11,20 @@ export default class Canvas {
     lastPosition = [0, 0]
     currPosition = [0, 0]
 
-
     // currentLine keeps current drawing line, might be a very bad name
     currentLine
     // shape is defined by an array of konva lines
     currentShape = []
-
-    // motion line 
-    motionLine
     // emit line
     emitLine
 
     stage = new Stage()
-
+    animations = []
 
     bodyPartID = []
     bodyPartHighlights = []
+
+
     bindedObjects = []
     hiddenObject = -1
     down = false
@@ -33,22 +32,17 @@ export default class Canvas {
 
 
     firstPointOffset = []
-
     emitters = []
 
+
+    // for the action trigger, will be aggregate into the a sperate class
     FPScount = 0
     WIDTH = 0
     HEIGHT = 0
 
-    particles = []
 
     color = '#FFFFFF'
 
-
-    elbowToHand = false
-    contourFirstPoint = { x: 0, y: 0 }
-    hipToFeet = false
-    progress = 0
 
     constructor(width, height) {
         this.WIDTH = width;
@@ -146,6 +140,10 @@ export default class Canvas {
         });
     }
 
+
+    new_animation(){
+        this.animations.push(new Animation());
+    }
 
     bind_drawing() {
         // calculate the offset of first point of the first line of the shape to the tracking point
@@ -323,7 +321,7 @@ export default class Canvas {
     }
 
 
-    
+
     update(bodyParts) {
 
         this.update_hidden(bodyParts);

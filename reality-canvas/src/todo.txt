@@ -24,4 +24,7 @@
 # 2022-08-03
 
 Attempt 1:
-    support flip book authoring
+    support flip book authoring:
+        1. aggreate drawing into animation.js, animation.js should handle the frame update.
+        2. app.js and canvas.js should be refactored to support animation
+        3. the particle should contains animation
