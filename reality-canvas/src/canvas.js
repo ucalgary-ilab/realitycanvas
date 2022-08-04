@@ -323,7 +323,7 @@ export default class Canvas {
     }
 
     update(bodyParts) {
-        
+
         this.update_hidden(bodyParts);
 
         for (let i = 0; i < this.bindedObjects.length; i++) {

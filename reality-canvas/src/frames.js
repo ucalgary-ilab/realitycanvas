@@ -1,37 +1,27 @@
 
 export default class frames {
     stage
-    firstPointOffset
+    firstPointOffsets
     bodyPartID
     frames = []
-    fpsCount = 0
+    fpsCount = -1
 
     constructor(id, stage, bodyPartID) {
         this.bodyPartID = id;
         this.stage = stage;
-
-        this.stage = stage;
         this.bodyPartID = bodyPartID;
     }
 
-    first_frame(frame, offset) {
-        // store the first point offset for future update
-        this.firstPointOffset = offset;
-        // add the first frame
-        this.new_frame(frame);
-    }
 
-    new_frame(frame) {
+    add_frame(frame, offset) {
         // hide the frame
         this.hide_frame(frame);
         // add the new frame
         this.frames.push(frame);
+        // add the first point offset
+        this.firstPointOffsets.push(offset);
     }
 
-    final_frame(frame) {
-        this.new_frame(frame);
-        this.show_frame(frames[this.fpsCount]);
-    }
 
     hide_frame(frame) {
         frame.map(line => {
@@ -46,11 +36,14 @@ export default class frames {
     }
 
     update(x, y) {
-        // update frames' positions
-        let offsetX = Math.floor(x - this.firstPointOffset[i].x - this.frameShapes[0][0].attrs.points[0]);
-        let offsetY = Math.floor(y - this.firstPointOffset[i].y - this.frameShapes[0][0].attrs.points[1]);
 
-        this.frames.map(frame => {
+
+        for (let i = 0; i < this.frames.length; i++) {
+            let frame = this.frames[i];
+            // update frames' positions
+            let offsetX = Math.floor(x - this.firstPointOffsets[i].x - this.frames[i][0].attrs.points[0]);
+            let offsetY = Math.floor(y - this.firstPointOffsets[i].y - this.frames[i][0].attrs.points[1]);
+
             frame.map(line => {
                 let newPoints = [];
                 for (let i = 0; i < line.attrs.points.length; i += 2) {
@@ -59,10 +52,11 @@ export default class frames {
                 }
                 line.points(newPoints);
             })
-        })
+        }
 
         // flip a frame
-        this.hide_frame(this.frames[this.fpsCount]);
+        if (this.fpsCount >= 0)
+            this.hide_frame(this.frames[this.fpsCount]);
         if (this.fpsCount == this.frames.length - 1) {
             this.fpsCount = 0;
         }

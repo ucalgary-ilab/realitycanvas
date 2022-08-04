@@ -16,22 +16,22 @@ body {
 
 
 
-#opencv{
-    position:fixed;
-    top:0px;
-    left:0px;
+#opencv {
+    position: fixed;
+    top: 0px;
+    left: 0px;
 }
 
-#media{
-    position:fixed;
-    top:1400px;
-    left:0px;
+#media {
+    position: fixed;
+    top: 1400px;
+    left: 0px;
 }
 
-#konva{
-    position:fixed;
-    top:0px;
-    left:0px;
+#konva {
+    position: fixed;
+    top: 0px;
+    left: 0px;
 }
 
 #videoInput {
@@ -53,42 +53,49 @@ body {
     z-index: 99;
 }
 
-#save_button {
+#frame_button {
     position: fixed;
     top: 0px;
     left: 200px;
     z-index: 99;
 }
 
-#emit_button {
+#save_button {
     position: fixed;
     top: 0px;
     left: 300px;
     z-index: 99;
 }
 
-#motion_button {
+#emit_button {
     position: fixed;
     top: 0px;
     left: 400px;
     z-index: 99;
 }
 
-#contour_button {
+#motion_button {
     position: fixed;
     top: 0px;
     left: 500px;
     z-index: 99;
 }
 
-#action_button {
+#contour_button {
     position: fixed;
     top: 0px;
     left: 600px;
     z-index: 99;
 }
 
-#opencv{
+#action_button {
+    position: fixed;
+    top: 0px;
+    left: 700px;
+    z-index: 99;
+}
+
+#opencv {
     position: fixed;
     top: 0px;
     left: 0px;
