@@ -1,7 +1,7 @@
 
 export default class Animation {
     stage
-    firstPointOffsets
+    firstPointOffsets = []
     bodyPartID
     frames = []
     fpsCount = -1
