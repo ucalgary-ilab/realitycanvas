@@ -141,11 +141,14 @@ export default class Canvas {
     }
 
 
-    new_animation(bodyPartID) {
-        this.animations.push(new Animation(bodyPartID, this.stage));
+    // create new animation
+    new_animation() {
+        // current body part is always the last one in the array
+        this.animations.push(new Animation(this.bodyPartID[this.bodyPartID.length - 1], this.stage));
     }
 
-    new_frame(bodyParts) {
+    // add a new frame into the current animation
+    add_frame(bodyParts) { // bodyParts are used to calculate the first point offset
         let firstPointOffset = { x: 0, y: 0 };
         let animation = this.animations[this.animations.length - 1]
         let bodyPart = bodyParts[animation.bodyPartID]
@@ -153,29 +156,17 @@ export default class Canvas {
         firstPointOffset.y = bodyPart.y * this.HEIGHT - this.currentShape[0].attrs.points[1];
         // add the new frame into animation
         animation.add_frame(this.currentShape, firstPointOffset);
-
         // empty the current shape to prepare next frame
         this.currentShape = [];
+        // next function should either be add_frame
     }
 
 
-
-
-
-    bind_drawing() {
-        // calculate the offset of first point of the first line of the shape to the tracking point
-        this.firstPointOffset.push({
-            x: this.bodyPartHighlights[this.bodyPartHighlights.length - 1].absolutePosition().x - this.currentShape[0].attrs.points[0],
-            y: this.bodyPartHighlights[this.bodyPartHighlights.length - 1].absolutePosition().y - this.currentShape[0].attrs.points[1]
-        })
-
-
-        // save current shape, savedShape is an array of array of konva lines
-        this.bindedObjects.push(this.currentShape);
-        // reset current shape
-        this.currentShape = [];
-        this.mode = "drawing"
+    finish_animation() {
+        this.animations[this.animations.length - 1].finish();
+        // no drawing should be done, next function called should be select()
     }
+
 
     action_setup() {
         this.bind_drawing();
@@ -291,7 +282,6 @@ export default class Canvas {
     }
 
 
-
     // select a body part to bind the drawing
     select(id, bodyPart) {
         if (!this.bodyPartID.includes(bodyPart.id)) {
@@ -338,53 +328,59 @@ export default class Canvas {
     }
 
 
-
     update(bodyParts) {
-
-        this.update_hidden(bodyParts);
-
-        for (let i = 0; i < this.bindedObjects.length; i++) {
-            if (this.bindedObjects[i] instanceof Array) {
-                let bodyPart = bodyParts[this.bodyPartID[i]];
-
-                let offsetX = Math.floor((bodyPart.x * this.WIDTH) - this.firstPointOffset[i].x - this.bindedObjects[i][0].attrs.points[0]);
-                let offsetY = Math.floor((bodyPart.y * this.HEIGHT) - this.firstPointOffset[i].y - this.bindedObjects[i][0].attrs.points[1]);
-
-                this.bindedObjects[i].map(line => {
-                    let newPoints = [];
-                    for (let i = 0; i < line.attrs.points.length; i += 2) {
-                        newPoints.push(line.attrs.points[i] + offsetX);
-                        newPoints.push(line.attrs.points[i + 1] + offsetY);
-                    }
-                    // update the points
-                    line.points(newPoints);
-                });
-            }
-            else if (this.bindedObjects[i] instanceof Emitter) {
-                this.bindedObjects[i].update(bodyParts);
-            }
-            else {
-                let bodyPart = bodyParts[this.bodyPartID[i]];
-                let newX = Math.floor(bodyPart.x * this.WIDTH);
-                let newY = Math.floor(bodyPart.y * this.HEIGHT);
-
-                let newPoints = []
-
-                for (let j = 0; j < this.bindedObjects[i].attrs.points.length; j++) {
-                    newPoints.push(this.bindedObjects[i].attrs.points[j]);
-                }
-                newPoints.push(newX);
-                newPoints.push(newY);
-
-                if (newPoints.length > 35) {
-                    newPoints = newPoints.slice(2);
-                }
-
-                this.bindedObjects[i].points(newPoints);
-                console.log("points", this.bindedObjects[i].attrs.points)
-            }
-        }
+        this.animations.map(animation => {
+            let x = bodyParts[animation.bodyPartID].x * this.WIDTH;
+            let y = bodyParts[animation.bodyPartID].y * this.HEIGHT;
+            animation.update(x, y);
+        });
     }
+    // update(bodyParts) {
+
+    //     this.update_hidden(bodyParts);
+
+    //     for (let i = 0; i < this.bindedObjects.length; i++) {
+    //         if (this.bindedObjects[i] instanceof Array) {
+    //             let bodyPart = bodyParts[this.bodyPartID[i]];
+
+    //             let offsetX = Math.floor((bodyPart.x * this.WIDTH) - this.firstPointOffset[i].x - this.bindedObjects[i][0].attrs.points[0]);
+    //             let offsetY = Math.floor((bodyPart.y * this.HEIGHT) - this.firstPointOffset[i].y - this.bindedObjects[i][0].attrs.points[1]);
+
+    //             this.bindedObjects[i].map(line => {
+    //                 let newPoints = [];
+    //                 for (let i = 0; i < line.attrs.points.length; i += 2) {
+    //                     newPoints.push(line.attrs.points[i] + offsetX);
+    //                     newPoints.push(line.attrs.points[i + 1] + offsetY);
+    //                 }
+    //                 // update the points
+    //                 line.points(newPoints);
+    //             });
+    //         }
+    //         else if (this.bindedObjects[i] instanceof Emitter) {
+    //             this.bindedObjects[i].update(bodyParts);
+    //         }
+    //         else {
+    //             let bodyPart = bodyParts[this.bodyPartID[i]];
+    //             let newX = Math.floor(bodyPart.x * this.WIDTH);
+    //             let newY = Math.floor(bodyPart.y * this.HEIGHT);
+
+    //             let newPoints = []
+
+    //             for (let j = 0; j < this.bindedObjects[i].attrs.points.length; j++) {
+    //                 newPoints.push(this.bindedObjects[i].attrs.points[j]);
+    //             }
+    //             newPoints.push(newX);
+    //             newPoints.push(newY);
+
+    //             if (newPoints.length > 35) {
+    //                 newPoints = newPoints.slice(2);
+    //             }
+
+    //             this.bindedObjects[i].points(newPoints);
+    //             console.log("points", this.bindedObjects[i].attrs.points)
+    //         }
+    //     }
+    // }
 }
 
 

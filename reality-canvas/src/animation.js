@@ -12,6 +12,10 @@ export default class Animation {
         this.stage = stage;
     }
 
+    finish() {
+        this.finished = true;
+    }
+
     add_frame(frame, offset) {
         // hide the frame
         this.hide_frame(frame);
@@ -38,7 +42,6 @@ export default class Animation {
         if (!this.finished) {
             return;
         }
-
 
         for (let i = 0; i < this.frames.length; i++) {
             let frame = this.frames[i];

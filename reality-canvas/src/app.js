@@ -35,21 +35,22 @@ document.getElementById('select_button')?.addEventListener('click', select)
 const draw = () => {
   opencvPlane.style.zIndex = "0";
   konvaPlane.style.zIndex = "1";
-  app.canvas.new_animation(theClosetPart);
+
+  app.canvas.new_animation();
 }
 document.getElementById('draw_button')?.addEventListener('click', draw)
 
 
 // this function should add a new frame 
 const frame = () => {
-  app.canvas.new_animation(theClosetPart);
+  app.canvas.add_frame(bodyParts);
 }
 document.getElementById('frame_button')?.addEventListener('click', frame)
 
 
 // register button event handlers
 const save = () => {
-  app.canvas.bind_drawing();
+  app.canvas.finish_animation();
 }
 document.getElementById('save_button')?.addEventListener('click', save)
 
