@@ -57,6 +57,7 @@ document.getElementById('save_button')?.addEventListener('click', save)
 
 const contour = () => {
   contourOn = !contourOn;
+
   // app.canvas.bind_drawing();
   // app.canvas.mode = "contouring";
 }
@@ -166,10 +167,11 @@ function onResults(results) {
     }
   }
 
-
+  let contourPoints = []
   if (contourOn && maxCnt) {
+    contourPoints = [...maxCnt.data32S];
 
-    window.contour = maxCnt.data32S;
+
     let toDraw = new cv.MatVector();
     toDraw.push_back(maxCnt);
     let color = new cv.Scalar(Math.round(Math.random() * 255), Math.round(Math.random() * 255),
@@ -193,7 +195,7 @@ function onResults(results) {
   bodyParts = results.poseLandmarks;
   // update highlights
   app.canvas.update_highlights(bodyParts);
-  app.canvas.update(bodyParts);
+  app.canvas.update(bodyParts, contourPoints);
 }
 
 const pose = new Pose({

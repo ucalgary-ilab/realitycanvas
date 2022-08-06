@@ -3,6 +3,7 @@ import Stage from "./stage.js"
 import Konva from 'konva'
 import Emitter from "./emitter.js"
 import Animation from "./animation.js"
+import Contour from "./contour.js"
 
 export default class Canvas {
     isPaint = false
@@ -30,6 +31,7 @@ export default class Canvas {
     down = false
     up = false
 
+    contours = []
 
     firstPointOffset = []
     emitters = []
@@ -40,6 +42,9 @@ export default class Canvas {
     WIDTH = 0
     HEIGHT = 0
 
+
+
+    contourPoints = []
 
     color = '#FFFFFF'
 
@@ -168,6 +173,11 @@ export default class Canvas {
     }
 
 
+    new_contour() {
+        this.contours.push(new Contour(this.stage));
+    }
+
+
     action_setup() {
         this.bind_drawing();
         this.hiddenObject = this.bindedObjects.length - 1;
@@ -281,7 +291,6 @@ export default class Canvas {
         })
     }
 
-
     // select a body part to bind the drawing
     select(id, bodyPart) {
         if (!this.bodyPartID.includes(bodyPart.id)) {
@@ -328,13 +337,23 @@ export default class Canvas {
     }
 
 
-    update(bodyParts) {
+    update(bodyParts, contourPoints) {
         this.animations.map(animation => {
             let x = bodyParts[animation.bodyPartID].x * this.WIDTH;
             let y = bodyParts[animation.bodyPartID].y * this.HEIGHT;
             animation.update(x, y);
         });
+
+        if (contourPoints.length > 0) {
+            this.contours.map(contour => {
+                contour.update(contourPoints);
+            })
+        }
+
     }
+
+
+
     // update(bodyParts) {
 
     //     this.update_hidden(bodyParts);

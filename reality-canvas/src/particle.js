@@ -1,5 +1,6 @@
 
 import Konva from 'konva'
+import Animation from './animation'
 import _ from 'lodash'
 
 export default class Particle {
@@ -11,7 +12,6 @@ export default class Particle {
     position
 
     constructor(shape, stage, color, position) {
-
         this.stage = stage;
         this.position = position;
 
