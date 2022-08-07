@@ -57,7 +57,7 @@ document.getElementById('save_button')?.addEventListener('click', save)
 
 const contour = () => {
   contourOn = !contourOn;
-
+  app.canvas.new_contour();
   // app.canvas.bind_drawing();
   // app.canvas.mode = "contouring";
 }
@@ -176,9 +176,9 @@ function onResults(results) {
     toDraw.push_back(maxCnt);
     let color = new cv.Scalar(Math.round(Math.random() * 255), Math.round(Math.random() * 255),
       Math.round(Math.random() * 255));
-    for (let i = 0; i < toDraw.size(); ++i) {
-      cv.drawContours(dst, toDraw, i, color, 5, cv.LINE_8, new cv.Mat(), 0);
-    }
+    // for (let i = 0; i < toDraw.size(); ++i) {
+    //   cv.drawContours(dst, toDraw, i, color, 5, cv.LINE_8, new cv.Mat(), 0);
+    // }
     // color.delete();
     toDraw.delete();
   }

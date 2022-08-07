@@ -1,10 +1,10 @@
 export default class Contour {
     contourLine
-    size = 40
+    size = 80
     stage
     constructor(stage) {
         this.contourLine = new Konva.Line({
-            stroke: 'red',
+            stroke: 'white',
             strokeWidth: 8,
             globalCompositeOperation: 'source-over',
             // round cap for smoother lines
@@ -16,8 +16,9 @@ export default class Contour {
         this.stage.layer.add(this.contourLine);
     }
 
-    udpate(contourPoints) {
+    update(contourPoints) {
         let newPoints = this.contourLine.attrs.points;
+
 
         // initialize the line
         if (newPoints.length == 0) {
@@ -38,12 +39,13 @@ export default class Contour {
                 }
             }
 
-            theClosetPoint = (theClosetPoint + 2) % contourPoints.length;
+            theClosetPoint = (theClosetPoint + 4) % contourPoints.length;
 
             newPoints = newPoints.slice(2);
             newPoints.push(contourPoints[theClosetPoint]);
             newPoints.push(contourPoints[theClosetPoint + 1]);
         }
+        console.log(newPoints);
         this.contourLine.points(newPoints);
     }
 }
