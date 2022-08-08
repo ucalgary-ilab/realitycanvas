@@ -1,7 +1,7 @@
 import Particle from "./particle.js"
 export default class Emitter {
     emitLine
-    particleShape
+    particleAnimation
     firstPointOffset
 
     particles = []
@@ -10,23 +10,15 @@ export default class Emitter {
     color
     xspeed = 0
     yspeed = 1
-    WIDTH = 1280
-    HEIGHT = 720/* #container {
-        position: fixed;
-        top: 0px;
-        left: 0px;
-    } */
 
-
-    constructor(id, line, shape, stage, color, offset) {
+    constructor(id, line, animation, stage, color, offset) {
         this.bodyPartID = id;
 
         this.emitLine = line;
         this.stage = stage;
         this.color = color;
-        this.particleShape = shape;
+        this.particleAnimation = animation;
         this.firstPointOffset = offset;
-
 
         // get the length of the emitter line
         let emitLineLength = this.emitLine.attrs.points.length / 2 - 1;
@@ -35,7 +27,7 @@ export default class Emitter {
             // select a random point on the line to be the spawning position for the new particle
             let randomPoint = Math.floor(Math.random() * emitLineLength);
             this.particles.push(new Particle(
-                this.particleShape,
+                this.particleAnimation,
                 this.stage,
                 this.color,
                 {
@@ -46,12 +38,10 @@ export default class Emitter {
     }
 
 
-    update(bodyParts) {
-
+    update(x, y) {
         // update the emit line
-        let bodyPart = bodyParts[this.bodyPartID];
-        let offsetX = Math.floor((bodyPart.x * this.WIDTH) - this.firstPointOffset.x - this.emitLine.attrs.points[0]);
-        let offsetY = Math.floor((bodyPart.y * this.HEIGHT) - this.firstPointOffset.y - this.emitLine.attrs.points[1]);
+        let offsetX = Math.floor(x - this.firstPointOffset.x - this.emitLine.attrs.points[0]);
+        let offsetY = Math.floor(y - this.firstPointOffset.y - this.emitLine.attrs.points[1]);
 
         // console.log(offsetX, offsetY)
 

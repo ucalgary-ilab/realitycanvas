@@ -16,10 +16,9 @@ export default class Contour {
         this.stage.layer.add(this.contourLine);
     }
 
+    
     update(contourPoints) {
         let newPoints = this.contourLine.attrs.points;
-
-
         // initialize the line
         if (newPoints.length == 0) {
             for (let i = 0; i < contourPoints.length && i < this.size; i += 2) {
@@ -39,13 +38,16 @@ export default class Contour {
                 }
             }
 
+
+            // move the line 2 points forward along the contour, but only enque one point
             theClosetPoint = (theClosetPoint + 4) % contourPoints.length;
 
+            // delete the trailing point
             newPoints = newPoints.slice(2);
             newPoints.push(contourPoints[theClosetPoint]);
             newPoints.push(contourPoints[theClosetPoint + 1]);
         }
-        console.log(newPoints);
+        // update the line
         this.contourLine.points(newPoints);
     }
 }
