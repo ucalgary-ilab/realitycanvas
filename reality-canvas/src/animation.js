@@ -38,6 +38,12 @@ export default class Animation {
         })
     }
 
+    hide_all_frame() {
+        this.frames.map(frame => {
+            this.hide_frame(frame);
+        })
+    }
+
     update(x, y) {
         if (!this.finished) {
             return;

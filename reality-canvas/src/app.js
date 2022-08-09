@@ -49,7 +49,7 @@ document.getElementById('frame_button')?.addEventListener('click', frame)
 // register button event handlers
 const save = () => {
   app.canvas.add_frame(bodyParts);
-  app.canvas.finish_animation();
+  app.canvas.finish_animation("bind");
 }
 document.getElementById('save_button')?.addEventListener('click', save)
 

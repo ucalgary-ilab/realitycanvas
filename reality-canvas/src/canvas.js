@@ -265,15 +265,9 @@ export default class Canvas {
         // this.emitters.push(newEmitter);
         this.updateList.push(newEmitter);
 
-        // remove the prototype from the staging area
-        this.currentAnimation.map(frame => {
-            frame.map(line => {
-                line.remove(); // use remove, the node would still exist for prototyping purpose
-            })
-        });
-
+        this.currentAnimation.hide_all_frame();
         // empty the currentFrame
-        this.currentAnimation = [];
+        this.currentAnimation = null;
         this.mode = "drawing"
     }
 

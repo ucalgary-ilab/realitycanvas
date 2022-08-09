@@ -4,22 +4,22 @@ import _ from 'lodash'
 
 export default class Particle {
     // stage shape should be an array of konva lines
-    animation = []
+    frames = []
     stage
     yspeed = Math.floor(Math.random() * 20 + 5)
     xspeed = 0
     position
+    fpsCount = -1
 
     constructor(animation, stage, color, position) {
         this.stage = stage;
         this.position = position;
 
         // the first point of the drawing would match the position
-        let offsetX = this.position.x - shape[0].attrs.points[0];
-        let offsetY = this.position.y - shape[0].attrs.points[1];
+        let offsetX = this.position.x - animation.frames[0][0].attrs.points[0];
+        let offsetY = this.position.y - animation.frames[0][0].attrs.points[1];
 
-
-        animation.map(frame => {
+        animation.frames.map(frame => {
             let newFrame = [];
             frame.map(line => {
                 let newPoints = [];
@@ -42,23 +42,39 @@ export default class Particle {
                 this.stage.layer.add(copiedLine);
                 newFrame.push(copiedLine);
             })
-            this.animation.push(newFrame);
+            this.frames.push(newFrame);
+            this.hide_frame(newFrame);
         });
+
+        console.log(this.frames)
 
     }
 
+    hide_frame(frame) {
+        frame.map(line => {
+            line.hide();
+        })
+    }
+
+    show_frame(frame) {
+        frame.map(line => {
+            line.show();
+        })
+    }
 
     update(x, y) {
         // the position is the respawning point
         this.position.x += x;
         this.position.y += y;
 
-        let offsetX = this.position.x - this.animation[0][0].attrs.points[0];
-        let offsetY = this.position.y - this.animation[0][0].attrs.points[1];
+        //  get the first frame, then the first line
+        console.log(this.frames);
+        let offsetX = this.position.x - this.frames[0][0].attrs.points[0];
+        let offsetY = this.position.y - this.frames[0][0].attrs.points[1];
 
         // if out of the screen, reset on the respawning point
-        if (this.animation[0][0].attrs.points[1] > 720) {
-            this.animation.map(
+        if (this.frames[0][0].attrs.points[1] > 720) {
+            this.frames.map(
                 frame => {
                     frame.map(
                         line => {
@@ -74,7 +90,7 @@ export default class Particle {
             );
         }
         else {
-            this.animation.map(
+            this.frames.map(
                 frame => {
                     frame.map(
                         line => {
@@ -87,7 +103,17 @@ export default class Particle {
                         })
                 }
             );
-
         }
+
+        // flip a frame
+        if (this.fpsCount >= 0)
+            this.hide_frame(this.frames[this.fpsCount]);
+        if (this.fpsCount == this.frames.length - 1) {
+            this.fpsCount = 0;
+        }
+        else {
+            this.fpsCount++;
+        }
+        this.show_frame(this.frames[this.fpsCount]);
     }
 }
