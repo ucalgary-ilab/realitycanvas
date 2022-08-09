@@ -39,60 +39,11 @@ body {
     display: none;
 }
 
-#select_button {
+#buttons {
     position: fixed;
     top: 0px;
     left: 0px;
-    z-index: 99;
-}
-
-#draw_button {
-    position: fixed;
-    top: 0px;
-    left: 100px;
-    z-index: 99;
-}
-
-#frame_button {
-    position: fixed;
-    top: 0px;
-    left: 200px;
-    z-index: 99;
-}
-
-#save_button {
-    position: fixed;
-    top: 0px;
-    left: 300px;
-    z-index: 99;
-}
-
-#emit_button {
-    position: fixed;
-    top: 0px;
-    left: 400px;
-    z-index: 99;
-}
-
-#motion_button {
-    position: fixed;
-    top: 0px;
-    left: 500px;
-    z-index: 99;
-}
-
-#contour_button {
-    position: fixed;
-    top: 0px;
-    left: 600px;
-    z-index: 99;
-}
-
-#action_button {
-    position: fixed;
-    top: 0px;
-    left: 700px;
-    z-index: 99;
+    z-index: 999;
 }
 
 #opencv {

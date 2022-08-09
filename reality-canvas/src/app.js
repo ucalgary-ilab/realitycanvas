@@ -72,9 +72,8 @@ document.getElementById('emit_button')?.addEventListener('click', emit)
 
 const motion = () => {
   app.canvas.new_motion("trailing");
-  // app.canvas.mode = "trailing";
 }
-document.getElementById('motion_button')?.addEventListener('click', motion)
+// document.getElementById('motion_button')?.addEventListener('click', motion)
 
 
 const action = () => {
