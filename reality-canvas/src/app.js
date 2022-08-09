@@ -78,7 +78,10 @@ const contour = (e) => {
     contourOn = !contourOn;
   }
   else if (e.target.innerHTML === 'Line Around') {
-    app.canvas.new_contour();
+    app.canvas.new_contour('line around');
+  }
+  else if (e.target.innerHTML === "Bottom Up"){
+    app.canvas.new_contour('bottom up');
   }
 }
 document.getElementById('contour_button')?.addEventListener('click', contour)

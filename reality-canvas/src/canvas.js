@@ -168,8 +168,8 @@ export default class Canvas {
     }
 
     // create a new contour line
-    new_contour() {
-        this.contours.push(new Contour(this.stage));
+    new_contour(type) {
+        this.contours.push(new Contour(this.stage, type));
     }
 
     // action_setup() {
