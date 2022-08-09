@@ -26,7 +26,7 @@ export default class Canvas {
     bodyPartHighlights = []
 
 
-    bindedObjects = []
+    updateList = []
     hiddenObject = -1
     down = false
     up = false
@@ -109,8 +109,6 @@ export default class Canvas {
             }
         });
 
-
-
         // and core function - drawing
         this.stage.stage.on('mousemove touchmove', e => {
 
@@ -158,86 +156,89 @@ export default class Canvas {
         // next function should either be add_frame
     }
 
-    finish_animation() {
+    finish_animation(mode) {
+        // finish the current animation
         this.currentAnimation.finish();
-        this.bindedObjects.push(this.currentAnimation);
-        this.currentAnimation = null;
-        // no drawing should be done, next function called should be select()
+        if (mode === "bind") {
+            // add the animation to the updateList
+            this.updateList.push(this.currentAnimation);
+            // reset the currentAnimation
+            this.currentAnimation = null;
+        }
     }
 
-
+    // create a new contour line
     new_contour() {
         this.contours.push(new Contour(this.stage));
     }
 
+    // action_setup() {
+    //     this.bind_drawing();
+    //     this.hiddenObject = this.updateList.length - 1;
+    //     this.updateList[this.hiddenObject].map(line => {
+    //         line.hide();
+    //     })
+    // }
 
-    action_setup() {
-        this.bind_drawing();
-        this.hiddenObject = this.bindedObjects.length - 1;
-        this.bindedObjects[this.hiddenObject].map(line => {
-            line.hide();
-        })
-    }
+    // update_hidden(bodyParts) {
+    //     if (this.hiddenObject < 0) {
+    //         return;
+    //     }
 
-    update_hidden(bodyParts) {
-        if (this.hiddenObject < 0) {
-            return;
-        }
-
-        let A = { x: bodyParts[11].x * this.WIDTH, y: bodyParts[11].y * this.HEIGHT };
-        let B = { x: bodyParts[23].x * this.WIDTH, y: bodyParts[23].y * this.HEIGHT };
-        let C = { x: bodyParts[25].x * this.WIDTH, y: bodyParts[25].y * this.HEIGHT };
-        let AB = Math.sqrt(Math.pow(B.x - A.x, 2) + Math.pow(B.y - A.y, 2));
-        let BC = Math.sqrt(Math.pow(B.x - C.x, 2) + Math.pow(B.y - C.y, 2));
-        let AC = Math.sqrt(Math.pow(C.x - A.x, 2) + Math.pow(C.y - A.y, 2));
-        let angle = Math.acos((BC * BC + AB * AB - AC * AC) / (2 * BC * AB)) * 180 / Math.PI;
+    //     let A = { x: bodyParts[11].x * this.WIDTH, y: bodyParts[11].y * this.HEIGHT };
+    //     let B = { x: bodyParts[23].x * this.WIDTH, y: bodyParts[23].y * this.HEIGHT };
+    //     let C = { x: bodyParts[25].x * this.WIDTH, y: bodyParts[25].y * this.HEIGHT };
+    //     let AB = Math.sqrt(Math.pow(B.x - A.x, 2) + Math.pow(B.y - A.y, 2));
+    //     let BC = Math.sqrt(Math.pow(B.x - C.x, 2) + Math.pow(B.y - C.y, 2));
+    //     let AC = Math.sqrt(Math.pow(C.x - A.x, 2) + Math.pow(C.y - A.y, 2));
+    //     let angle = Math.acos((BC * BC + AB * AB - AC * AC) / (2 * BC * AB)) * 180 / Math.PI;
 
 
-        if (angle <= 99 && this.FPScount == 0) {
-            console.log("down");
-            this.down = true;
-        }
+    //     if (angle <= 99 && this.FPScount == 0) {
+    //         console.log("down");
+    //         this.down = true;
+    //     }
 
-        if (this.down && angle >= 100 && this.FPScount == 0) {
-            console.log("up");
-            this.up = true;
-        }
+    //     if (this.down && angle >= 100 && this.FPScount == 0) {
+    //         console.log("up");
+    //         this.up = true;
+    //     }
 
-        if (this.up && this.FPScount == 0) {
-            this.FPScount = 20;
-            this.bindedObjects[this.hiddenObject].map(line => {
-                console.log("line added", line.attrs.points);
-                line.show();
-            })
-            console.log("one situp");
-            this.up = false;
-            this.down = false;
-        }
+    //     if (this.up && this.FPScount == 0) {
+    //         this.FPScount = 20;
+    //         this.updateList[this.hiddenObject].map(line => {
+    //             console.log("line added", line.attrs.points);
+    //             line.show();
+    //         })
+    //         console.log("one situp");
+    //         this.up = false;
+    //         this.down = false;
+    //     }
 
-        if (this.FPScount > 0) {
-            this.FPScount--;
-        }
+    //     if (this.FPScount > 0) {
+    //         this.FPScount--;
+    //     }
 
-        if (this.FPScount == 0) {
-            this.bindedObjects[this.hiddenObject].map(line => {
-                line.hide()
-            })
-        }
-    }
+    //     if (this.FPScount == 0) {
+    //         this.updateList[this.hiddenObject].map(line => {
+    //             line.hide()
+    //         })
+    //     }
+    // }
 
-    trailing_setup() {
-        let trailingLine = new Konva.Line({
-            stroke: "#ADD8E6",
-            strokeWidth: 10,
-            globalCompositeOperation: 'source-over',
-            // round cap for smoother lines
-            lineCap: 'round',
-            // add point twice, so we have some drawings even on a simple click
-            points: [],
-        });
-        this.stage.layer.add(trailingLine);
-        this.bindedObjects.push(trailingLine);
-    }
+    // trailing_setup() {
+    //     let trailingLine = new Konva.Line({
+    //         stroke: "#ADD8E6",
+    //         strokeWidth: 10,
+    //         globalCompositeOperation: 'source-over',
+    //         // round cap for smoother lines
+    //         lineCap: 'round',
+    //         // add point twice, so we have some drawings even on a simple click
+    //         points: [],
+    //     });
+    //     this.stage.layer.add(trailingLine);
+    //     this.updateList.push(trailingLine);
+    // }
 
     // initialize the particles with the current shape
     // this function should only be called once when the emit line is created
@@ -248,11 +249,11 @@ export default class Canvas {
             y: this.bodyPartHighlights[this.bodyPartHighlights.length - 1].absolutePosition().y - this.emitLine.attrs.points[1]
         })
 
-
+        // create new Emitter
         let newEmitter = new Emitter(
             this.bodyPartID[this.bodyPartID.length - 1],
-            this.emitLine,
-            this.currentFrame,
+            this.emitLine, // give the emitter line
+            this.currentAnimation, // the particle animation prototype
             this.stage,
             this.color,
             {
@@ -261,28 +262,29 @@ export default class Canvas {
             });
 
 
-        this.emitters.push(newEmitter);
-        this.bindedObjects.push(newEmitter);
-
+        // this.emitters.push(newEmitter);
+        this.updateList.push(newEmitter);
 
         // remove the prototype from the staging area
-        this.currentFrame.map(line => {
-            line.remove(); // use remove, the node would still exist for prototyping purpose
-        })
+        this.currentAnimation.map(frame => {
+            frame.map(line => {
+                line.remove(); // use remove, the node would still exist for prototyping purpose
+            })
+        });
 
         // empty the currentFrame
-        this.currentFrame = [];
+        this.currentAnimation = [];
         this.mode = "drawing"
     }
 
 
-    // keep emitting the particle
-    update_emitters(bodyParts) {
-        // update every particles
-        this.emitters.map(emitter => {
-            emitter.update(bodyParts);
-        })
-    }
+    // // keep emitting the particle
+    // update_emitters(bodyParts) {
+    //     // update every particles
+    //     this.emitters.map(emitter => {
+    //         emitter.update(bodyParts);
+    //     })
+    // }
 
     // select a body part to bind the drawing
     select(id, bodyPart) {
@@ -303,15 +305,15 @@ export default class Canvas {
 
         // show on stage
         this.stage.layer.add(highlight);
-        // record
+        // create green dot for the selected body part
         this.bodyPartHighlights.push(highlight);
-
 
         // create new animation
         this.currentAnimation = new Animation(id, this.stage);
     }
 
 
+    // update the green dots of selected body parts
     update_highlights(bodyParts) {
         for (let i = 0; i < this.bodyPartID.length; i++) {
             // get the id of tracking body part
@@ -333,18 +335,25 @@ export default class Canvas {
 
 
     update(bodyParts, contourPoints) {
-        // this.animations.map(animation => {
-        //     let x = bodyParts[animation.bodyPartID].x * this.WIDTH;
-        //     let y = bodyParts[animation.bodyPartID].y * this.HEIGHT;
-        //     animation.update(x, y);
-        // });
+        this.updateList.map(obj => {
+            // update animation
+            if (obj instanceof Animation) {
+                let x = bodyParts[obj.bodyPartID].x * this.WIDTH;
+                let y = bodyParts[obj.bodyPartID].y * this.HEIGHT;
+                obj.update(x, y);
+            }// update emitter  
+            else if (obj instanceof Emitter) {
+                let x = bodyParts[obj.bodyPartID].x * this.WIDTH;
+                let y = bodyParts[obj.bodyPartID].y * this.HEIGHT;
+                obj.update(x, y);
+            }
+        })
 
         if (contourPoints.length > 0) {
             this.contours.map(contour => {
                 contour.update(contourPoints);
             })
         }
-
     }
 
 
@@ -353,14 +362,14 @@ export default class Canvas {
 
     //     this.update_hidden(bodyParts);
 
-    //     for (let i = 0; i < this.bindedObjects.length; i++) {
-    //         if (this.bindedObjects[i] instanceof Array) {
+    //     for (let i = 0; i < this.updateList.length; i++) {
+    //         if (this.updateList[i] instanceof Array) {
     //             let bodyPart = bodyParts[this.bodyPartID[i]];
 
-    //             let offsetX = Math.floor((bodyPart.x * this.WIDTH) - this.firstPointOffset[i].x - this.bindedObjects[i][0].attrs.points[0]);
-    //             let offsetY = Math.floor((bodyPart.y * this.HEIGHT) - this.firstPointOffset[i].y - this.bindedObjects[i][0].attrs.points[1]);
+    //             let offsetX = Math.floor((bodyPart.x * this.WIDTH) - this.firstPointOffset[i].x - this.updateList[i][0].attrs.points[0]);
+    //             let offsetY = Math.floor((bodyPart.y * this.HEIGHT) - this.firstPointOffset[i].y - this.updateList[i][0].attrs.points[1]);
 
-    //             this.bindedObjects[i].map(line => {
+    //             this.updateList[i].map(line => {
     //                 let newPoints = [];
     //                 for (let i = 0; i < line.attrs.points.length; i += 2) {
     //                     newPoints.push(line.attrs.points[i] + offsetX);
@@ -370,8 +379,8 @@ export default class Canvas {
     //                 line.points(newPoints);
     //             });
     //         }
-    //         else if (this.bindedObjects[i] instanceof Emitter) {
-    //             this.bindedObjects[i].update(bodyParts);
+    //         else if (this.updateList[i] instanceof Emitter) {
+    //             this.updateList[i].update(bodyParts);
     //         }
     //         else {
     //             let bodyPart = bodyParts[this.bodyPartID[i]];
@@ -380,8 +389,8 @@ export default class Canvas {
 
     //             let newPoints = []
 
-    //             for (let j = 0; j < this.bindedObjects[i].attrs.points.length; j++) {
-    //                 newPoints.push(this.bindedObjects[i].attrs.points[j]);
+    //             for (let j = 0; j < this.updateList[i].attrs.points.length; j++) {
+    //                 newPoints.push(this.updateList[i].attrs.points[j]);
     //             }
     //             newPoints.push(newX);
     //             newPoints.push(newY);
@@ -390,8 +399,8 @@ export default class Canvas {
     //                 newPoints = newPoints.slice(2);
     //             }
 
-    //             this.bindedObjects[i].points(newPoints);
-    //             console.log("points", this.bindedObjects[i].attrs.points)
+    //             this.updateList[i].points(newPoints);
+    //             console.log("points", this.updateList[i].attrs.points)
     //         }
     //     }
     // }

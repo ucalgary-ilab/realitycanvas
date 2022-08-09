@@ -42,9 +42,7 @@ export default class Emitter {
         // update the emit line
         let offsetX = Math.floor(x - this.firstPointOffset.x - this.emitLine.attrs.points[0]);
         let offsetY = Math.floor(y - this.firstPointOffset.y - this.emitLine.attrs.points[1]);
-
         // console.log(offsetX, offsetY)
-
         let newPoints = [];
 
         for (let i = 0; i < this.emitLine.attrs.points.length; i += 2) {
