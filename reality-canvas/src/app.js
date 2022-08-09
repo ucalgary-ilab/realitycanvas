@@ -15,8 +15,6 @@ class App {
   }
 };
 
-
-
 // create application instance
 const app = new App();
 
@@ -53,14 +51,6 @@ const save = () => {
 }
 document.getElementById('save_button')?.addEventListener('click', save)
 
-const contour = () => {
-  if (!contourOn)
-    contourOn = true;
-  app.canvas.new_contour();
-  // app.canvas.bind_drawing();
-  // app.canvas.mode = "contouring";
-}
-document.getElementById('contour_button')?.addEventListener('click', contour)
 
 const emit = () => {
   app.canvas.add_frame(bodyParts);
@@ -71,8 +61,6 @@ const emit = () => {
 document.getElementById('emit_button')?.addEventListener('click', emit)
 
 const motion = (e) => {
-  window.event = e;
-  console.log(e.target.innerHTML);
   app.canvas.new_motion(e.target.innerHTML.toLowerCase());
 }
 document.getElementById('motion_button')?.addEventListener('click', motion)
@@ -85,6 +73,20 @@ const action = () => {
 document.getElementById('action_button')?.addEventListener('click', action)
 
 
+const contour = (e) => {
+  if (e.target.innerHTML === 'Full Body') {
+    contourOn = !contourOn;
+  }
+  else if (e.target.innerHTML === 'Line Around') {
+    app.canvas.new_contour();
+  }
+}
+document.getElementById('contour_button')?.addEventListener('click', contour)
+
+
+
+
+// end of buttons' registration
 const inputVideo = document.getElementById('input_video');
 const videoElement = document.getElementById("input_video");
 const canvasElement = document.getElementById("output_canvas");
@@ -169,17 +171,19 @@ function onResults(results) {
   }
 
   let contourPoints = []
-  if (contourOn && maxCnt) {
+
+  if (maxCnt) {
     contourPoints = [...maxCnt.data32S];
+  }
 
-
+  if (contourOn && maxCnt) {
     let toDraw = new cv.MatVector();
     toDraw.push_back(maxCnt);
     let color = new cv.Scalar(Math.round(Math.random() * 255), Math.round(Math.random() * 255),
       Math.round(Math.random() * 255));
-    // for (let i = 0; i < toDraw.size(); ++i) {
-    //   cv.drawContours(dst, toDraw, i, color, 5, cv.LINE_8, new cv.Mat(), 0);
-    // }
+    for (let i = 0; i < toDraw.size(); ++i) {
+      cv.drawContours(dst, toDraw, i, color, 5, cv.LINE_8, new cv.Mat(), 0);
+    }
     // color.delete();
     toDraw.delete();
   }
