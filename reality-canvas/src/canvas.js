@@ -15,13 +15,13 @@ export default class Canvas {
     // currentLine keeps current drawing line, might be a very bad name
     currentLine
     // shape is defined by an array of konva lines
-    currentShape = []
+    currentFrame = []
+    currentAnimation
+
     // emit line
     emitLine
 
     stage = new Stage()
-    animations = []
-
     bodyPartID = []
     bodyPartHighlights = []
 
@@ -102,7 +102,7 @@ export default class Canvas {
                     break;
                 default:
                     // save the line into current shape
-                    this.currentShape.push(this.currentLine);
+                    this.currentFrame.push(this.currentLine);
                     // reset current line
                     this.currentLine = null;
                     ;
@@ -145,30 +145,23 @@ export default class Canvas {
         });
     }
 
-
-    // create new animation
-    new_animation() {
-        // current body part is always the last one in the array
-        this.animations.push(new Animation(this.bodyPartID[this.bodyPartID.length - 1], this.stage));
-    }
-
     // add a new frame into the current animation
     add_frame(bodyParts) { // bodyParts are used to calculate the first point offset
         let firstPointOffset = { x: 0, y: 0 };
-        let animation = this.animations[this.animations.length - 1]
-        let bodyPart = bodyParts[animation.bodyPartID]
-        firstPointOffset.x = bodyPart.x * this.WIDTH - this.currentShape[0].attrs.points[0];
-        firstPointOffset.y = bodyPart.y * this.HEIGHT - this.currentShape[0].attrs.points[1];
+        let bodyPart = bodyParts[this.currentAnimation.bodyPartID]
+        firstPointOffset.x = bodyPart.x * this.WIDTH - this.currentFrame[0].attrs.points[0];
+        firstPointOffset.y = bodyPart.y * this.HEIGHT - this.currentFrame[0].attrs.points[1];
         // add the new frame into animation
-        animation.add_frame(this.currentShape, firstPointOffset);
+        this.currentAnimation.add_frame(this.currentFrame, firstPointOffset);
         // empty the current shape to prepare next frame
-        this.currentShape = [];
+        this.currentFrame = [];
         // next function should either be add_frame
     }
 
-
     finish_animation() {
-        this.animations[this.animations.length - 1].finish();
+        this.currentAnimation.finish();
+        this.bindedObjects.push(this.currentAnimation);
+        this.currentAnimation = null;
         // no drawing should be done, next function called should be select()
     }
 
@@ -259,7 +252,7 @@ export default class Canvas {
         let newEmitter = new Emitter(
             this.bodyPartID[this.bodyPartID.length - 1],
             this.emitLine,
-            this.currentShape,
+            this.currentFrame,
             this.stage,
             this.color,
             {
@@ -273,12 +266,12 @@ export default class Canvas {
 
 
         // remove the prototype from the staging area
-        this.currentShape.map(line => {
+        this.currentFrame.map(line => {
             line.remove(); // use remove, the node would still exist for prototyping purpose
         })
 
-        // empty the currentShape
-        this.currentShape = [];
+        // empty the currentFrame
+        this.currentFrame = [];
         this.mode = "drawing"
     }
 
@@ -293,27 +286,29 @@ export default class Canvas {
 
     // select a body part to bind the drawing
     select(id, bodyPart) {
-        if (!this.bodyPartID.includes(bodyPart.id)) {
-            // get id of the body part
-            this.bodyPartID.push(id);
-            let highlight = new Konva.Circle({
-                radius: 2,
-                fill: 'green',
-                stroke: 'green',
-                strokeWidth: 3
-            });
+        // get id of the body part
+        this.bodyPartID.push(id);
+        let highlight = new Konva.Circle({
+            radius: 2,
+            fill: 'green',
+            stroke: 'green',
+            strokeWidth: 3
+        });
 
-            // set position
-            highlight.absolutePosition({
-                x: Math.floor(bodyPart.x * this.WIDTH),
-                y: Math.floor(bodyPart.y * this.HEIGHT)
-            });
+        // set position
+        highlight.absolutePosition({
+            x: Math.floor(bodyPart.x * this.WIDTH),
+            y: Math.floor(bodyPart.y * this.HEIGHT)
+        });
 
-            // show on stage
-            this.stage.layer.add(highlight);
-            // record
-            this.bodyPartHighlights.push(highlight);
-        }
+        // show on stage
+        this.stage.layer.add(highlight);
+        // record
+        this.bodyPartHighlights.push(highlight);
+
+
+        // create new animation
+        this.currentAnimation = new Animation(id, this.stage);
     }
 
 
@@ -338,11 +333,11 @@ export default class Canvas {
 
 
     update(bodyParts, contourPoints) {
-        this.animations.map(animation => {
-            let x = bodyParts[animation.bodyPartID].x * this.WIDTH;
-            let y = bodyParts[animation.bodyPartID].y * this.HEIGHT;
-            animation.update(x, y);
-        });
+        // this.animations.map(animation => {
+        //     let x = bodyParts[animation.bodyPartID].x * this.WIDTH;
+        //     let y = bodyParts[animation.bodyPartID].y * this.HEIGHT;
+        //     animation.update(x, y);
+        // });
 
         if (contourPoints.length > 0) {
             this.contours.map(contour => {

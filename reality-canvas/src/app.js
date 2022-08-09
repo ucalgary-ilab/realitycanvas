@@ -35,8 +35,6 @@ document.getElementById('select_button')?.addEventListener('click', select)
 const draw = () => {
   opencvPlane.style.zIndex = "0";
   konvaPlane.style.zIndex = "1";
-
-  app.canvas.new_animation();
 }
 document.getElementById('draw_button')?.addEventListener('click', draw)
 
@@ -56,7 +54,8 @@ const save = () => {
 document.getElementById('save_button')?.addEventListener('click', save)
 
 const contour = () => {
-  contourOn = !contourOn;
+  if (!contourOn)
+    contourOn = true;
   app.canvas.new_contour();
   // app.canvas.bind_drawing();
   // app.canvas.mode = "contouring";
@@ -64,6 +63,8 @@ const contour = () => {
 document.getElementById('contour_button')?.addEventListener('click', contour)
 
 const emit = () => {
+  app.canvas.add_frame(bodyParts);
+  app.canvas.finish_animation();
   app.canvas.mode = "emit";
 }
 
@@ -120,7 +121,6 @@ cvOutput.addEventListener("click", (e) => {
   }
 
   if (theClosetPart) {
-    //
     app.canvas.select(theClosetPart, bodyParts[theClosetPart]);
     draw();
   }
