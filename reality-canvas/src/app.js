@@ -70,10 +70,12 @@ const emit = () => {
 
 document.getElementById('emit_button')?.addEventListener('click', emit)
 
-const motion = () => {
-  app.canvas.new_motion("trailing");
+const motion = (e) => {
+  window.event = e;
+  console.log(e.target.innerHTML);
+  app.canvas.new_motion(e.target.innerHTML.toLowerCase());
 }
-// document.getElementById('motion_button')?.addEventListener('click', motion)
+document.getElementById('motion_button')?.addEventListener('click', motion)
 
 
 const action = () => {
