@@ -4,6 +4,7 @@ import Konva from 'konva'
 import Emitter from "./emitter.js"
 import Animation from "./animation.js"
 import Contour from "./contour.js"
+import Motion from "./motion.js"
 
 export default class Canvas {
     isPaint = false
@@ -98,7 +99,6 @@ export default class Canvas {
                     this.emit_setup();
                     break;
                 case "motion":
-                    this.add_motion();
                     break;
                 default:
                     // save the line into current shape
@@ -226,6 +226,10 @@ export default class Canvas {
     //     }
     // }
 
+    new_motion(type) {
+        this.updateList.push(new Motion(this.bodyPartID[this.bodyPartID.length - 1], type, this.stage));
+    }
+
     // trailing_setup() {
     //     let trailingLine = new Konva.Line({
     //         stroke: "#ADD8E6",
@@ -331,16 +335,19 @@ export default class Canvas {
     update(bodyParts, contourPoints) {
         this.updateList.map(obj => {
             // update animation
-            if (obj instanceof Animation) {
-                let x = bodyParts[obj.bodyPartID].x * this.WIDTH;
-                let y = bodyParts[obj.bodyPartID].y * this.HEIGHT;
-                obj.update(x, y);
-            }// update emitter  
-            else if (obj instanceof Emitter) {
-                let x = bodyParts[obj.bodyPartID].x * this.WIDTH;
-                let y = bodyParts[obj.bodyPartID].y * this.HEIGHT;
-                obj.update(x, y);
-            }
+            let x = bodyParts[obj.bodyPartID].x * this.WIDTH;
+            let y = bodyParts[obj.bodyPartID].y * this.HEIGHT;
+            obj.update(x, y);
+            // if (obj instanceof Animation) {
+            //     obj.update(x, y);
+            // }// update emitter  
+            // else if (obj instanceof Emitter) {
+
+            //     obj.update(x, y);
+            // }
+            // else if (obj instanceof Motion){
+            //     obj.update
+            // }
         })
 
         if (contourPoints.length > 0) {
