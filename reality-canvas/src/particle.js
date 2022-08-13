@@ -11,10 +11,10 @@ export default class Particle {
     position
     fpsCount = -1
 
-    constructor(animation, stage, color, position, type) {
+    constructor(animation, stage, color, position) {
         this.stage = stage;
         this.position = position;
-        this.type = type;
+
         // the first point of the drawing would match the position
         let offsetX = this.position.x - animation.frames[0][0].attrs.points[0];
         let offsetY = this.position.y - animation.frames[0][0].attrs.points[1];
