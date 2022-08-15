@@ -230,21 +230,8 @@ export default class Canvas {
         this.updateList.push(new Motion(this.bodyPartID[this.bodyPartID.length - 1], type, this.stage));
     }
 
-    // trailing_setup() {
-    //     let trailingLine = new Konva.Line({
-    //         stroke: "#ADD8E6",
-    //         strokeWidth: 10,
-    //         globalCompositeOperation: 'source-over',
-    //         // round cap for smoother lines
-    //         lineCap: 'round',
-    //         // add point twice, so we have some drawings even on a simple click
-    //         points: [],
-    //     });
-    //     this.stage.layer.add(trailingLine);
-    //     this.updateList.push(trailingLine);
-    // }
-
     emit_setup_OneTime() {
+
         let newEmitter = new Emitter(
             this.bodyPartID[this.bodyPartID.length - 1],
             this.emitLine, // give the emitter line
@@ -252,8 +239,8 @@ export default class Canvas {
             this.stage,
             this.color,
             {
-                x: this.bodyPartHighlights[this.bodyPartHighlights.length - 1].absolutePosition().x - this.emitLine.attrs.points[0],
-                y: this.bodyPartHighlights[this.bodyPartHighlights.length - 1].absolutePosition().y - this.emitLine.attrs.points[1]
+                x: 0,
+                y: 0
             },
             "One Time"
         );

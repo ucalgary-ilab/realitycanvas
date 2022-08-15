@@ -1,4 +1,5 @@
 import Particle from "./particle.js"
+import _ from "lodash"
 export default class Emitter {
     emitLine
     particleAnimation
@@ -35,7 +36,8 @@ export default class Emitter {
                     {
                         x: this.emitLine.attrs.points[randomPoint * 2],
                         y: this.emitLine.attrs.points[randomPoint * 2 + 1]
-                    }));
+                    }, "Respawn")
+                );
             }
         }
 
@@ -62,15 +64,15 @@ export default class Emitter {
             })
         }
         else {
+            _.remove(this.particles, function (particle) {
+                return particle.fpsCount == particle.frames.length;
+            });
+
             this.particles.map(particle => {
-                if (particle.fpsCount == particle.frames.length - 1) {
-                    this.particles.remove(particle);
-                }
-                else {
-                    particle.update(0, 0);
-                }
+                particle.update(0, 0);
             })
-            if (this.particles.length < 5) {
+
+            if (this.particles.length < 10) {
                 this.particles.push(new Particle(
                     this.particleAnimation,
                     this.stage,
@@ -78,7 +80,8 @@ export default class Emitter {
                     {
                         x: x,
                         y: y
-                    }));
+                    }, "One Time")
+                );
             }
         }
     }

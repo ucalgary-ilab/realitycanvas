@@ -52,10 +52,18 @@ const save = () => {
 document.getElementById('save_button')?.addEventListener('click', save)
 
 
-const emit = () => {
-  app.canvas.add_frame(bodyParts);
-  app.canvas.finish_animation();
-  app.canvas.mode = "emit";
+const emit = (e) => {
+  if (e.target.innerHTML == "Respawn") {
+    app.canvas.add_frame(bodyParts);
+    app.canvas.finish_animation();
+    app.canvas.mode = "emit";
+  }
+  else {
+    app.canvas.add_frame(bodyParts);
+    app.canvas.finish_animation();
+    app.canvas.emit_setup_OneTime();
+  }
+
 }
 
 document.getElementById('emit_button')?.addEventListener('click', emit)
@@ -80,7 +88,7 @@ const contour = (e) => {
   else if (e.target.innerHTML === 'Line Around') {
     app.canvas.new_contour('line around');
   }
-  else if (e.target.innerHTML === "Bottom Up"){
+  else if (e.target.innerHTML === "Bottom Up") {
     app.canvas.new_contour('bottom up');
   }
 }
