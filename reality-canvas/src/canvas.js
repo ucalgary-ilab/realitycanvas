@@ -230,28 +230,20 @@ export default class Canvas {
         this.updateList.push(new Motion(this.bodyPartID[this.bodyPartID.length - 1], type, this.stage));
     }
 
-    emit_setup_OneTime() {
+    // trailing_setup() {
+    //     let trailingLine = new Konva.Line({
+    //         stroke: "#ADD8E6",
+    //         strokeWidth: 10,
+    //         globalCompositeOperation: 'source-over',
+    //         // round cap for smoother lines
+    //         lineCap: 'round',
+    //         // add point twice, so we have some drawings even on a simple click
+    //         points: [],
+    //     });
+    //     this.stage.layer.add(trailingLine);
+    //     this.updateList.push(trailingLine);
+    // }
 
-        let newEmitter = new Emitter(
-            this.bodyPartID[this.bodyPartID.length - 1],
-            this.emitLine, // give the emitter line
-            this.currentAnimation, // the particle animation prototype
-            this.stage,
-            this.color,
-            {
-                x: 0,
-                y: 0
-            },
-            "One Time"
-        );
-        // this.emitters.push(newEmitter);
-        this.updateList.push(newEmitter);
-
-        this.currentAnimation.hide_all_frame();
-        // empty the currentFrame
-        this.currentAnimation = null;
-
-    }
     // initialize the particles with the current shape
     // this function should only be called once when the emit line is created
     emit_setup() {
@@ -271,9 +263,7 @@ export default class Canvas {
             {
                 x: this.bodyPartHighlights[this.bodyPartHighlights.length - 1].absolutePosition().x - this.emitLine.attrs.points[0],
                 y: this.bodyPartHighlights[this.bodyPartHighlights.length - 1].absolutePosition().y - this.emitLine.attrs.points[1]
-            },
-            "Respawn"
-        );
+            });
 
 
         // this.emitters.push(newEmitter);
