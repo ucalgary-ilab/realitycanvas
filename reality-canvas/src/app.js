@@ -66,9 +66,9 @@ const motion = (e) => {
 document.getElementById('motion_button')?.addEventListener('click', motion)
 
 
-const action = () => {
-  app.canvas.action_setup();
-  // app.canvas.mode = "trailing";
+const action = (e) => {
+  app.canvas.add_frame(bodyParts);
+  app.canvas.action_setup(e.target.innerHTML);
 }
 document.getElementById('action_button')?.addEventListener('click', action)
 
@@ -80,7 +80,7 @@ const contour = (e) => {
   else if (e.target.innerHTML === 'Line Around') {
     app.canvas.new_contour('line around');
   }
-  else if (e.target.innerHTML === "Bottom Up"){
+  else if (e.target.innerHTML === "Bottom Up") {
     app.canvas.new_contour('bottom up');
   }
 }

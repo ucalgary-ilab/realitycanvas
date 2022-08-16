@@ -44,6 +44,8 @@ export default class Animation {
         })
     }
 
+    actionUpdate(x,y) {}
+
     update(x, y) {
         if (!this.finished) {
             return;
@@ -74,6 +76,7 @@ export default class Animation {
         else {
             this.fpsCount++;
         }
+        // console.log(this.frames[this.fpsCount]);
         this.show_frame(this.frames[this.fpsCount]);
     }
 

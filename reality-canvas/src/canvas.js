@@ -5,6 +5,7 @@ import Emitter from "./emitter.js"
 import Animation from "./animation.js"
 import Contour from "./contour.js"
 import Motion from "./motion.js"
+import Action from "./action.js"
 
 export default class Canvas {
     isPaint = false
@@ -172,59 +173,12 @@ export default class Canvas {
         this.contours.push(new Contour(this.stage, type));
     }
 
-    // action_setup() {
-    //     this.bind_drawing();
-    //     this.hiddenObject = this.updateList.length - 1;
-    //     this.updateList[this.hiddenObject].map(line => {
-    //         line.hide();
-    //     })
-    // }
+    action_setup(type) {
+        this.currentAnimation.finish();
+        this.updateList.push(new Action(type, this.currentAnimation));
+        this.currentAnimation = null;
+    }
 
-    // update_hidden(bodyParts) {
-    //     if (this.hiddenObject < 0) {
-    //         return;
-    //     }
-
-    //     let A = { x: bodyParts[11].x * this.WIDTH, y: bodyParts[11].y * this.HEIGHT };
-    //     let B = { x: bodyParts[23].x * this.WIDTH, y: bodyParts[23].y * this.HEIGHT };
-    //     let C = { x: bodyParts[25].x * this.WIDTH, y: bodyParts[25].y * this.HEIGHT };
-    //     let AB = Math.sqrt(Math.pow(B.x - A.x, 2) + Math.pow(B.y - A.y, 2));
-    //     let BC = Math.sqrt(Math.pow(B.x - C.x, 2) + Math.pow(B.y - C.y, 2));
-    //     let AC = Math.sqrt(Math.pow(C.x - A.x, 2) + Math.pow(C.y - A.y, 2));
-    //     let angle = Math.acos((BC * BC + AB * AB - AC * AC) / (2 * BC * AB)) * 180 / Math.PI;
-
-
-    //     if (angle <= 99 && this.FPScount == 0) {
-    //         console.log("down");
-    //         this.down = true;
-    //     }
-
-    //     if (this.down && angle >= 100 && this.FPScount == 0) {
-    //         console.log("up");
-    //         this.up = true;
-    //     }
-
-    //     if (this.up && this.FPScount == 0) {
-    //         this.FPScount = 20;
-    //         this.updateList[this.hiddenObject].map(line => {
-    //             console.log("line added", line.attrs.points);
-    //             line.show();
-    //         })
-    //         console.log("one situp");
-    //         this.up = false;
-    //         this.down = false;
-    //     }
-
-    //     if (this.FPScount > 0) {
-    //         this.FPScount--;
-    //     }
-
-    //     if (this.FPScount == 0) {
-    //         this.updateList[this.hiddenObject].map(line => {
-    //             line.hide()
-    //         })
-    //     }
-    // }
 
     new_motion(type) {
         this.updateList.push(new Motion(this.bodyPartID[this.bodyPartID.length - 1], type, this.stage));
@@ -335,19 +289,18 @@ export default class Canvas {
     update(bodyParts, contourPoints) {
         this.updateList.map(obj => {
             // update animation
-            let x = bodyParts[obj.bodyPartID].x * this.WIDTH;
-            let y = bodyParts[obj.bodyPartID].y * this.HEIGHT;
-            obj.update(x, y);
-            // if (obj instanceof Animation) {
-            //     obj.update(x, y);
-            // }// update emitter  
-            // else if (obj instanceof Emitter) {
 
-            //     obj.update(x, y);
-            // }
-            // else if (obj instanceof Motion){
-            //     obj.update
-            // }
+
+            if (obj instanceof Animation || obj instanceof Emitter || obj instanceof Motion) {
+                let x = bodyParts[obj.bodyPartID].x * this.WIDTH;
+                let y = bodyParts[obj.bodyPartID].y * this.HEIGHT;
+                obj.update(x, y);
+            }
+            else if (obj instanceof Action) {
+                let x = bodyParts[obj.animation.bodyPartID].x * this.WIDTH;
+                let y = bodyParts[obj.animation.bodyPartID].y * this.HEIGHT;
+                obj.update(x, y, bodyParts);
+            }
         })
 
         if (contourPoints.length > 0) {
