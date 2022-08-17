@@ -94,6 +94,9 @@ export default class Action {
 
             if (this.actionComplete) {
                 console.log("Triggered");
+
+                window.contourThickness = -1;
+
                 this.triggered = true;
 
                 this.actionInitial = false;
@@ -128,8 +131,6 @@ export default class Action {
             }
             if (this.actionComplete) {
                 console.log("Triggered");
-
-                window.contourThickness = -1;
 
                 this.triggered = true;
 
