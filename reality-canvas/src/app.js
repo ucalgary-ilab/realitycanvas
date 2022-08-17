@@ -102,6 +102,9 @@ const MIN_VISIBILITY = 0.8;
 
 let bodyParts;
 
+window.contourThickness = 5;
+let fpsCountDown = 5;
+
 cvOutput.addEventListener("click", (e) => {
   let theClosetPart;
 
@@ -151,7 +154,9 @@ function onResults(results) {
   );
 
 
+  // get
   let contourData = canvasCtx.getImageData(0, 0, canvasElement.width, canvasElement.height);
+
   let src = cv.matFromImageData(contourData);
   let dst = new cv.Mat(canvasElement.height, canvasElement.width, cv.CV_8UC4);
   cap.read(dst);
@@ -184,10 +189,21 @@ function onResults(results) {
     toDraw.push_back(maxCnt);
     let color = new cv.Scalar(Math.round(Math.random() * 255), Math.round(Math.random() * 255),
       Math.round(Math.random() * 255));
+
+
     for (let i = 0; i < toDraw.size(); ++i) {
-      cv.drawContours(dst, toDraw, i, color, 5, cv.LINE_8, new cv.Mat(), 0);
+      cv.drawContours(dst, toDraw, i, color, window.contourThickness, cv.LINE_8, new cv.Mat(), 0);
+      if (window.contourThickness < 0) {
+        if (fpsCountDown > 0) {
+          fpsCountDown -= 1;
+        }
+        else {
+          fpsCountDown = 5;
+          window.contourThickness = 5;
+        }
+      }
     }
-    // color.delete();
+
     toDraw.delete();
   }
 

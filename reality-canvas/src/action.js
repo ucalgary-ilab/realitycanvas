@@ -42,9 +42,7 @@ export default class Action {
             if (!this.inStage(C)) {
                 return;
             }
-            // console.log(angle);
 
-            // console.log(A, B, C, angle);
             if (angle < 90) {
                 // console.log("initialized", angle);
                 this.actionInitial = true;
@@ -85,15 +83,12 @@ export default class Action {
             if (!this.inStage(C)) {
                 return;
             }
-            // console.log(angle);
 
-            // console.log(A, B, C, angle);
+
             if (angle < 120) {
-                // console.log("initialized", angle);
                 this.actionInitial = true;
             }
             else if (this.actionInitial && angle >= 150) {
-                // console.log("completed", angle);
                 this.actionComplete = true;
             }
 
@@ -124,7 +119,6 @@ export default class Action {
             let distance = Math.sqrt(Math.pow(leftHand.x - rightHand.x, 2) + Math.pow(leftHand.y - rightHand.y, 2));
             let fistSize = Math.sqrt(Math.pow(leftHand.x - leftHandPinky.x, 2) + Math.pow(leftHand.y - leftHandPinky.y, 2));
 
-            console.log(distance, fistSize);
             if (distance > 10 * fistSize) {
                 this.actionInitial = true;
             }
@@ -134,6 +128,9 @@ export default class Action {
             }
             if (this.actionComplete) {
                 console.log("Triggered");
+
+                window.contourThickness = -1;
+
                 this.triggered = true;
 
                 this.actionInitial = false;
