@@ -14,6 +14,10 @@ export default class Action {
         this.animation = animation;
     }
 
+    inStage(pos) {
+        return pos.x >= 0 && pos.x < 1280 && pos.y >= 0 && pos.y < 720;
+    }
+
 
     detectAction(bodyParts) {
         if (this.type == "Wave") { // left 
@@ -29,13 +33,13 @@ export default class Action {
             let AC = Math.sqrt(Math.pow(C.x - A.x, 2) + Math.pow(C.y - A.y, 2));
             let angle = Math.acos((BC * BC + AB * AB - AC * AC) / (2 * BC * AB)) * 180 / Math.PI;
 
-            if (A.x < 0 || A.y < 0) {
+            if (!this.inStage(A)) {
                 return;
             }
-            if (B.x < 0 || B.y < 0) {
+            if (!this.inStage(B)) {
                 return;
             }
-            if (C.x < 0 || B.y < 0) {
+            if (!this.inStage(C)) {
                 return;
             }
             // console.log(angle);
@@ -72,13 +76,13 @@ export default class Action {
             let AC = Math.sqrt(Math.pow(C.x - A.x, 2) + Math.pow(C.y - A.y, 2));
             let angle = Math.acos((BC * BC + AB * AB - AC * AC) / (2 * BC * AB)) * 180 / Math.PI;
 
-            if (A.x < 0 || A.y < 0) {
+            if (!this.inStage(A)) {
                 return;
             }
-            if (B.x < 0 || B.y < 0) {
+            if (!this.inStage(B)) {
                 return;
             }
-            if (C.x < 0 || B.y < 0) {
+            if (!this.inStage(C)) {
                 return;
             }
             // console.log(angle);
@@ -93,6 +97,41 @@ export default class Action {
                 this.actionComplete = true;
             }
 
+            if (this.actionComplete) {
+                console.log("Triggered");
+                this.triggered = true;
+
+                this.actionInitial = false;
+                this.actionComplete = false;
+            }
+        }
+
+        if (this.type == "Fist Pump") {
+            if (this.triggered) {
+                return;
+            }
+
+
+
+            let leftHand = { x: bodyParts[19].x * 1280, y: bodyParts[19].y * 720 };
+            let rightHand = { x: bodyParts[20].x * 1280, y: bodyParts[20].y * 720 };
+            let leftHandPinky = { x: bodyParts[17].x * 1280, y: bodyParts[17].y * 720 }
+
+            if (!this.inStage(leftHand) || !this.inStage(rightHand) || !this.inStage(leftHandPinky)) {
+                return;
+            }
+
+            let distance = Math.sqrt(Math.pow(leftHand.x - rightHand.x, 2) + Math.pow(leftHand.y - rightHand.y, 2));
+            let fistSize = Math.sqrt(Math.pow(leftHand.x - leftHandPinky.x, 2) + Math.pow(leftHand.y - leftHandPinky.y, 2));
+
+            console.log(distance, fistSize);
+            if (distance > 10 * fistSize) {
+                this.actionInitial = true;
+            }
+            else if (this.actionInitial && distance < 5 * fistSize) {
+                // console.log("completed", angle);
+                this.actionComplete = true;
+            }
             if (this.actionComplete) {
                 console.log("Triggered");
                 this.triggered = true;
