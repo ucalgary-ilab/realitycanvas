@@ -32,32 +32,44 @@
   <div id='konva'>
   </div>
 
-  <div id="toolbar">
+  <div id="toolbar" class="row bg-secondary">
 
-
-    <div id='buttons' class="d-flex flex-row">
-      <button id="select_button" class="btn btn-secondary">
+    <div id='left_buttons' class="col-4 d-flex flex-row">
+      <button id="select_button" class="btn btn-outline-dark">
         Select
       </button>
 
-      <button id="draw_button" class="btn btn-secondary">
+      <button id="draw_button" class="btn btn-outline-dark">
         Draw
       </button>
 
-      <button id="frame_button" class="btn btn-secondary">
+      <button id="frame_button" class="btn btn-outline-dark">
         Frame
       </button>
+    </div>
 
-      <button id="save_button" class="btn btn-secondary">
+    <div class="col-4 d-flex flex-row">
+      <div>
+        color
+      </div>
+
+      <div class="d-flex">
+        <label for="customRange1" class="form-label">Thickness</label>
+        <input type="range" class="form-range" id="customRange1">
+      </div>
+    </div>
+
+    <div id="right_buttons" class="col-4 d-flex flex-row">
+      <button id="save_button" class="btn btn-outline-dark">
         Save
       </button>
 
-      <button id="emit_button" class="btn btn-secondary">
+      <button id="emit_button" class="btn btn-outline-dark">
         Emit
       </button>
 
       <div class="dropdown">
-        <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <button class="btn btn-outline-dark dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
           Motion
         </button>
         <ul id="motion_button" class="dropdown-menu">
@@ -66,7 +78,7 @@
       </div>
 
       <div class="dropdown">
-        <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <button class="btn btn-outline-dark dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
           Contour
         </button>
         <ul id="contour_button" class="dropdown-menu">
@@ -76,8 +88,8 @@
         </ul>
       </div>
 
-      <div class="dropdown">
-        <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+      <div class="dropdown bg-secondary">
+        <button class="btn btn-outline-dark dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
           Action
         </button>
         <ul id="action_button" class="dropdown-menu">
@@ -88,7 +100,6 @@
           <li class="dropdown-item">Bottom Up</li> -->
         </ul>
       </div>
-
     </div>
   </div>
 
