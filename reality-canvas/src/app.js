@@ -7,6 +7,9 @@ const HEIGHT = 720;
 let contourOn = false;
 
 
+
+
+
 class App {
   canvas = new Canvas(WIDTH, HEIGHT);
 
@@ -21,6 +24,26 @@ const app = new App();
 // let mediaPlane = document.getElementById('media');
 let konvaPlane = document.getElementById('konva');
 let opencvPlane = document.getElementById('opencv');
+
+
+// color picker
+
+
+
+let colorPicker = document.getElementById('color-picker');
+colorPicker.addEventListener('change', e => {
+  console.log(e.target.value);
+});
+
+
+let thickness = document.getElementById('thickness');
+thickness.addEventListener('change', e => {
+  console.log(e.target.value);
+})
+
+
+
+
 
 // hook buttons and handler
 const select = () => {
