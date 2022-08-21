@@ -48,7 +48,7 @@ export default class Canvas {
 
     contourPoints = []
 
-    color = '#FFFFFF'
+    // color = '#FFFFFF'
 
 
     constructor(width, height) {
@@ -61,25 +61,15 @@ export default class Canvas {
             // get the current pointed position on the stage
             let pos = this.stage.stage.getPointerPosition();
 
-            let color
-            switch (this.mode) {
-                case 'emit':
-                    color = '#3cb043';    // emitting = green
-                    break;
-                case 'motion':
-                    color = '#29446f';    // motion = blue
-                    break;
-                default:
-                    color = this.color;    // drawing = red
-            }
+
 
             // if the pos is not null
             if (pos) {
                 //  create new konva line, store it in the this.currentLine
                 this.lastPosition = pos;
                 this.currentLine = new Konva.Line({
-                    stroke: color,
-                    strokeWidth: 8,
+                    stroke: window.color,
+                    strokeWidth: window.thickness,
                     globalCompositeOperation: 'source-over',
                     // round cap for smoother lines
                     lineCap: 'round',
@@ -213,7 +203,6 @@ export default class Canvas {
             this.emitLine, // give the emitter line
             this.currentAnimation, // the particle animation prototype
             this.stage,
-            this.color,
             {
                 x: this.bodyPartHighlights[this.bodyPartHighlights.length - 1].absolutePosition().x - this.emitLine.attrs.points[0],
                 y: this.bodyPartHighlights[this.bodyPartHighlights.length - 1].absolutePosition().y - this.emitLine.attrs.points[1]
@@ -310,54 +299,6 @@ export default class Canvas {
         }
     }
 
-
-
-    // update(bodyParts) {
-
-    //     this.update_hidden(bodyParts);
-
-    //     for (let i = 0; i < this.updateList.length; i++) {
-    //         if (this.updateList[i] instanceof Array) {
-    //             let bodyPart = bodyParts[this.bodyPartID[i]];
-
-    //             let offsetX = Math.floor((bodyPart.x * this.WIDTH) - this.firstPointOffset[i].x - this.updateList[i][0].attrs.points[0]);
-    //             let offsetY = Math.floor((bodyPart.y * this.HEIGHT) - this.firstPointOffset[i].y - this.updateList[i][0].attrs.points[1]);
-
-    //             this.updateList[i].map(line => {
-    //                 let newPoints = [];
-    //                 for (let i = 0; i < line.attrs.points.length; i += 2) {
-    //                     newPoints.push(line.attrs.points[i] + offsetX);
-    //                     newPoints.push(line.attrs.points[i + 1] + offsetY);
-    //                 }
-    //                 // update the points
-    //                 line.points(newPoints);
-    //             });
-    //         }
-    //         else if (this.updateList[i] instanceof Emitter) {
-    //             this.updateList[i].update(bodyParts);
-    //         }
-    //         else {
-    //             let bodyPart = bodyParts[this.bodyPartID[i]];
-    //             let newX = Math.floor(bodyPart.x * this.WIDTH);
-    //             let newY = Math.floor(bodyPart.y * this.HEIGHT);
-
-    //             let newPoints = []
-
-    //             for (let j = 0; j < this.updateList[i].attrs.points.length; j++) {
-    //                 newPoints.push(this.updateList[i].attrs.points[j]);
-    //             }
-    //             newPoints.push(newX);
-    //             newPoints.push(newY);
-
-    //             if (newPoints.length > 35) {
-    //                 newPoints = newPoints.slice(2);
-    //             }
-
-    //             this.updateList[i].points(newPoints);
-    //             console.log("points", this.updateList[i].attrs.points)
-    //         }
-    //     }
-    // }
 }
 
 

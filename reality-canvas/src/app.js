@@ -7,7 +7,8 @@ const HEIGHT = 720;
 let contourOn = false;
 
 
-
+// window.color
+// window.color = 
 
 
 class App {
@@ -26,23 +27,26 @@ let konvaPlane = document.getElementById('konva');
 let opencvPlane = document.getElementById('opencv');
 
 
+
 // color picker
-
-
-
 let colorPicker = document.getElementById('color-picker');
+colorPicker.value = '#FFFFFF'
+window.color = '#FFFFFF';
 colorPicker.addEventListener('change', e => {
-  console.log(e.target.value);
+  // console.log(e.target.value);
+  window.color = e.target.value;
 });
 
-
+// thickness
+window.thickness = 5
 let thickness = document.getElementById('thickness');
+thickness.value = '40';
 thickness.addEventListener('change', e => {
-  console.log(e.target.value);
+  // console.log(e.target.value);
+  let val = e.target.value / 10;
+  val += 1;
+  window.thickness = val;
 })
-
-
-
 
 
 // hook buttons and handler

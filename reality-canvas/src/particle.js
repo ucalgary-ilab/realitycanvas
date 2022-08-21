@@ -11,7 +11,7 @@ export default class Particle {
     position
     fpsCount = -1
 
-    constructor(animation, stage, color, position) {
+    constructor(animation, stage, position) {
         this.stage = stage;
         this.position = position;
 
@@ -29,8 +29,8 @@ export default class Particle {
                 }
 
                 let copiedLine = new Konva.Line({
-                    stroke: color,
-                    strokeWidth: 4,
+                    stroke: window.color,
+                    strokeWidth: window.thickness,
                     globalCompositeOperation: 'source-over',
                     // round cap for smoother lines
                     lineCap: 'round',

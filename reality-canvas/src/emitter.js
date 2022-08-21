@@ -7,16 +7,15 @@ export default class Emitter {
     particles = []
     bodyPartID
 
-    color
+    
     xspeed = 0
     yspeed = 1
 
-    constructor(id, line, animation, stage, color, offset) {
+    constructor(id, line, animation, stage, offset) {
         this.bodyPartID = id;
 
         this.emitLine = line;
         this.stage = stage;
-        this.color = color;
         this.particleAnimation = animation;
         this.firstPointOffset = offset;
 
@@ -29,7 +28,7 @@ export default class Emitter {
             this.particles.push(new Particle(
                 this.particleAnimation,
                 this.stage,
-                this.color,
+                window.color,
                 {
                     x: this.emitLine.attrs.points[randomPoint * 2],
                     y: this.emitLine.attrs.points[randomPoint * 2 + 1]

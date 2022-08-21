@@ -10,8 +10,8 @@ export default class Motion {
 
         if (this.type === "trailing") {
             this.trailing = new Konva.Line({
-                stroke: "#ADD8E6",
-                strokeWidth: 10,
+                stroke: window.color,
+                strokeWidth: window.thickness,
                 globalCompositeOperation: 'source-over',
                 // round cap for smoother lines
                 lineCap: 'round',

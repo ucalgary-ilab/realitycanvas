@@ -7,7 +7,7 @@ export default class Contour {
     constructor(stage, type) {
         this.contourLine = new Konva.Line({
             stroke: 'white',
-            strokeWidth: 8,
+            strokeWidth: window.thickness,
             globalCompositeOperation: 'source-over',
             // round cap for smoother lines
             lineCap: 'round',
