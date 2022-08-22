@@ -56,7 +56,7 @@ export default class Contour {
             this.contourLine.points(newPoints);
         }
         else if (this.type == "bottom up") {
-            if (this.progress == 100) {
+            if (this.progress >= 100) {
                 this.progress = 0;
                 return;
             }
@@ -78,7 +78,7 @@ export default class Contour {
                 }
             }
             this.contourLine.points(newPoints);
-            this.progress += 1;
+            this.progress += 3;
         }
 
     }
