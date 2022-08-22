@@ -7,7 +7,7 @@ export default class Emitter {
     particles = []
     bodyPartID
 
-    
+
     xspeed = 0
     yspeed = 1
 
@@ -28,7 +28,6 @@ export default class Emitter {
             this.particles.push(new Particle(
                 this.particleAnimation,
                 this.stage,
-                window.color,
                 {
                     x: this.emitLine.attrs.points[randomPoint * 2],
                     y: this.emitLine.attrs.points[randomPoint * 2 + 1]
