@@ -59,6 +59,9 @@ body {
     left: 0px;
 } */
 
+button {
+    width: 100px !important;
+}
 
 canvas {
     background: transparent;

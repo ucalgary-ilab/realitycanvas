@@ -75,6 +75,10 @@ export default class Canvas {
                     lineCap: 'round',
                     // add point twice, so we have some drawings even on a simple click
                     points: [pos.x, pos.y],
+                    shadowColor: window.color,
+                    shadowBlur: 1,
+                    shadowOffset: { x: 0.2, y: 0.2 },
+                    shadowOpacity: 1
                 });
                 this.stage.layer.add(this.currentLine);
             }
