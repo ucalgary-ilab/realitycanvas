@@ -29,7 +29,10 @@ Attempt 1:
         2. app.js and canvas.js should be refactored to support animation
         3. the particle should contains animation
 
-# 2022-08-08
 
-Canvas.js: 
-    make 
+# 2022-08-23
+
+1. Copy and paste everything, just swap opencv color tracking and mediapipe.
+2. Object Tracking integration:
+    1. add a field in Canvas.js, => that is, we only tracking one object 
+    2. the object 
