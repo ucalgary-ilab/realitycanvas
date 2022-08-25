@@ -112,7 +112,7 @@ document.getElementById('contour_button')?.addEventListener('click', contour)
 
 
 
-
+window.app = app
 
 // end of buttons' registration
 const inputVideo = document.getElementById('input_video');
@@ -124,6 +124,9 @@ const cvOutput = document.getElementById("canvasOutput");
 // get canvas output, opencv would draw on this element
 let output = document.getElementById("canvasOutput");
 
+// we are only tracking one element, faking the object as a body
+let bodyParts = [{ x: -1, y: -1, id: 0, visibility:0.9 }];
+let newSelect = false;
 
 let src;
 let dst;
@@ -162,11 +165,14 @@ cvOutput.addEventListener("click", (e) => {
     color_low.push(255);
     color_high.push(255);
 
-    console.log(color, color_low, color_high);
 
 
     low = new cv.Mat(src.rows, src.cols, src.type(), color_low);
     high = new cv.Mat(src.rows, src.cols, src.type(), color_high);
+
+    if (!newSelect) {
+        newSelect = true;
+    }
 });
 
 
@@ -222,35 +228,44 @@ navigator.mediaDevices
 
                     // if there is a contour exist in the frame, draw
                     if (maxCnt && maxCnt.data32S) {
-
-                        let toDraw = new cv.MatVector();
-                        toDraw.push_back(maxCnt);
-                        let color = new cv.Scalar(255, 0, 0);
-
-                        // let allPoints = maxCnt.data32S;
-                        // let sumX=0;
-                        // let sumY=0;
-                        // let numPoints = allPoints.length/2;
-                        // for(let i=0; i<allPoints.length; i+=2){
-                        //     sumX += allPoints[i];
-                        //     sumY += allPoints[i+1];
-                        // }
-
-                        // update offset for animation
-                        // app.canvas.setPosition(Math.floor(sumX/numPoints),Math.floor(sumY/numPoints));
-                        // app.canvas.setContourPoints(maxCnt.data32S);
-                        // draw the contours
-                        for (let i = 0; i < toDraw.size(); ++i) {
-                            cv.drawContours(src, toDraw, i, color, 5, cv.LINE_8, new cv.Mat(), 0);
+                        let allPoints = maxCnt.data32S;
+                        let sumX = 0;
+                        let sumY = 0;
+                        let numPoints = allPoints.length / 2;
+                        for (let i = 0; i < allPoints.length; i += 2) {
+                            sumX += allPoints[i];
+                            sumY += allPoints[i + 1];
                         }
+
+                        // update bodyParts
+                        bodyParts[0].x = Math.floor(sumX / numPoints)/1280;
+                        bodyParts[0].y = Math.floor(sumY / numPoints)/720;
+
+
+                        // add new select
+                        if(newSelect){
+                            newSelect = false;
+                            app.canvas.select(0, bodyParts[0]);
+                            draw();
+                        }
+                        app.canvas.update_highlights(bodyParts)
+                        app.canvas.update(bodyParts, maxCnt.data32S)
+                        // let toDraw = new cv.MatVector();
+                        // toDraw.push_back(maxCnt);
+                        // let color = new cv.Scalar(255, 0, 0);
+
+                        // for (let i = 0; i < toDraw.size(); ++i) {
+                        //     cv.drawContours(src, toDraw, i, color, 5, cv.LINE_8, new cv.Mat(), 0);
+                        // }
+                    }
+                    else {
+                        app.canvas.update_highlights(bodyParts)
+                        app.canvas.update(bodyParts, []);
                     }
 
                 }
 
-
                 cv.imshow("canvasOutput", src);
-
-                app.canvas.update([],[]);
                 // schedule the next one.
                 let delay = 1000 / FPS - (Date.now() - begin);
                 setTimeout(processVideo, delay);
