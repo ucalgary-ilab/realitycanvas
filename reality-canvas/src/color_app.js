@@ -125,7 +125,7 @@ const cvOutput = document.getElementById("canvasOutput");
 let output = document.getElementById("canvasOutput");
 
 // we are only tracking one element, faking the object as a body
-let bodyParts = [{ x: -1, y: -1, id: 0, visibility:0.9 }];
+let bodyParts = [{ x: -1, y: -1, id: 0, visibility: 0.9 }];
 let newSelect = false;
 
 let src;
@@ -178,7 +178,13 @@ cvOutput.addEventListener("click", (e) => {
 
 
 navigator.mediaDevices
-    .getUserMedia({ video: true, audio: false })
+    .getUserMedia({
+        video: {
+            facingMode: {
+                exact: 'environment'
+            }
+        }, audio: false,
+    })
     .then(async function (stream) {
         // get video stream
         inputVideo.srcObject = stream;
@@ -238,12 +244,12 @@ navigator.mediaDevices
                         }
 
                         // update bodyParts
-                        bodyParts[0].x = Math.floor(sumX / numPoints)/1280;
-                        bodyParts[0].y = Math.floor(sumY / numPoints)/720;
+                        bodyParts[0].x = Math.floor(sumX / numPoints) / 1280;
+                        bodyParts[0].y = Math.floor(sumY / numPoints) / 720;
 
 
                         // add new select
-                        if(newSelect){
+                        if (newSelect) {
                             newSelect = false;
                             app.canvas.select(0, bodyParts[0]);
                             draw();
