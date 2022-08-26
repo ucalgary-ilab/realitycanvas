@@ -270,7 +270,8 @@ const camera = new Camera(inputVideo, {
     await pose.send({ image: inputVideo });
   },
   width: WIDTH,
-  height: HEIGHT
+  height: HEIGHT,
+  facingMode:'environment'
 });
 
 camera.start();
