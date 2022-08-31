@@ -44,27 +44,45 @@ thickness.addEventListener('change', e => {
   window.thickness = val;
 })
 
+const selectButton = document.getElementById('select_button');
+const drawButton = document.getElementById('draw_button');
+const frameButton = document.getElementById('frame_button');
+const saveButton = document.getElementById('save_button');
+const emitButton = document.getElementById('emit_button');
+const motionButton = document.getElementById('motion_dropdown');
+const actionButton = document.getElementById('action_dropdown');
+const contourButton = document.getElementById('contour_button');
 
 // hook buttons and handler
 const select = () => {
   opencvPlane.style.zIndex = "1";
   konvaPlane.style.zIndex = "0";
+
+  selectButton.setAttribute('disabled', 'true');
+  drawButton.setAttribute('disabled', 'true');
+  frameButton.setAttribute('disabled', 'true');
+  saveButton.setAttribute('disabled', 'true');
+  emitButton.setAttribute('disabled', 'true');
+  motionButton.setAttribute('disabled', 'true');
+  actionButton.setAttribute('disabled', 'true');
 }
-document.getElementById('select_button')?.addEventListener('click', select)
+selectButton?.addEventListener('click', select)
 
 
 const draw = () => {
   opencvPlane.style.zIndex = "0";
   konvaPlane.style.zIndex = "1";
+
+
 }
-document.getElementById('draw_button')?.addEventListener('click', draw)
+drawButton?.addEventListener('click', draw)
 
 
 // this function should add a new frame 
 const frame = () => {
   app.canvas.add_frame(bodyParts);
 }
-document.getElementById('frame_button')?.addEventListener('click', frame)
+frameButton?.addEventListener('click', frame)
 
 
 // register button event handlers
@@ -72,7 +90,7 @@ const save = () => {
   app.canvas.add_frame(bodyParts);
   app.canvas.finish_animation("bind");
 }
-document.getElementById('save_button')?.addEventListener('click', save)
+saveButton?.addEventListener('click', save)
 
 
 const emit = () => {
@@ -81,7 +99,7 @@ const emit = () => {
   app.canvas.mode = "emit";
 }
 
-document.getElementById('emit_button')?.addEventListener('click', emit)
+emitButton?.addEventListener('click', emit)
 
 const motion = (e) => {
   app.canvas.new_motion(e.target.innerHTML.toLowerCase());
@@ -107,7 +125,7 @@ const contour = (e) => {
     app.canvas.new_contour('bottom up');
   }
 }
-document.getElementById('contour_button')?.addEventListener('click', contour)
+contourButton?.addEventListener('click', contour)
 
 
 
@@ -156,6 +174,8 @@ cvOutput.addEventListener("click", (e) => {
 
   if (theClosetPart) {
     app.canvas.select(theClosetPart, bodyParts[theClosetPart]);
+    drawButton.removeAttribute('disabled');
+    motionButton.removeAttribute('disabled');
     draw();
   }
 })
@@ -271,7 +291,7 @@ const camera = new Camera(inputVideo, {
   },
   width: WIDTH,
   height: HEIGHT,
-  facingMode:'environment'
+  facingMode: 'environment'
 });
 
 camera.start();
