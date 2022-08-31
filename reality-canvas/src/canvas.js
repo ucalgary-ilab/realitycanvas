@@ -112,6 +112,7 @@ export default class Canvas {
             }
         });
 
+
         // and core function - drawing
         this.stage.stage.on('mousemove touchmove', e => {
 
@@ -167,6 +168,34 @@ export default class Canvas {
             this.updateList.push(this.currentAnimation);
             // reset the currentAnimation
             this.currentAnimation = null;
+        }
+    }
+
+    undo() {
+        let line = this.currentFrame.pop();
+        if (line) {
+            line.destroy();
+            console.log(this.currentAnimation);
+            console.log(this.currentFrame);
+            if (this.currentAnimation.frames.length == 0 && this.currentFrame.length == 0) {
+                const selectButton = document.getElementById('select_button');
+                const drawButton = document.getElementById('draw_button');
+                const frameButton = document.getElementById('frame_button');
+                const saveButton = document.getElementById('save_button');
+                const emitButton = document.getElementById('emit_button');
+                const motionButton = document.getElementById('motion_dropdown');
+                const actionButton = document.getElementById('action_dropdown');
+                const contourButton = document.getElementById('contour_button');
+                selectButton.setAttribute('disabled', 'true');
+                drawButton.setAttribute('disabled', 'true');
+                frameButton.setAttribute('disabled', 'true');
+                saveButton.setAttribute('disabled', 'true');
+                emitButton.setAttribute('disabled', 'true');
+                motionButton.setAttribute('disabled', 'true');
+                actionButton.setAttribute('disabled', 'true');
+                drawButton.removeAttribute('disabled');
+                motionButton.removeAttribute('disabled');
+            }
         }
     }
 

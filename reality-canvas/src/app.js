@@ -146,7 +146,10 @@ const contour = (e) => {
 contourButton?.addEventListener('click', contour)
 
 
-
+const undo = () => {
+  app.canvas.undo();
+}
+document.getElementById('undo_button').addEventListener('click', undo)
 
 
 
