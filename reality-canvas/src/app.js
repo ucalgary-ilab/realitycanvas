@@ -108,12 +108,16 @@ const emit = () => {
   app.canvas.add_frame(bodyParts);
   app.canvas.finish_animation();
   app.canvas.mode = "emit";
-}
 
+  disableAll();
+}
 emitButton?.addEventListener('click', emit)
 
 const motion = (e) => {
   app.canvas.new_motion(e.target.innerHTML.toLowerCase());
+  disableAll();
+  selectButton.removeAttribute('disabled');
+  document.getElementById('motion_button').classList.remove("show");
 }
 document.getElementById('motion_button')?.addEventListener('click', motion)
 

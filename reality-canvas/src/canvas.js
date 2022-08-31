@@ -65,7 +65,7 @@ export default class Canvas {
             // if the pos is not null
             if (pos) {
 
-                
+
                 //  create new konva line, store it in the this.currentLine
                 this.lastPosition = pos;
                 this.currentLine = new Konva.Line({
@@ -82,11 +82,13 @@ export default class Canvas {
                     shadowOpacity: 1
                 });
                 this.stage.layer.add(this.currentLine);
-                document.getElementById('frame_button').removeAttribute('disabled');
-                document.getElementById('save_button').removeAttribute('disabled');
-                document.getElementById('emit_button').removeAttribute('disabled');
-                document.getElementById('action_dropdown').removeAttribute('disabled');
-                document.getElementById('motion_dropdown').removeAttribute('disabled');
+                document.getElementById('motion_dropdown').setAttribute('disabled', 'true');
+                if (this.mode != "emit") {
+                    document.getElementById('frame_button').removeAttribute('disabled');
+                    document.getElementById('save_button').removeAttribute('disabled');
+                    document.getElementById('emit_button').removeAttribute('disabled');
+                    document.getElementById('action_dropdown').removeAttribute('disabled');
+                }
             }
         });
 
@@ -226,6 +228,9 @@ export default class Canvas {
         // empty the currentFrame
         this.currentAnimation = null;
         this.mode = "drawing"
+
+
+        document.getElementById('select_button').removeAttribute('disabled');
     }
 
 
