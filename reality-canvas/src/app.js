@@ -53,11 +53,15 @@ const motionButton = document.getElementById('motion_dropdown');
 const actionButton = document.getElementById('action_dropdown');
 const contourButton = document.getElementById('contour_button');
 
-// hook buttons and handler
-const select = () => {
-  opencvPlane.style.zIndex = "1";
-  konvaPlane.style.zIndex = "0";
 
+drawButton.setAttribute('disabled', 'true');
+frameButton.setAttribute('disabled', 'true');
+saveButton.setAttribute('disabled', 'true');
+emitButton.setAttribute('disabled', 'true');
+motionButton.setAttribute('disabled', 'true');
+actionButton.setAttribute('disabled', 'true');
+
+const disableAll = () => {
   selectButton.setAttribute('disabled', 'true');
   drawButton.setAttribute('disabled', 'true');
   frameButton.setAttribute('disabled', 'true');
@@ -66,14 +70,19 @@ const select = () => {
   motionButton.setAttribute('disabled', 'true');
   actionButton.setAttribute('disabled', 'true');
 }
+// hook buttons and handler
+const select = () => {
+  opencvPlane.style.zIndex = "1";
+  konvaPlane.style.zIndex = "0";
+
+  disableAll();
+}
 selectButton?.addEventListener('click', select)
 
 
 const draw = () => {
   opencvPlane.style.zIndex = "0";
   konvaPlane.style.zIndex = "1";
-
-
 }
 drawButton?.addEventListener('click', draw)
 
@@ -89,6 +98,8 @@ frameButton?.addEventListener('click', frame)
 const save = () => {
   app.canvas.add_frame(bodyParts);
   app.canvas.finish_animation("bind");
+  disableAll();
+  selectButton.removeAttribute('disabled');
 }
 saveButton?.addEventListener('click', save)
 

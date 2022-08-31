@@ -62,9 +62,10 @@ export default class Canvas {
             let pos = this.stage.stage.getPointerPosition();
 
 
-
             // if the pos is not null
             if (pos) {
+
+                
                 //  create new konva line, store it in the this.currentLine
                 this.lastPosition = pos;
                 this.currentLine = new Konva.Line({
@@ -81,6 +82,11 @@ export default class Canvas {
                     shadowOpacity: 1
                 });
                 this.stage.layer.add(this.currentLine);
+                document.getElementById('frame_button').removeAttribute('disabled');
+                document.getElementById('save_button').removeAttribute('disabled');
+                document.getElementById('emit_button').removeAttribute('disabled');
+                document.getElementById('action_dropdown').removeAttribute('disabled');
+                document.getElementById('motion_dropdown').removeAttribute('disabled');
             }
         });
 
