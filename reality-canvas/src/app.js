@@ -125,6 +125,9 @@ document.getElementById('motion_button')?.addEventListener('click', motion)
 const action = (e) => {
   app.canvas.add_frame(bodyParts);
   app.canvas.action_setup(e.target.innerHTML);
+  disableAll();
+  selectButton.removeAttribute('disabled');
+  document.getElementById('action_button').classList.remove("show");
 }
 document.getElementById('action_button')?.addEventListener('click', action)
 
