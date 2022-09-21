@@ -206,7 +206,6 @@ let cap = new cv.VideoCapture(videoElement);
 
 // event loop
 function onResults(results) {
-  console.log(results)
   if (!results.poseLandmarks) {
     return;
   }
@@ -323,7 +322,6 @@ window.init = () => {
   }, 100)
 }
 
-window.init()
 // setTimeout(() => {
 //   console.log('start')
 //   window.init()
