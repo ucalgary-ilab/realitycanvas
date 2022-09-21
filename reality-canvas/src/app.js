@@ -314,11 +314,29 @@ inputVideo.oncanplay = () => {
   window.init()
 }
 
+const videoSlider = document.getElementById('video-slider')
+const videoButton = document.getElementById('video-button')
+videoButton.onclick = () => {
+  if (inputVideo.paused) {
+    inputVideo.play()
+  } else {
+    inputVideo.pause()
+  }
+}
+videoSlider.oninput = (event) => {
+  videoSlider.value = event.target.value
+  inputVideo.currentTime = videoSlider.value / 100 * inputVideo.duration
+}
+
 window.init = () => {
   pose.initialize()
   pose.reset()
   setInterval(async () => {
     await pose.send({ image: inputVideo })
+
+    let current = inputVideo.currentTime / inputVideo.duration
+    // console.log(current)
+    videoSlider.value = current * 100
   }, 100)
 }
 

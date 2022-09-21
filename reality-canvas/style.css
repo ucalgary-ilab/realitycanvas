@@ -14,7 +14,25 @@ body {
 } */
 
 
+#video-command {
+    z-index: 1000;
+    position: fixed;
+    top: 680px;
+}
 
+#video-command .slidecontainer {
+    float: left;
+}
+
+#video-slider {
+    width: 1100px;
+    margin-left: 20px;
+}
+
+#video-button {
+    float: left;
+    margin-top: -10px;
+}
 
 #opencv {
     position: fixed;
