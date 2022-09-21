@@ -155,6 +155,7 @@ document.getElementById('undo_button').addEventListener('click', undo)
 
 // end of buttons' registration
 const inputVideo = document.getElementById('input_video');
+const inputVideo2 = document.getElementById('input_video_2');
 const videoElement = document.getElementById("input_video");
 const canvasElement = document.getElementById("output_canvas");
 const canvasCtx = canvasElement.getContext("2d");
@@ -205,6 +206,7 @@ let cap = new cv.VideoCapture(videoElement);
 
 // event loop
 function onResults(results) {
+  console.log(results)
   if (!results.poseLandmarks) {
     return;
   }
@@ -305,10 +307,33 @@ pose.setOptions({
 
 
 pose.onResults(onResults);
+window.pose = pose
 
-const camera = new Camera(inputVideo, {
+window.inputVideo = inputVideo
+inputVideo.oncanplay = () => {
+  inputVideo.play()
+  window.init()
+}
+
+window.init = () => {
+  pose.initialize()
+  pose.reset()
+  setInterval(async () => {
+    await pose.send({ image: inputVideo })
+  }, 100)
+}
+
+window.init()
+// setTimeout(() => {
+//   console.log('start')
+//   window.init()
+// }, 3000)
+
+/*
+const camera = new Camera(inputVideo2, {
   onFrame: async () => {
-    await pose.send({ image: inputVideo });
+    window.input = inputVideo
+    await pose.send({ image: new Image() });
   },
   width: WIDTH,
   height: HEIGHT,
@@ -316,3 +341,4 @@ const camera = new Camera(inputVideo, {
 });
 
 camera.start();
+*/
