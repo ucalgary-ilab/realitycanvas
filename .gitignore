@@ -1,3 +1,5 @@
+reality-canvas/videos/*.mp4
+
 .DS_STORE
 bundle.js
 node_modules

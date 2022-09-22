@@ -87,7 +87,7 @@ const draw = () => {
 drawButton?.addEventListener('click', draw)
 
 
-// this function should add a new frame 
+// this function should add a new frame
 const frame = () => {
   app.canvas.add_frame(bodyParts);
 }
@@ -332,11 +332,14 @@ window.init = () => {
   pose.initialize()
   pose.reset()
   setInterval(async () => {
-    await pose.send({ image: inputVideo })
-
-    let current = inputVideo.currentTime / inputVideo.duration
-    // console.log(current)
-    videoSlider.value = current * 100
+    try {
+      await pose.send({ image: inputVideo })
+      let current = inputVideo.currentTime / inputVideo.duration
+      // console.log(current)
+      videoSlider.value = current * 100
+    } catch (err) {
+      console.log('error')
+    }
   }, 100)
 }
 
